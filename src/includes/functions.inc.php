@@ -41,7 +41,7 @@ function psm_get_lang() {
 	$args = func_get_args();
 	
 	if (empty($args)) 
-		return isset($GLOBALS['sm_lang']) ? $lang = $GLOBALS['sm_lang'] : $lang = $GLOBALS['sm_lang_default'];
+		return isset($GLOBALS['sm_lang']) ? $GLOBALS['sm_lang'] : $GLOBALS['sm_lang_default'];
 	
 	if(isset($GLOBALS['sm_lang'])) {
 		$lang = $GLOBALS['sm_lang'];
