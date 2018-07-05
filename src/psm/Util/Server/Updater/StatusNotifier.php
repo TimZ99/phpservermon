@@ -214,7 +214,7 @@ class StatusNotifier {
 		// build mail object with some default values
 		$mail = psm_build_mail();
 		$mail->Subject = psm_parse_msg($this->status_new, 'email_subject', $this->server);
-		$mail->Priority	= 1;
+		$mail->Priority = 1;
 
 		$body = psm_parse_msg($this->status_new, 'email_body', $this->server);
 		$mail->Body = $body;
