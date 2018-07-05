@@ -69,7 +69,7 @@ class Modal implements ModalInterface {
 	 */
 	protected $twig;
 
-	public function __construct(\Twig_Environment $twig, $modal_id = 'main', $type = self::MODAL_TYPE_OK ) {
+	public function __construct(\Twig_Environment $twig, $modal_id = 'main', $type = self::MODAL_TYPE_OK) {
 		$this->modal_id = $modal_id;
 		$this->twig = $twig;
 		$this->type = $type;
@@ -89,7 +89,7 @@ class Modal implements ModalInterface {
 	 * @return \psm\Util\Module\Modal
 	 */
 	public function setType($type) {
-		if(in_array($type, array(self::MODAL_TYPE_OK, self::MODAL_TYPE_OKCANCEL, self::MODAL_TYPE_DANGER))) {
+		if (in_array($type, array(self::MODAL_TYPE_OK, self::MODAL_TYPE_OKCANCEL, self::MODAL_TYPE_DANGER))) {
 			$this->type = $type;
 		}
 		return $this;
@@ -127,9 +127,9 @@ class Modal implements ModalInterface {
 		$message = !empty($this->message) ? $this->message : '';
 
 		$matches = array();
-		if(preg_match_all('/%(\d)/', $message, $matches, PREG_SET_ORDER)) {
-			foreach($matches as $match) {
-				$message = str_replace($match[0], '<span class="modalP' . $match[1] . '"></span>', $message);
+		if (preg_match_all('/%(\d)/', $message, $matches, PREG_SET_ORDER)) {
+			foreach ($matches as $match) {
+				$message = str_replace($match[0], '<span class="modalP'.$match[1].'"></span>', $message);
 			}
 		}
 
