@@ -106,7 +106,6 @@ namespace {
                 E_USER_ERROR
             );
         }
-    }
 
     $lang = psm_get_conf('language', 'en_US');
     psm_load_lang($lang);
