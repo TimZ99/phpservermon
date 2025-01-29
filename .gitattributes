@@ -1,14 +1,11 @@
-# Autodetect text files
-* text=auto
+* text=auto eol=lf
 
-# Force the following filetypes to have unix eols, so Windows does not break them
-*.txt text eol=lf
-*.php text eol=lf
-*.css text eol=lf
-*.js text eol=lf
-*.phar binary
+*.blade.php diff=html
+*.css diff=css
+*.html diff=html
+*.md diff=markdown
+*.php diff=php
 
-.gitignore export-ignore
-.gitattributes export-ignore
-Vagrantfile export-ignore
-puphpet export-ignore
+/.github export-ignore
+CHANGELOG.md export-ignore
+.styleci.yml export-ignore
