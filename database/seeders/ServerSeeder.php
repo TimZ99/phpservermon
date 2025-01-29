@@ -12,6 +12,10 @@ class ServerSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        Server::factory(10)->create([
+            'name' => Str::random(10),
+            'ip' => Str::random(15),
+            'port' => Int::random(4),
+        ]);
     }
 }
