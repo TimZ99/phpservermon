@@ -37,7 +37,7 @@ class ServerController extends Controller
      */
     public function show(Server $server)
     {
-        // return view('server.overview', []);
+        return view('server.show', ['server' => Server::find($server->server_id)]);
     }
 
     /**

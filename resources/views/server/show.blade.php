@@ -5,9 +5,10 @@
         </h2>
     </x-slot>
     <div class="font-medium text-base text-gray-800 dark:text-gray-200">
-        Serverlijst<br>
-        @foreach ($servers as $server)
-            This is Server <a href="localhost/server/{{ $server->server_id }}">{{ $server->name }}</a><br>
-        @endforeach
+        Server overview<br><br>
+        Server id {{ $server->server_id }}<br>
+        Name {{ $server->name }}<br>
+        IP {{ $server->ip }}<br>
+        Port {{ $server->port }}<br>
     </div>
 </x-app-layout>
