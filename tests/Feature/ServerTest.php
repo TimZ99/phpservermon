@@ -1,7 +1,18 @@
 <?php
 
-test('servers page is displayed', function () {
-    $response = $this->get('/servers');
+use App\Models\User;
 
-    $response->assertStatus(200);
+test('servers page is displayed', function () {
+    $user = User::factory()->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->get('/servers');
+
+    $response->assertOk();
+});
+
+test('servers require login', function () {
+    $response = $this->get('/servers');
+    $response->assertRedirectToRoute('login');
 });
