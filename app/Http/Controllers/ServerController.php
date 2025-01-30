@@ -13,7 +13,7 @@ class ServerController extends Controller
      */
     public function index()
     {
-        return view('server.index', Server::all());
+        return view('server.index', ['servers' => Server::all()]);
     }
 
     /**
