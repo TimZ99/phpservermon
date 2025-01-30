@@ -4,4 +4,5 @@
             Overview
         </h2>
     </x-slot>
+    <div class="font-medium text-base text-gray-800 dark:text-gray-200">Serverlijst</div>
 </x-app-layout>

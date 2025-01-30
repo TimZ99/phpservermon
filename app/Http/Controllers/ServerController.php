@@ -13,7 +13,7 @@ class ServerController extends Controller
      */
     public function index()
     {
-        //
+        return view('server.index', Server::all());
     }
 
     /**
@@ -37,7 +37,7 @@ class ServerController extends Controller
      */
     public function show(Server $server)
     {
-        return view('server.overview', []);
+        // return view('server.overview', []);
     }
 
     /**
