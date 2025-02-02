@@ -4,7 +4,7 @@
             Overview
         </h2>
     </x-slot>
-    <div class="font-medium text-base text-gray-800 dark:text-gray-200">
+    <div class="p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
         Server overview<br><br>
         Server id {{ $server->server_id }}<br>
         Name {{ $server->name }}<br>

@@ -4,11 +4,9 @@
             Overview
         </h2>
     </x-slot>
-    <div class="flex">
+    <div class="grid grid-cols-2 gap-4">
         @foreach($servers as $server)
-        <div class="w-1/4">
             @include('server.components.server-card', ['server' => $server])
-        </div>
         @endforeach
     </div>
 </x-app-layout>
