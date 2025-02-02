@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreServerRequest;
-use App\Http\Requests\UpdateServerRequest;
+use App\Http\Requests\Server\StoreServerRequest;
+use App\Http\Requests\Server\UpdateServerRequest;
 use App\Models\Server;
 
 class ServerController extends Controller
@@ -57,7 +57,11 @@ class ServerController extends Controller
      */
     public function update(UpdateServerRequest $request, Server $server)
     {
-        //
+        $server->fill($request->validated());
+
+        $server->save();
+
+        return to_route('server.edit', $server->server_id)->with('status', 'server-updated');
     }
 
     /**
