@@ -7,7 +7,7 @@
     <div class="flex">
         @foreach($servers as $server)
         <div class="w-1/4">
-            <x-server-card :server="$server" />
+            @include('server.components.server-card', ['server' => $server])
         </div>
         @endforeach
     </div>
