@@ -37,7 +37,9 @@ class ServerController extends Controller
      */
     public function show(Server $server)
     {
-        return view('server.show', ['server' => Server::find($server->server_id)]);
+        return view('server.show', [
+            'server' => Server::find($server->server_id)
+        ]);
     }
 
     /**
@@ -45,7 +47,9 @@ class ServerController extends Controller
      */
     public function edit(Server $server)
     {
-        return view('server.edit', ['server' => Server::find($server->server_id)]);
+        return view('server.edit', [
+            'server' => Server::find($server->server_id)
+        ]);
     }
 
     /**
@@ -61,6 +65,8 @@ class ServerController extends Controller
      */
     public function destroy(Server $server)
     {
-        //
+        $server->delete();
+
+        return to_route('server.index');
     }
 }

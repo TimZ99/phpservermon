@@ -5,6 +5,12 @@
         </h2>
     </x-slot>
     <div class="p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+        <a href="{{route('server.update', $server->server_id)}}">
+            <button class="btn btn-secondary mb-4">
+                {{ __('Edit server') }}
+            </button>
+        </a>
+        <br>
         Server overview<br><br>
         Server id {{ $server->server_id }}<br>
         Name {{ $server->name }}<br>
