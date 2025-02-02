@@ -18,6 +18,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/servers', [ServerController::class, 'index'])->name('server.index');
     Route::get('/server/{server}', [ServerController::class, 'show'])->name('server.show');
+    Route::get('/server/{server}/edit', [ServerController::class, 'edit'])->name('server.edit');
+    Route::patch('/server/{server}/edit', [ServerController::class, 'update'])->name('server.update');
 });
 
 require __DIR__.'/auth.php';

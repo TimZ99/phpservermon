@@ -45,7 +45,7 @@ class ServerController extends Controller
      */
     public function edit(Server $server)
     {
-        //
+        return view('server.edit', ['server' => Server::find($server->server_id)]);
     }
 
     /**
