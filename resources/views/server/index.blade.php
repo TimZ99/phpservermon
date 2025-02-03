@@ -4,10 +4,9 @@
             Overview
         </h2>
     </x-slot>
-    <div class="font-medium text-base text-gray-800 dark:text-gray-200">
-        Serverlijst<br>
-        @foreach ($servers as $server)
-            This is Server {{ $server->server_id }}<br>
+    <div class="grid grid-cols-2 gap-4">
+        @foreach($servers as $server)
+            @include('server.components.server-card', ['server' => $server])
         @endforeach
     </div>
 </x-app-layout>

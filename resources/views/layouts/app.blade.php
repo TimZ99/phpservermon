@@ -2,10 +2,25 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>{{ config('app.name', 'PHPServerMonitor') }}</title>
+
+        <meta name="description" content="PHP Server Monitor">
+        <meta name="robots" content="noindex" />
+        <!--<link rel="manifest" href="./manifest.json">-->
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        <meta name="apple-mobile-web-app-title" content="PSM">
+        <link rel="apple-touch-icon" href="./phpservermon.png">
+        <meta name="msapplication-TileImage" content="./phpservermon.png">
+        <meta name="msapplication-TileColor" content="#424242">
+
+        <meta name="theme-color" content="#424242">
+        <link rel="icon" type="image/x-icon" href="./favicon.ico" />
+        <link rel="icon" type="image/png" href="./favicon.png" />
+        <link rel="apple-touch-icon" href="./favicon.png" />
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -28,7 +43,7 @@
             @endisset
 
             <!-- Page Content -->
-            <main>
+            <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                 {{ $slot }}
             </main>
         </div>

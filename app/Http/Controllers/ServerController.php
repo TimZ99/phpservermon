@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreServerRequest;
-use App\Http\Requests\UpdateServerRequest;
+use App\Http\Requests\Server\StoreServerRequest;
+use App\Http\Requests\Server\UpdateServerRequest;
 use App\Models\Server;
 
 class ServerController extends Controller
@@ -37,7 +37,9 @@ class ServerController extends Controller
      */
     public function show(Server $server)
     {
-        // return view('server.overview', []);
+        return view('server.show', [
+            'server' => Server::find($server->server_id)
+        ]);
     }
 
     /**
@@ -45,7 +47,9 @@ class ServerController extends Controller
      */
     public function edit(Server $server)
     {
-        //
+        return view('server.edit', [
+            'server' => Server::find($server->server_id)
+        ]);
     }
 
     /**
@@ -53,7 +57,11 @@ class ServerController extends Controller
      */
     public function update(UpdateServerRequest $request, Server $server)
     {
-        //
+        $server->fill($request->validated());
+
+        $server->save();
+
+        return to_route('server.edit', $server->server_id)->with('status', 'server-updated');
     }
 
     /**
@@ -61,6 +69,8 @@ class ServerController extends Controller
      */
     public function destroy(Server $server)
     {
-        //
+        $server->delete();
+
+        return to_route('server.index');
     }
 }
