@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Log;
 
 class RegisteredUserController extends Controller
 {
@@ -33,6 +34,9 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'phone' => ['string', 'max:15', 'nullable'],
+            'suspended' => ['boolean'],
+            'admin' => ['boolean'],
         ]);
 
         $user = User::create([
@@ -40,6 +44,15 @@ class RegisteredUserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
+
+        Log::info('New user registered with id:'. $user->id);
+
+        /* check if there is an admin, if not, make user admin */
+        if(User::where(['admin' => true])->count() === 0) {
+            $user->admin = true;
+            $user->save();
+            Log::info('No admin found, making user '. $user->id .' administrator.');
+        }
 
         event(new Registered($user));
 

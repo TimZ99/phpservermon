@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Auth\Access\Response;
 
-class AppServiceProvider extends ServiceProvider
+class AppServiceProvider extends \Illuminate\Support\ServiceProvider
 {
     /**
      * Register any application services.
@@ -13,7 +15,7 @@ class AppServiceProvider extends ServiceProvider
     {
         if ($this->app->environment('local') && class_exists(\Laravel\Telescope\TelescopeServiceProvider::class)) {
             $this->app->register(\Laravel\Telescope\TelescopeServiceProvider::class);
-            $this->app->register(TelescopeServiceProvider::class);
+            $this->app->register(\Laravel\Telescope\TelescopeServiceProvider::class);
         }
     }
 
@@ -22,6 +24,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Gate::define('admin-only', function () {
+            return Auth::user()->isAdmin()
+                ? Response::allow()
+                : Response::deny('Sorry can\'t let you in.');
+        });
+        
+        Gate::define('not-suspended', function () {
+            return Auth::user()->isSuspended()
+                ? Response::deny('Your account has been suspended.')
+                : Response::allow();
+        });
     }
 }
