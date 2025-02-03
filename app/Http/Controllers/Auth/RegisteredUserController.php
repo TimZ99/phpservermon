@@ -46,6 +46,14 @@ class RegisteredUserController extends Controller
         ]);
 
         Log::info('New user registered with id:'. $user->id);
+
+        /* check if there is an admin, if not, make user admin */
+        if(User::where(['admin' => true])->count() === 0) {
+            $user->admin = true;
+            $user->save();
+            Log::info('No admin found, making user '. $user->id .' administrator.');
+        }
+
         event(new Registered($user));
 
         Auth::login($user);
