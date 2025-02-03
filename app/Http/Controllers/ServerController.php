@@ -17,22 +17,6 @@ class ServerController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreServerRequest $request)
-    {
-        //
-    }
-
-    /**
      * Display the specified resource.
      */
     public function show(Server $server)
@@ -58,9 +42,7 @@ class ServerController extends Controller
     public function update(UpdateServerRequest $request, Server $server)
     {
         $server->fill($request->validated());
-
         $server->save();
-
         return to_route('server.edit', $server->server_id)->with('status', 'server-updated');
     }
 
@@ -70,7 +52,6 @@ class ServerController extends Controller
     public function destroy(Server $server)
     {
         $server->delete();
-
         return to_route('server.index');
     }
 }
