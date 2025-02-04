@@ -20,13 +20,6 @@ class Server extends Model
     protected $table = 'servers';
 
     /**
-     * The primary key associated with the table.
-     *
-     * @var string
-     */
-    protected $primaryKey = 'server_id';
-
-    /**
      * The data type of the primary key.
      *
      * @var string

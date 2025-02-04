@@ -15,7 +15,7 @@
     >{{ __('Delete server') }}</x-danger-button>
 
     <x-modal name="confirm-server-deletion" :show="$errors->serverDeletion->isNotEmpty()" focusable>
-        <form method="post" action="{{ route('server.destroy', $server->server_id) }}" class="p-6">
+        <form method="post" action="{{ route('server.destroy', $server->id) }}" class="p-6">
             @csrf
             @method('delete')
 

@@ -23,7 +23,7 @@ class ServerController extends Controller
     public function show(Server $server)
     {
         return view('server.show', [
-            'server' => Server::find($server->server_id)
+            'server' => Server::find($server->id)
         ]);
     }
 
@@ -34,7 +34,7 @@ class ServerController extends Controller
     {
         Gate::authorize('admin-only');
         return view('server.edit', [
-            'server' => Server::find($server->server_id)
+            'server' => Server::find($server->id)
         ]);
     }
 
@@ -47,7 +47,7 @@ class ServerController extends Controller
 
         $server->fill($request->validated());
         $server->save();
-        return to_route('server.edit', $server->server_id)->with('status', 'server-updated');
+        return to_route('server.edit', $server->id)->with('status', 'server-updated');
     }
 
     /**

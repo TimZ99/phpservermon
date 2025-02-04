@@ -25,11 +25,11 @@ test('server information can be updated', function () {
 
     $response = $this
         ->actingAs($user)
-        ->patch('/server/'.$server->server_id.'/edit', ['name' => 'Test Server Name']);
+        ->patch('/server/'.$server->id.'/edit', ['name' => 'Test Server Name']);
 
     $response
         ->assertSessionHasNoErrors()
-        ->assertRedirect('/server/'.$server->server_id.'/edit');
+        ->assertRedirect('/server/'.$server->id.'/edit');
 
     $server->refresh();
 
@@ -43,7 +43,7 @@ test('user is authorized to update server', function () {
     $oldServername = $server->name;
 
     $response = $this
-        ->patch('/server/'.$server->server_id.'/edit', ['name' => 'Test Server Name']);
+        ->patch('/server/'.$server->id.'/edit', ['name' => 'Test Server Name']);
 
     $response
         ->assertSessionHasNoErrors()
@@ -63,7 +63,7 @@ test('server can be deleted', function () {
 
     $response = $this
         ->actingAs($user)
-        ->delete('/server/'.$server->server_id.'/edit');
+        ->delete('/server/'.$server->id.'/edit');
 
     $response
         ->assertSessionHasNoErrors()
@@ -79,7 +79,7 @@ test('user is authorized to delete server', function () {
     $oldServername = $server->name;
 
     $response = $this
-        ->delete('/server/'.$server->server_id.'/edit');
+        ->delete('/server/'.$server->id.'/edit');
 
     $response
         ->assertSessionHasNoErrors()
