@@ -51,6 +51,10 @@ class User extends Authenticatable
         ];
     }
 
+    function isAdmin(): bool
+    {
+        return $this->admin === null ? false : $this->admin;
+    }
     function isSuspended(): bool
     {
         return $this->suspended === null ? false : $this->suspended;
