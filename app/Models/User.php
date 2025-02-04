@@ -50,4 +50,9 @@ class User extends Authenticatable
             'suspended' => 'boolean',
         ];
     }
+
+    function isSuspended(): bool
+    {
+        return $this->suspended === null ? false : $this->suspended;
+    }
 }
