@@ -2,10 +2,25 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'PHPServermonitor') }}</title>
+        <title>{{ config('app.name', 'PHPServerMonitor') }}</title>
+
+        <meta name="description" content="PHP Server Monitor">
+        <meta name="robots" content="noindex" />
+        <!--<link rel="manifest" href="./manifest.json">-->
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        <meta name="apple-mobile-web-app-title" content="PSM">
+        <link rel="apple-touch-icon" href="/phpservermon.png">
+        <meta name="msapplication-TileImage" content="./phpservermon.png">
+        <meta name="msapplication-TileColor" content="#424242">
+
+        <meta name="theme-color" content="#424242">
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" href="/favicon.png" />
+        <link rel="apple-touch-icon" href="/favicon.png" />
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -14,18 +29,14 @@
         <!-- Scripts -->
         @vite(['resources/css/app.scss', 'resources/js/app.js'])
     </head>
-    <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900">
-            <div>
-                <a href="/">
-                    PHPServerMonitor
-                </a>
+    <body class="font-sans antialiased">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand ps-2" href="#">PHPServerMonitor</a>
             </div>
-
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
-                guest
-                {{ $slot }}
-            </div>
-        </div>
+        </nav>
+        <main> 
+            {{ $slot }}
+        </main>
     </body>
 </html>
