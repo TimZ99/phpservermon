@@ -30,44 +30,14 @@
         @vite(['resources/css/app.scss', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased">
-        <nav class="navbar navbar-expand-lg bg-light">
-            <div class="container-fluid">
-                <a class="navbar-brand ps-2" href="#">PHPServerMonitor</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                    <a class="nav-link @if(Route::currentRouteName() == 'dashboard')active @endif" aria-current="page" href="{{ route('dashboard') }}">Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                    <a class="nav-link @if(Route::currentRouteName() == 'server.index')active @endif" aria-current="page" href="{{ route('server.index') }}">Servers</a>
-                    </li>
-                </ul>
-                <li class="nav-item dropdown d-flex pe-4">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Profile
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ route('profile.edit') }}">Profile</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <form method="POST" action="{{ route('logout') }}" >
-                            @csrf
-                            <li><a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault(); this.closest('form').submit();">{{ __('Log Out') }}</a></li>
-                        </form> 
-                    </ul>
-                    </li>
-                </div>
-            </div>
-        </nav>
-        <main role="main" class="container-fluid px-4">
-            <!-- Page Heading -->
-            @isset($header)
-                <header>
+        @include('layouts.navigation')
+        <!-- Page Heading -->
+        @isset($header)
+                <header class="px-4 pb-3 text-bg-dark">
                     {{ $header }}
                 </header>
             @endisset
+        <main role="main" class="container-fluid px-4 mt-4">
             {{ $slot }}
         </main>
         <footer class="footer fixed-bottom" role="contentinfo">
