@@ -1,20 +1,22 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            Overview
-        </h2>
+        Server details
     </x-slot>
-    <div class="p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-        <a href="{{route('server.update', $server->id)}}">
-            <button class="btn btn-secondary mb-4">
-                {{ __('Edit server') }}
-            </button>
-        </a>
-        <br>
-        Server overview<br><br>
-        Server id {{ $server->id }}<br>
-        Name {{ $server->name }}<br>
-        IP {{ $server->ip }}<br>
-        Port {{ $server->port }}<br>
+    <div class="card">
+        <div class="card-header">
+            Server details
+        </div>
+        <div class="card-body">
+            <a href="{{route('server.update', $server->id)}}">
+                <button class="btn btn-secondary mb-4">
+                    {{ __('Edit server') }}
+                </button>
+            </a>
+            <br>
+            <b>Server id</b> {{ $server->id }}<br>
+            <b>Name</b> {{ $server->name }}<br>
+            <b>IP</b> {{ $server->ip }}<br>
+            <b>Port</b> {{ $server->port }}<br>
+        </div>
     </div>
 </x-app-layout>

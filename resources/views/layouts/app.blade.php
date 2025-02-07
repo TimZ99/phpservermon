@@ -27,25 +27,31 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @vite(['resources/css/app.scss', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
-            @include('layouts.navigation')
-
-            <!-- Page Heading -->
-            @isset($header)
-                <header class="bg-white dark:bg-gray-800 shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
-            @endisset
-
-            <!-- Page Content -->
-            <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <body>
+        @include('layouts.navigation')
+        <!-- Page Heading -->
+        @isset($header)
+            <header class="px-4 pb-3 text-bg-dark">
+                {{ $header }}
+            </header>
+        @endisset
+        <main role="main">
+            <div class="mt-4 col-12 col-md-9 col-lg-7 col-xl-6 col-xxl-5 container d-flex align-items-center justify-content-center">
                 {{ $slot }}
-            </main>
-        </div>
+            </div>
+        </main>
+        <footer class="footer fixed-bottom" role="contentinfo">
+            <div class="container">
+                <span class="text-body-secondary">
+                    Powered by
+                    <a href="https://github.com/phpservermon/phpservermon/" target="_blank" rel="noopener">
+                        PHPServerMonitor.
+                    </a>
+                    Laravel v{{ Illuminate\Foundation\Application::VERSION }} (PHP v{{ PHP_VERSION }})
+                </span>
+            </div>
+        </footer>
     </body>
 </html>

@@ -1,4 +1,4 @@
 @props(['server'])
-<div class="p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+<li class="list-group-item">
     <a href="{{ route('server.show', $server->id) }}">{{$server->id}}</a>
-</div>
+</li>
