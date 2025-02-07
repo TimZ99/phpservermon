@@ -33,12 +33,14 @@
         @include('layouts.navigation')
         <!-- Page Heading -->
         @isset($header)
-                <header class="px-4 pb-3 text-bg-dark">
-                    {{ $header }}
-                </header>
-            @endisset
-        <main role="main" class="container-fluid px-4 mt-4">
-            {{ $slot }}
+            <header class="px-4 pb-3 text-bg-dark">
+                {{ $header }}
+            </header>
+        @endisset
+        <main role="main">
+            <div class="mt-4 col-12 col-md-9 col-lg-7 col-xl-6 col-xxl-5 container d-flex align-items-center justify-content-center">
+                {{ $slot }}
+            </div>
         </main>
         <footer class="footer fixed-bottom" role="contentinfo">
             <div class="container">
