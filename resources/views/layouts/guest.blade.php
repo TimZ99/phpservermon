@@ -29,14 +29,21 @@
         <!-- Scripts -->
         @vite(['resources/css/app.scss', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased">
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container-fluid">
-                <a class="navbar-brand ps-2" href="#">PHPServerMonitor</a>
-            </div>
-        </nav>
+    <body>
+        @include('layouts.navigation')
         <main> 
             {{ $slot }}
         </main>
+        <footer class="fixed-bottom" role="contentinfo">
+            <div class="container">
+                <span class="text-body-secondary">
+                    Powered by
+                    <a href="https://github.com/phpservermon/phpservermon/" target="_blank" rel="noopener">
+                        PHPServerMonitor.
+                    </a>
+                    Laravel v{{ Illuminate\Foundation\Application::VERSION }} (PHP v{{ PHP_VERSION }})
+                </span>
+            </div>
+        </footer>
     </body>
 </html>

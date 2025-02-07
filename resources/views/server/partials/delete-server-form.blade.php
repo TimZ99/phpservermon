@@ -6,12 +6,12 @@
 
     <x-danger-button data-bs-toggle="modal" data-bs-target="#confirm-server-deletion">{{ __('Delete server') }}</x-danger-button>
 
-    <x-modal id="confirm-server-deletion">
+    <x-modal id="confirm-server-deletion" ariaLabelledby="confirm-server-deletion-label" >
         <form method="post" action="{{ route('server.destroy', $server->id) }}" class="p-6">
             @csrf
             @method('delete')
             <div class="modal-header">
-                <h5 class="modal-title">{{ __('Are you sure you want to delete the server?') }}</h5>
+                <h5 class="modal-title" id="confirm-server-deletion-label">{{ __('Are you sure you want to delete the server?') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">

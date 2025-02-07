@@ -29,7 +29,7 @@
         <!-- Scripts -->
         @vite(['resources/css/app.scss', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased">
+    <body>
         @include('layouts.navigation')
         <!-- Page Heading -->
         @isset($header)
@@ -44,7 +44,7 @@
         </main>
         <footer class="footer fixed-bottom" role="contentinfo">
             <div class="container">
-                <span class="text-muted">
+                <span class="text-body-secondary">
                     Powered by
                     <a href="https://github.com/phpservermon/phpservermon/" target="_blank" rel="noopener">
                         PHPServerMonitor.

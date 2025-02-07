@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        Overview
+        Server details
     </x-slot>
     <div class="card">
         <div class="card-header">

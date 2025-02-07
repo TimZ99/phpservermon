@@ -1,10 +1,8 @@
 <section>
     <header>
-        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-            {{ __('General settings') }}
-        </h2>
+        <h2>{{ __('General settings') }}</h2>
     </header>
-    <form method="post" action="{{ route('server.update', $server->id) }}" class="mt-6 space-y-6">
+    <form method="post" action="{{ route('server.update', $server->id) }}" class="mt-6">
         @csrf
         @method('patch')
 
@@ -29,7 +27,8 @@
                     x-show="show"
                     x-transition
                     x-init="setTimeout(() => show = false, 2000)"
-                >{{ __('Saved.') }}</p>
+                    class="text-success"
+                >{{ __('Saved') }}</p>
             @endif
         </div>
     </form>

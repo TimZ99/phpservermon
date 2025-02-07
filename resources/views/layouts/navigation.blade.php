@@ -6,34 +6,49 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                    {{ __('Dashboard') }}
-                </x-nav-link>
-                <x-nav-link :href="route('server.index')" :active="request()->routeIs('server.index')">
-                    {{ __('Servers') }}
-                </x-nav-link>
-            </ul>
-            <li class="nav-item dropdown d-flex pe-4 text-bg-dark">
-                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                    aria-expanded="false">
-                    {{ Auth::user()->name }}
-                </a>
-                <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
-                    <li>
-                        <a class="dropdown-item" href="{{ route('profile.edit') }}">Profile</a>
-                    </li>
-                    <li>
-                        <hr class="dropdown-divider">
-                    </li>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <li><a class="dropdown-item" href="{{ route('logout') }}"
-                                onclick="event.preventDefault(); this.closest('form').submit();">{{ __('Log Out') }}</a>
-                        </li>
-                    </form>
+            @auth
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                        {{ __('Dashboard') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('server.index')" :active="request()->routeIs('server.index')">
+                        {{ __('Servers') }}
+                    </x-nav-link>
                 </ul>
-            </li>
+                <li class="nav-item dropdown d-flex pe-4 text-bg-dark">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                        {{ Auth::user()->name }}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" href="{{ route('profile.edit') }}">Profile</a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <li><a class="dropdown-item" href="{{ route('logout') }}"
+                                    onclick="event.preventDefault(); this.closest('form').submit();">{{ __('Log Out') }}</a>
+                            </li>
+                        </form>
+                    </ul>
+                </li>
+            @else
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    @if (Route::has('login'))
+                        <x-nav-link :href="route('login')" class="d-flex pe-4" :active="request()->routeIs('login')">
+                            {{ __('Login') }}
+                        </x-nav-link>
+                    @endif
+                    @if (Route::has('register'))
+                        <x-nav-link :href="route('register')" class="d-flex pe-4" :active="request()->routeIs('register')">
+                            {{ __('Register') }}
+                        </x-nav-link>
+                    @endif
+                </ul>
+            @endauth
         </div>
     </div>
 </nav>

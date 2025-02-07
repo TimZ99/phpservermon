@@ -51,7 +51,8 @@
                     x-show="show"
                     x-transition
                     x-init="setTimeout(() => show = false, 2000)"
-                >{{ __('Saved.') }}</p>
+                    class="text-success"
+                >{{ __('Saved') }}</p>
             @endif
         </div>
     </form>
