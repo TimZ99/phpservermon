@@ -13,7 +13,7 @@
                     @csrf
 
                     <!-- Email Address -->
-                    <label for="password" class="sr-only">{{ __('Password') }}</label>
+                    <label for="password">{{ __('Password') }}</label>
                     <input id="password" class="form-control mb-2" type="password" name="password" required autocomplete="current-password" />
                     <x-input-error :messages="$errors->get('password')" class="mt-2" />
 

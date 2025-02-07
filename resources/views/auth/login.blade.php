@@ -8,12 +8,12 @@
                     @csrf
 
                     <!-- Email Address -->
-                    <label for="email" class="sr-only">{{ __('Email') }}</label>
-                    <input id="email" class="form-control mb-2" type="email" name="email" :value="old('email')" required autocomplete="username" />
+                    <label for="email">{{ __('Email') }}</label>
+                    <input id="email" class="form-control mb-2" type="email" name="email" value="{{ old('email') }}" required autocomplete="username" />
                     <x-input-error :messages="$errors->get('email')" class="mt-2" />
 
                     <!-- Password -->
-                    <label for="password" class="sr-only">{{ __('Password') }}</label>
+                    <label for="password">{{ __('Password') }}</label>
                     <input id="password" class="form-control mb-2"
                                     type="password"
                                     name="password"

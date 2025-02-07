@@ -13,12 +13,12 @@
                     <input type="hidden" name="token" value="{{ $request->route('token') }}">
 
                     <!-- Email Address -->
-                    <label for="email" class="sr-only">{{ __('Email') }}</label>
-                    <input id="email" class="form-control mb-2" type="email" name="email" :value="old('email', $request->email)" required autofocus autocomplete="username" />
+                    <label for="email">{{ __('Email') }}</label>
+                    <input id="email" class="form-control mb-2" type="email" name="email" value="{{ old('email', $request->email) }}" required autofocus autocomplete="username" />
                     <x-input-error :messages="$errors->get('email')" class="mt-2" />
 
                     <!-- Password -->
-                    <label for="password" class="sr-only">{{ __('Password') }}</label>
+                    <label for="password">{{ __('Password') }}</label>
                     <input id="password" class="form-control mb-2"
                                     type="password"
                                     name="password"
@@ -26,7 +26,7 @@
                     <x-input-error :messages="$errors->get('password')" class="mt-2" />
 
                     <!-- Confirm Password -->
-                    <label for="password_confirmation" class="sr-only">{{ __('Confirm Password') }}</label>
+                    <label for="password_confirmation">{{ __('Confirm Password') }}</label>
                     <input id="password_confirmation" class="form-control" type="password" name="password_confirmation" required autocomplete="new-password" />
                     <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
 

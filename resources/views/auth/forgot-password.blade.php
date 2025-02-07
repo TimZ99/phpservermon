@@ -16,8 +16,8 @@
                     @csrf
 
                     <!-- Email Address -->
-                    <label for="email" class="sr-only">{{ __('Email') }}</label>
-                    <input id="email" class="form-control mb-2" type="email" name="email" :value="old('email')" required autocomplete="email" />
+                    <label for="email">{{ __('Email') }}</label>
+                    <input id="email" class="form-control mb-2" type="email" name="email" value="{{ old('email') }}" required autocomplete="email" />
                     <x-input-error :messages="$errors->get('email')" class="mt-2" />
 
                     <div class="flex items-center justify-end mt-4">
