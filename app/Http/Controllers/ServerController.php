@@ -47,7 +47,7 @@ class ServerController extends Controller
 
         $server->fill($request->validated());
         $server->save();
-        return to_route('server.edit', $server->id)->with('status', 'server-updated');
+        return to_route('server.show', $server->id);
     }
 
     /**
