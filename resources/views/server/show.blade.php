@@ -17,6 +17,7 @@
             <b>Name</b> {{ $server->name }}<br>
             <b>IP</b> {{ $server->ip }}<br>
             <b>Port</b> {{ $server->port }}<br>
+            @isset($server->users) <b>Users</b> @foreach($server->users as $user) {{ $user->name }}, @endforeach <br>@endisset
         </div>
     </div>
 </x-app-layout>

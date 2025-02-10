@@ -34,6 +34,15 @@
             </optgroup>
         </select>
 
+    <div class="form-group">
+        <label for="users">{{ __('Users') }}</label>
+        <select class="form-select mb-2" id="users" name="users[]" multiple>
+            @foreach ($users as $user)
+                <option value="{{ $user->id }}"> {{ $user->name }}</option>
+            @endforeach
+        </select>
+    </div>
+
         <label for="port" class="d-none">{{ __('Custom port') }}</label>
         <input id="port" name="port" class="form-control mb-2 d-none" type="number" value="{{ old('port', $server->port) }}" required autocomplete="off" />
         <x-input-error class="mt-2" :messages="$errors->get('port')" />
