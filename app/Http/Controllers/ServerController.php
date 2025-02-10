@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Auth\Access\Response;
 use App\Models\Server;
 use App\Models\User;
 
