@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ServerUpdateRequest;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Auth\Access\Response;
 use App\Models\Server;
 use App\Models\User;
+use Exception;
 
 /**
  * Routing:
@@ -77,26 +76,31 @@ class ServerController extends Controller
      * @return \Illuminate\Http\Response
      * 
      */
-    public function update(FormRequest $request, $id)
+    public function update(ServerUpdateRequest $request, $id)
     {
         Gate::authorize('admin-only');
         
-        $server = Server::findOrFail($id);
+        try {
+            $server = Server::findOrFail($id);
 
-        if($request->has('users')) {
-            $user_ids = array_filter($request->input('users'), function($user_id) {
-                return in_array((int) $user_id, User::pluck('id')->toArray());
-            });
-            // Filter out invalid user ids from the input
-            $server->users()->sync($user_ids);
+            if($request->has('users')) {
+                $user_ids = array_filter($request->input('users'), function($user_id) {
+                    return in_array((int) $user_id, User::pluck('id')->toArray());
+                });
+                // Filter out invalid user ids from the input
+                $server->users()->sync($user_ids);
+            }
+            
+            // Update the server
+            // Fill the server with the validated data
+            $server->fill($request->validated());
+            $server->save();
+
+            return to_route('server.show', $server->id);
+        } catch (Exception $e) {
+            report($e);
+            return back()->withInput()->withErrors(['general' => 'A problem occurred while updating the server. Please try again later.']);
         }
-        
-        // Update the server
-        // Fill the server with the validated data
-        $server->fill($request->validate(Server::rules()));
-        $server->save();
-
-        return to_route('server.show', $server->id);
     }
 
     /**
