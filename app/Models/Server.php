@@ -61,7 +61,7 @@ class Server extends Model
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'ip' => ['required', 'string', 'max:255'],
+            'ip' => ['string', 'max:255'],
             'port' => ['numeric', 'between:0,99999']
         ];
     }

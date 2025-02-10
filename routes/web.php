@@ -23,7 +23,7 @@ Route::middleware(['auth', 'can:not-suspended'])->group(function () {
     Route::get('/server/{server}', [ServerController::class, 'show'])->name('server.show');
     Route::get('/server/{server}/edit', [ServerController::class, 'edit'])->name('server.edit');
     Route::patch('/server/{server}/edit', [ServerController::class, 'update'])->name('server.update');
-    Route::delete('/server/{server}/edit', [ServerController::class, 'destroy'])->name('server.destroy');
+    Route::delete('/server/{server}', [ServerController::class, 'destroy'])->name('server.destroy');
     // ->can('admin-only')
 });
 

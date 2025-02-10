@@ -9,11 +9,22 @@ use Illuminate\Auth\Access\Response;
 use App\Models\Server;
 use App\Models\User;
 
+/**
+ * Routing:
+ * @group Server
+ * @authenticated
+ * @middleware can:not-suspended
+ * 
+ */
 class ServerController extends Controller
 {
     /**
      * Display a listing of the resource.
+     * 
+     * @return \Illuminate\Http\Response
      */
+
+     // TODO: show only the servers that the user is attached to
     public function index()
     {
         return view('server.index', ['servers' => Server::all()]);
@@ -21,6 +32,13 @@ class ServerController extends Controller
 
     /**
      * Display the specified resource.
+     * 
+     * Allow users that are attached to the servers
+     * Allow admins
+     * 
+     * @param  \App\Models\Server  $server
+     * @return \Illuminate\Http\Response
+     * 
      */
     public function show(Server $server)
     {
@@ -33,32 +51,48 @@ class ServerController extends Controller
 
     /**
      * Show the form for editing the specified resource.
+     * Admin-only function
+     * 
+     * @param  \App\Models\Server  $server
+     * @return \Illuminate\Http\Response
+     * 
      */
     public function edit(Server $server)
     {
         Gate::authorize('admin-only');
+
         return view('server.edit', [
             'server' => Server::find($server->id),
+            // Get id and name for all users that are not suspended
             'users' => User::where('suspended', false)->select('id', 'name')->get()
         ]);
     }
 
     /**
      * Update the specified resource in storage.
+     * Admin-only function
+     * 
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Server  $server
+     * @return \Illuminate\Http\Response
+     * 
      */
-    public function update(FormRequest $request, Server $server)
+    public function update(FormRequest $request, $id)
     {
         Gate::authorize('admin-only');
+        
+        $server = Server::findOrFail($id);
 
-        /**
-         * Filter out invalid user ids from the input
-         */
-        $user_ids = array_filter($request->input('users'), function($user_id) {
-            return in_array((int) $user_id, User::pluck('id')->toArray());
-        });
-
-        $server->users()->sync($user_ids);
-
+        if($request->has('users')) {
+            $user_ids = array_filter($request->input('users'), function($user_id) {
+                return in_array((int) $user_id, User::pluck('id')->toArray());
+            });
+            // Filter out invalid user ids from the input
+            $server->users()->sync($user_ids);
+        }
+        
+        // Update the server
+        // Fill the server with the validated data
         $server->fill($request->validate(Server::rules()));
         $server->save();
 
@@ -66,12 +100,18 @@ class ServerController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified resource from storage
+     * Before deleting the server, detach all users from the server to prevent a foreign key error
+     * Admin-only function
+     * 
+     * @param  \App\Models\Server  $server
+     * @return \Illuminate\Http\Response
+     * 
      */
     public function destroy(Server $server)
     {
         Gate::authorize('admin-only');
-
+        $server->users()->detach();
         $server->delete();
         return to_route('server.index');
     }
