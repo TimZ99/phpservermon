@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
 
 class Server extends Model
 {
@@ -18,13 +21,6 @@ class Server extends Model
      * @var string
      */
     protected $table = 'servers';
-
-    /**
-     * The primary key associated with the table.
-     *
-     * @var string
-     */
-    protected $primaryKey = 'server_id';
 
     /**
      * The data type of the primary key.
@@ -48,6 +44,25 @@ class Server extends Model
     protected $fillable = [
         'name',
         'ip',
-        'port',
+        'port'
     ];
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class);
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     */
+    static function rules(): array|ValidationRule
+    {
+        return [
+            'name' => ['required', 'string', 'max:255'],
+            'ip' => ['string', 'max:255'],
+            'port' => ['numeric', 'between:0,99999']
+        ];
+    }
 }

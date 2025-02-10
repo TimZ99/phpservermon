@@ -35,5 +35,11 @@ class AppServiceProvider extends \Illuminate\Support\ServiceProvider
                 ? Response::deny('Your account has been suspended.')
                 : Response::allow();
         });
+
+        Gate::define('user-connected-to-server', function (\App\Models\User $user, \App\Models\Server $server) {
+            return $server->users()->where('id', Auth::user()->id)->exists()
+                ? Response::allow()
+                : Response::deny('Sorry can\'t let you in.');
+        });
     }
 }
