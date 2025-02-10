@@ -2,9 +2,8 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Auth\Access\Response;
+use App\Gates\Gates;
+use Illuminate\Database\Eloquent\Model;
 
 class AppServiceProvider extends \Illuminate\Support\ServiceProvider
 {
@@ -23,22 +22,7 @@ class AppServiceProvider extends \Illuminate\Support\ServiceProvider
      */
     public function boot(): void
     {
-        Gate::define('admin-only', function () {
-            return Auth::user()->isAdmin()
-                ? Response::allow()
-                : Response::deny('Sorry can\'t let you in.');
-        });
-        
-        Gate::define('not-suspended', function () {
-            return Auth::user()->isSuspended()
-                ? Response::deny('Your account has been suspended.')
-                : Response::allow();
-        });
-
-        Gate::define('user-connected-to-server', function (\App\Models\User $user, \App\Models\Server $server) {
-            return $server->users()->where('id', Auth::user()->id)->exists()
-                ? Response::allow()
-                : Response::deny('Sorry can\'t let you in.');
-        });
+        Model::preventSilentlyDiscardingAttributes($this->app->environment('local'));
+        Gates::boot();
     }
 }
