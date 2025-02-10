@@ -22,6 +22,8 @@ class ServerController extends Controller
      */
     public function show(Server $server)
     {
+        Gate::any(['admin-only', 'user-connected-to-server'], [$server]);
+
         return view('server.show', [
             'server' => Server::find($server->id)
         ]);
