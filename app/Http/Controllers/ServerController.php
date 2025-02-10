@@ -6,6 +6,7 @@ use App\Http\Requests\Server\StoreServerRequest;
 use App\Http\Requests\Server\UpdateServerRequest;
 use Illuminate\Support\Facades\Gate;
 use App\Models\Server;
+use App\Models\User;
 
 class ServerController extends Controller
 {
@@ -36,7 +37,8 @@ class ServerController extends Controller
     {
         Gate::authorize('admin-only');
         return view('server.edit', [
-            'server' => Server::find($server->id)
+            'server' => Server::find($server->id),
+            'users' => User::where('suspended', false)->select('id', 'name')->get()
         ]);
     }
 
