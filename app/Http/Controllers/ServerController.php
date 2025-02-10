@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\Server\StoreServerRequest;
-use App\Http\Requests\Server\UpdateServerRequest;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use App\Models\Server;
 use App\Models\User;
@@ -45,12 +44,22 @@ class ServerController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateServerRequest $request, Server $server)
+    public function update(FormRequest $request, Server $server)
     {
         Gate::authorize('admin-only');
 
-        $server->fill($request->validated());
+        /**
+         * Filter out invalid user ids from the input
+         */
+        $user_ids = array_filter($request->input('users'), function($user_id) {
+            return in_array((int) $user_id, User::pluck('id')->toArray());
+        });
+
+        $server->users()->sync($user_ids);
+
+        $server->fill($request->validate(Server::rules()));
         $server->save();
+
         return to_route('server.show', $server->id);
     }
 
