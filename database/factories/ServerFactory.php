@@ -17,7 +17,9 @@ class ServerFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name' => fake()->word(),
+            'ip' => fake()->ipv4(),
+            'port' => fake()->numberBetween(1,99999)
         ];
     }
 }
