@@ -47,6 +47,11 @@ class Server extends Model
         'port'
     ];
 
+    /**
+     * Get the users that are attached to this server.
+     *
+     * @return BelongsToMany<User>
+     */
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class);

@@ -9,9 +9,11 @@ use Illuminate\Validation\Rule;
 
 class UserUpdateRequest extends FormRequest
 {
-
     /**
      * Prepare the data for validation.
+     *
+     * This will convert the admin and suspended fields
+     * to boolean values.
      */
     protected function prepareForValidation(): void
     {
@@ -30,19 +32,35 @@ class UserUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['sometimes', 'required', 'string', 'max:255'],
-            'email' => [
-                'sometimes',
-                'required',
-                'string',
-                'lowercase',
-                'email',
-                'max:255',
-                Rule::unique(User::class)->ignore($this->user),
+            'name' => [
+                'sometimes', // Only validate if the field is present
+                'required', // The field is required
+                'string', // The field must be a string
+                'max:255' // The field must not be longer than 255 characters
             ],
-            'phone' => ['sometimes', 'nullable', 'string', 'max:20'],
-            'admin' => ['required', 'boolean'],
-            'suspended' => ['required', 'boolean'],
+            'email' => [
+                'sometimes', // Only validate if the field is present
+                'required', // The field is required
+                'string', // The field must be a string
+                'lowercase', // The field must be lowercase
+                'email', // The field must be a valid email
+                'max:255', // The field must not be longer than 255 characters
+                Rule::unique(User::class)->ignore($this->user) // The field must be unique
+            ],
+            'phone' => [
+                'sometimes', // Only validate if the field is present
+                'nullable', // The field is not required
+                'string', // The field must be a string
+                'max:20' // The field must not be longer than 20 characters
+            ],
+            'admin' => [
+                'required', // The field is required
+                'boolean' // The field must be a boolean
+            ],
+            'suspended' => [
+                'required', // The field is required
+                'boolean' // The field must be a boolean
+            ]
         ];
     }
 }

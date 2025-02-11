@@ -22,11 +22,12 @@ class UserController extends Controller
      * Display a listing of the resource.
      * 
      * @return \Illuminate\Http\Response
+     * 
+     * @todo Filter the users by the ones that the user is attached to
      */
-
-     // TODO: show only the users that the user is attached to
     public function index()
     {
+        // TODO: show only the users that the user is attached to
         return view('user.index', ['users' => User::all()]);
     }
 
@@ -51,7 +52,9 @@ class UserController extends Controller
 
     /**
      * Show the form for editing the specified resource.
+     * 
      * Admin-only function
+     * Allows an admin to edit a user
      * 
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
@@ -59,8 +62,10 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
+        // Check for admin permissions
         Gate::authorize('admin-only');
 
+        // Return the edit page with the user and servers
         return view('user.edit', [
             'user' => $user,
             'servers' => Server::select('id', 'name')->get()
@@ -69,6 +74,7 @@ class UserController extends Controller
 
     /**
      * Update the specified resource in storage.
+     * 
      * Admin-only function
      * 
      * @param  \Illuminate\Http\Request  $request
@@ -81,6 +87,15 @@ class UserController extends Controller
         Gate::authorize('admin-only');
 
         try {
+            /**
+             * Sync the servers with the user
+             * 
+             * If the request has servers, filter the list of server ids
+             * and sync the list of server ids with the user's servers
+             * 
+             * If no servers are provided, detach all the user's servers
+             * 
+             */
             if($request->has('servers')) {
                 $server_ids = array_filter($request->input('servers'), function($server_id) {
                     return in_array($server_id, Server::pluck('id')->toArray());
@@ -91,14 +106,22 @@ class UserController extends Controller
                 $user->servers()->detach();
             }
 
-            // Cannot delete the last admin
+            /**
+             * Check if the user is the last admin
+             * If the user is the last admin, do not allow to remove the admin role
+             * 
+             */
             if ($user->isLastAdmin() && !$request->input('admin')) {
                 Log::notice('User update failed, tried removing the last admin', ['user_id' => $user->id]);
                 return back()->withErrors(['admin' => 'Cannot delete the last admin.']);
             }
             
-            // Update the user
-            // Fill the user with the validated data
+            /**
+             * Update the user
+             * Fill the user with the validated data
+             * and save the user
+             * 
+             */
             $user->fill($request->validated());
             $user->save();
 

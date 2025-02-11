@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Server;
 
-
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -40,7 +39,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * The attributes that should be cast.
      *
      * @return array<string, string>
      */
@@ -54,15 +53,31 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * Check if the user is an admin.
+     *
+     * @return bool
+     */
     public function isAdmin(): bool
     {
         return $this->admin === null ? false : $this->admin;
     }
+
+    /**
+     * Check if the user is suspended.
+     *
+     * @return bool
+     */
     public function isSuspended(): bool
     {
         return $this->suspended === null ? false : $this->suspended;
     }
 
+    /**
+     * Get the servers the user is attached to.
+     *
+     * @return BelongsToMany
+     */
     public function servers(): BelongsToMany
     {
         return $this->belongsToMany(Server::class);
@@ -71,10 +86,9 @@ class User extends Authenticatable
     /**
      * Check if the user is the last admin.
      *
-     * @param  \App\Models\User  $user
      * @return bool
      */
-    public function isLastAdmin()
+    public function isLastAdmin(): bool
     {
         return User::where('admin', true)->count() <= 1 && $this->admin;
     }
