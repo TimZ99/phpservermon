@@ -3,16 +3,12 @@ use App\Models\User;
 use App\Models\Server;
 
 test('servers index page is displayed', function () {
-    $this->seed();
-    $user = User::first();
-    $server = Server::all()->last();
-
-    $view = $this->view('server.index', ['servers' => Server::all()])
-        ->assertSee($server->id);
+    $user = User::factory()->create();
+    $server = Server::factory(10)->create()->last(); 
 
     $this->actingAs($user)->get('/servers')
-        ->assertOk();
-
+        ->assertOk()
+        ->assertSee($server->id);
 });
 
 test('servers page require login', function () {
@@ -22,14 +18,14 @@ test('servers page require login', function () {
 });
 
 test('server show can be displayed', function () {
-    $this->seed();
+    $admin = User::factory()->create(['admin' => true]);
+    $server = Server::factory()->create();
 
-    $user = User::first();
-    $server = Server::all()->last();
-    $this->actingAs($user)
+    $this->actingAs($admin)
         ->get('/server/' . $server->id)
         ->assertOk()
         ->assertSee($server->name)
         ->assertSee($server->port)
-        ->assertSee($server->ip);
+        ->assertSee($server->ip)
+        ->assertViewIs('server.show');
 });
