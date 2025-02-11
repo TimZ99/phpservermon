@@ -67,4 +67,15 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Server::class);
     }
+
+    /**
+     * Check if the user is the last admin.
+     *
+     * @param  \App\Models\User  $user
+     * @return bool
+     */
+    public function isLastAdmin()
+    {
+        return User::where('admin', true)->count() <= 1 && $this->admin;
+    }
 }

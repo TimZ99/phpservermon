@@ -1,0 +1,37 @@
+<section>
+    <header>
+        <h2>{{ __('General settings') }}</h2>
+    </header>
+    <form method="post" action="{{ route('user.update', ['user' => $user]) }}" class="mt-6">
+        @csrf
+        @method('patch')
+
+        <label for="name">{{ __('Name') }}</label>
+        <input id="name" name="name" class="form-control mb-2" type="text" class="mt-1" value="{{old('name', $user->name)}}" required autofocus autocomplete="off" />
+        <x-input-error class="mt-2" :messages="$errors->get('name')" />
+
+        <label for="email">{{ __('Email') }}</label>
+        <input id="email" name="email" class="form-control mb-2" type="email" class="mt-1" value="{{old('email', $user->email)}}" required autocomplete="off" />
+        <x-input-error class="mt-2" :messages="$errors->get('email')" />
+
+        <input id="admin" name="admin" class="form-check-input mb-2" type="checkbox" class="mt-1" value="1" autocomplete="off" @if (old('admin', $user->admin)) checked @endif>
+        <label for="admin" class="form-check-label">{{ __('Admin') }}</label>
+        <x-input-error class="mt-2" :messages="$errors->get('admin')" />
+        <br>
+        <input id="suspended" name="suspended" class="form-check-input mb-2" type="checkbox" class="mt-1" value="1" autocomplete="off" @if (old('suspended', $user->suspended)) checked @endif/>
+        <label for="suspended" class="form-check-label">{{ __('Suspended') }}</label>
+        <x-input-error class="mt-2" :messages="$errors->get('suspended')" />
+        <br>
+        <label for="servers">{{ __('Servers') }}</label>
+        <select class="form-select mb-2" id="users" name="servers[]" multiple>
+            @foreach ($servers as $server)
+                <option value="{{ $server->id }}"> {{ $server->name }}</option>
+            @endforeach
+        </select>
+
+        <div class="flex items-center gap-4">
+            <x-primary-button>{{ __('Save') }}</x-primary-button>
+            <x-input-error class="mt-2" :messages="$errors->get('general')" />
+        </div>
+    </form>
+</section>
