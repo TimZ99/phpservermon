@@ -2,6 +2,7 @@
 
 namespace App\Gates;
 
+use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Access\Response;
@@ -21,7 +22,8 @@ class Gates
              *
              * @return Response
              */
-            return Auth::user()->isAdmin()
+            $user = Auth::user();
+            return User::find($user->id)->isAdmin()
                 ? Response::allow()
                 : Response::deny('Sorry can\'t let you in.');
         });
@@ -32,7 +34,8 @@ class Gates
              *
              * @return Response
              */
-            return Auth::user()->isSuspended()
+            $user = Auth::user();
+            return User::find($user->id)->isSuspended()
                 ? Response::deny('Your account has been suspended.')
                 : Response::allow();
         });
