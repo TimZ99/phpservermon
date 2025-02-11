@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UserUpdateRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Response;
 use App\Models\Server;
 use App\Models\User;
 use Exception;
@@ -113,7 +114,7 @@ class UserController extends Controller
              */
             if ($user->isLastAdmin() && !$request->input('admin')) {
                 Log::notice('User update failed, tried removing the last admin', ['user_id' => $user->id]);
-                return back()->withErrors(['admin' => 'Cannot delete the last admin.']);
+                return back()->withInput()->withErrors(['admin' => 'Cannot delete the last admin.']);
             }
             
             /**
@@ -149,7 +150,7 @@ class UserController extends Controller
         // Cannot delete the last admin
         if ($user->isLastAdmin()) {
             Log::notice('User deleted failed, tried removing the last admin', ['user_id' => $user->id]);
-            return back()->withErrors(['general' => 'Cannot delete the last admin.']);
+            return back()->withErrors(['admindelete' => 'Cannot delete the last admin.']);
         }
 
         $user->servers()->detach();

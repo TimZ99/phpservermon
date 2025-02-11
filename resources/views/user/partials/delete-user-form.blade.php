@@ -5,6 +5,7 @@
     </header>
 
     <x-danger-button data-bs-toggle="modal" data-bs-target="#confirm-user-deletion">{{ __('Delete user') }}</x-danger-button>
+    <x-input-error class="mt-2" :messages="$errors->get('admindelete')" />
 
     <x-modal id="confirm-user-deletion" ariaLabelledby="confirm-user-deletion-label" >
         <form method="post" action="{{ route('user.destroy', $user->id) }}" class="p-6">
