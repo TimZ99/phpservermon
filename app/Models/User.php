@@ -2,13 +2,12 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Server;
-
 
 class User extends Authenticatable
 {
@@ -40,7 +39,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * The attributes that should be cast.
      *
      * @return array<string, string>
      */
@@ -54,17 +53,43 @@ class User extends Authenticatable
         ];
     }
 
-    function isAdmin(): bool
+    /**
+     * Check if the user is an admin.
+     *
+     * @return bool
+     */
+    public function isAdmin(): bool
     {
         return $this->admin === null ? false : $this->admin;
     }
-    function isSuspended(): bool
+
+    /**
+     * Check if the user is suspended.
+     *
+     * @return bool
+     */
+    public function isSuspended(): bool
     {
         return $this->suspended === null ? false : $this->suspended;
     }
 
-    public function servers(): HasMany
+    /**
+     * Get the servers the user is attached to.
+     *
+     * @return BelongsToMany
+     */
+    public function servers(): BelongsToMany
     {
-        return $this->hasMany(Server::class);
+        return $this->belongsToMany(Server::class);
+    }
+
+    /**
+     * Check if the user is the last admin.
+     *
+     * @return bool
+     */
+    public function isLastAdmin(): bool
+    {
+        return User::where('admin', true)->count() <= 1 && $this->admin;
     }
 }

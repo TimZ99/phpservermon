@@ -14,6 +14,9 @@
                     <x-nav-link :href="route('server.index')" :active="request()->routeIs('server.index')">
                         {{ __('Servers') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('user.index')" :active="request()->routeIs('user.index')">
+                        {{ __('Users') }}
+                    </x-nav-link>
                 </ul>
                 <li class="nav-item dropdown d-flex pe-4 text-bg-dark">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"

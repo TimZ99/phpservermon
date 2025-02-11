@@ -47,22 +47,13 @@ class Server extends Model
         'port'
     ];
 
+    /**
+     * Get the users that are attached to this server.
+     *
+     * @return BelongsToMany<User>
+     */
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class);
-    }
-
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
-    static function rules(): array|ValidationRule
-    {
-        return [
-            'name' => ['required', 'string', 'max:255'],
-            'ip' => ['string', 'max:255'],
-            'port' => ['numeric', 'between:0,99999']
-        ];
     }
 }

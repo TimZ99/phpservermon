@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\ServerController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,7 +25,28 @@ Route::middleware(['auth', 'can:not-suspended'])->group(function () {
     Route::get('/server/{server}/edit', [ServerController::class, 'edit'])->name('server.edit');
     Route::patch('/server/{server}/edit', [ServerController::class, 'update'])->name('server.update');
     Route::delete('/server/{server}', [ServerController::class, 'destroy'])->name('server.destroy');
-    // ->can('admin-only')
+
+    /* User */
+    Route::get('/users', [UserController::class, 'index'])->name('user.index');
+    Route::get('/user/{user}', [UserController::class, 'show'])->name('user.show');
+    Route::get('/user/{user}/edit', [UserController::class, 'edit'])->name('user.edit');
+    Route::patch('/user/{user}/edit', [UserController::class, 'update'])->name('user.update');
+    Route::delete('/user/{user}', [UserController::class, 'destroy'])->name('user.destroy');
+});
+
+Route::get('/run-seed', function () {
+    try {
+        Artisan::call('migrate:fresh', ["--force" => true, '--schema-path' => 'do not run schema path']);
+    } catch (Exception $e) {
+        return $this->response($e->getMessage());
+    }
+    try {
+        Artisan::call('db:seed');
+    } catch (Exception $e) {
+        return $this->response($e->getMessage());
+    }
+
+    return 'success';
 });
 
 require __DIR__.'/auth.php';
