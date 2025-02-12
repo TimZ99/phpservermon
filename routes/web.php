@@ -18,7 +18,7 @@ Route::middleware(['auth', 'can:not-suspended'])->group(function () {
 
     /* Server */
     // view
-    Route::resource('server', ServerController::class)->except(['index', 'create', 'store']);
+    Route::resource('server', ServerController::class)->except(['index']);
     Route::get('/dashboard', [ServerController::class, 'monitorPage'])->name('dashboard');
     Route::get('/servers', [ServerController::class, 'index'])->name('server.index');
 

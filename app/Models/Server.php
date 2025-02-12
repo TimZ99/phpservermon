@@ -47,6 +47,15 @@ class Server extends Model
     ];
 
     /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'port' => 'integer',
+    ];
+
+    /**
      * Get the users that are attached to this server.
      *
      * @return BelongsToMany<User>
