@@ -34,7 +34,7 @@ class ServerController extends Controller
             $server->statusCss = 'danger';
         }
 
-        return view('dashboard', ['servers' => $user->servers]);
+        return view('server.monitor', ['servers' => $user->servers]);
     }
 
     /**

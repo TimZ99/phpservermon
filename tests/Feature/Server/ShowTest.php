@@ -5,8 +5,8 @@ use App\Models\Server;
 test('server monitor page is displayed', function () {
     $user = User::factory()->create();
 
-    $this->get('/dashboard')->assertRedirectToRoute('login');
-    $this->actingAs($user)->get('/dashboard')->assertOk();
+    $this->get('/monitor')->assertRedirectToRoute('login');
+    $this->actingAs($user)->get('/monitor')->assertOk();
 });
 
 test('servers index page is displayed', function () {

@@ -8,8 +8,8 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             @auth
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
+                    <x-nav-link :href="route('server.monitor')" :active="request()->routeIs('server.monitor')">
+                        {{ __('Monitor') }}
                     </x-nav-link>
                     <x-nav-link :href="route('server.index')" :active="request()->routeIs('server.index')">
                         {{ __('Servers') }}
