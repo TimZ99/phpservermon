@@ -2,13 +2,21 @@
 use App\Models\User;
 use App\Models\Server;
 
+test('server monitor page is displayed', function () {
+    $user = User::factory()->create();
+
+    $this->get('/dashboard')->assertRedirectToRoute('login');
+    $this->actingAs($user)->get('/dashboard')->assertOk();
+});
+
 test('servers index page is displayed', function () {
     $user = User::factory()->create();
+    $admin = User::factory()->create(['admin' => true]);
     $server = Server::factory(10)->create()->last(); 
 
-    $this->actingAs($user)->get('/servers')
-        ->assertOk()
-        ->assertSee($server->id);
+    $this->get('/servers')->assertRedirectToRoute('login');
+    $this->actingAs($user)->get('/servers')->assertForbidden();
+    $this->actingAs($admin)->get('/servers')->assertOk()->assertSee($server->name);
 });
 
 test('servers page require login', function () {
