@@ -7,7 +7,7 @@
             Server details
         </div>
         <div class="card-body">
-            <a href="{{route('server.update', $server->id)}}">
+            <a href="{{route('server.edit', $server->id)}}">
                 <button class="btn btn-secondary mb-4">
                     {{ __('Edit server') }}
                 </button>
