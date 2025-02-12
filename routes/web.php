@@ -4,14 +4,11 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ServerController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
 
 Route::get('/', function () {
     return view('welcome');
 });
-
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', 'can:not-suspended'])->group(function () {
     /* Profile */
@@ -20,18 +17,15 @@ Route::middleware(['auth', 'can:not-suspended'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     /* Server */
+    // view
+    Route::resource('server', ServerController::class)->except(['index']);
+    Route::get('/monitor', [ServerController::class, 'monitorPage'])->name('server.monitor');
     Route::get('/servers', [ServerController::class, 'index'])->name('server.index');
-    Route::get('/server/{server}', [ServerController::class, 'show'])->name('server.show');
-    Route::get('/server/{server}/edit', [ServerController::class, 'edit'])->name('server.edit');
-    Route::patch('/server/{server}/edit', [ServerController::class, 'update'])->name('server.update');
-    Route::delete('/server/{server}', [ServerController::class, 'destroy'])->name('server.destroy');
+
 
     /* User */
+    Route::resource('user', UserController::class)->except(['index', 'create', 'store']);
     Route::get('/users', [UserController::class, 'index'])->name('user.index');
-    Route::get('/user/{user}', [UserController::class, 'show'])->name('user.show');
-    Route::get('/user/{user}/edit', [UserController::class, 'edit'])->name('user.edit');
-    Route::patch('/user/{user}/edit', [UserController::class, 'update'])->name('user.update');
-    Route::delete('/user/{user}', [UserController::class, 'destroy'])->name('user.destroy');
 });
 
 Route::get('/run-seed', function () {

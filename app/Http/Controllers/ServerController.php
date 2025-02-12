@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ServerUpdateRequest;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Server;
 use App\Models\User;
 use Exception;
@@ -26,9 +27,37 @@ class ServerController extends Controller
      * 
      * @todo Filter the servers by the ones that the user is attached to
      */
+    public function monitorPage()
+    {
+        $user = Auth::user();
+        foreach($user->servers as $server) {
+            $server->statusCss = 'danger';
+            $server->statusCssColor = '#dc3545';
+        }
+
+        return view('server.monitor', ['servers' => $user->servers]);
+    }
+
+    /**
+     * Display a listing of the resource.
+     * 
+     * This function will show a list of all servers.
+     * 
+     * @return \Illuminate\Http\Response
+     * 
+     * @todo Filter the servers by the ones that the user is attached to
+     */
     public function index()
     {
-        return view('server.index', ['servers' => Server::all()]);
+        // Check if the user is an admin
+        Gate::authorize('admin-only');
+
+        $servers = Server::all();
+        foreach($servers as $server) {
+            $server->statusCss = 'danger';
+            $server->statusCssColor = '#dc3545';
+        }
+        return view('server.index', ['servers' => $servers]);
     }
 
     /**
@@ -50,6 +79,49 @@ class ServerController extends Controller
         return view('server.show', [
             'server' => Server::find($server->id)
         ]);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     * Admin-only function
+     * 
+     * @return \Illuminate\Http\Response
+     * 
+     */
+    public function create()
+    {
+        // Check if the user is an admin
+        Gate::authorize('admin-only');
+        // Return the server create page with a list of users with id and name
+        return view('server.create');
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     * Admin-only function
+     * 
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     * 
+     */
+    public function store(ServerUpdateRequest $request)
+    {
+        // Check if the user is an admin
+        Gate::authorize('admin-only');
+        
+        try {
+            // Create the server
+            
+            $server = Server::create($request->validated());
+            // Sync the users with the server
+            $server->users()->sync($request->input('users'));
+            // Return the server page with the created server
+            return to_route('server.show', $server->id);
+        } catch (Exception $e) {
+            report($e);
+            // If an error occurs, return back to the server create page with the input and errors
+            return back()->withInput()->withErrors(['general' => 'A problem occurred while creating the server. Please try again later.']);
+        }
     }
 
     /**

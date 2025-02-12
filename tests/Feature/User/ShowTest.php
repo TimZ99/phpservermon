@@ -11,7 +11,7 @@ test('all routes are covered by authorization', function () {
     $this->get('/user')->assertNotFound();
     $this->get('/user/randomid')->assertRedirectToRoute('login');
     $this->get('/user/randomid/edit')->assertRedirectToRoute('login');
-    $this->patch('/user/randomid/edit')->assertRedirectToRoute('login');
+    $this->patch('/user/randomid')->assertRedirectToRoute('login');
     $this->delete('/user/randomid')->assertRedirectToRoute('login');
 
     //user
@@ -20,7 +20,7 @@ test('all routes are covered by authorization', function () {
     $this->actingAs($user)->get('/user')->assertNotFound();
     $this->actingAs($user)->get('/user/' . $user->id)->assertOk();
     $this->actingAs($user)->get('/user/' . $user->id . '/edit')->assertForbidden();
-    $this->actingAs($user)->patch('/user/' . $user->id . '/edit')->assertForbidden();
+    $this->actingAs($user)->patch('/user/' . $user->id)->assertForbidden();
     $this->actingAs($user)->delete('/user/' . $user->id)->assertForbidden();
 
     //admin
@@ -29,7 +29,7 @@ test('all routes are covered by authorization', function () {
     $this->actingAs($admin)->get('/user')->assertNotFound();
     $this->actingAs($admin)->get('/user/' . $user->id)->assertOk();
     $this->actingAs($admin)->get('/user/' . $user->id . '/edit')->assertOk();
-    $this->actingAs($admin)->patch('/user/' . $user->id . '/edit')->assertRedirectToRoute('user.show', ['user' => $user->id]);
+    $this->actingAs($admin)->patch('/user/' . $user->id)->assertRedirectToRoute('user.show', ['user' => $user->id]);
     $this->actingAs($admin)->delete('/user/' . $user->id)->assertRedirectToRoute('user.index');
 });
 
