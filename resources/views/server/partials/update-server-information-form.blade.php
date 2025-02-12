@@ -38,7 +38,12 @@
         <label for="users">{{ __('Users') }}</label>
         <select class="form-select mb-2" id="users" name="users[]" multiple>
             @foreach ($users as $user)
-                <option value="{{ $user->id }}"> {{ $user->name }}</option>
+                <option
+                    value="{{ $user->id }}"
+                    @if(in_array($user->id, $server->users->pluck('id')->toArray())) selected @endif
+                > 
+                    {{ $user->name }}
+                </option>
             @endforeach
         </select>
     </div>
