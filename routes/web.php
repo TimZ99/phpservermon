@@ -17,7 +17,6 @@ Route::middleware(['auth', 'can:not-suspended'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     /* Server */
-    // view
     Route::resource('server', ServerController::class)->except(['index']);
     Route::get('/monitor', [ServerController::class, 'monitorPage'])->name('server.monitor');
     Route::get('/servers', [ServerController::class, 'index'])->name('server.index');
