@@ -32,6 +32,7 @@ class ServerController extends Controller
         $user = Auth::user();
         foreach($user->servers as $server) {
             $server->statusCss = 'danger';
+            $server->statusCssColor = '#dc3545';
         }
 
         return view('server.monitor', ['servers' => $user->servers]);
@@ -54,6 +55,7 @@ class ServerController extends Controller
         $servers = Server::all();
         foreach($servers as $server) {
             $server->statusCss = 'danger';
+            $server->statusCssColor = '#dc3545';
         }
         return view('server.index', ['servers' => $servers]);
     }
