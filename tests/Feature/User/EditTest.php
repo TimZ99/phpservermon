@@ -9,7 +9,7 @@ test('non-admin user cannot edit other users', function () {
     $this->assertDatabaseCount('users', 2);
 
     $this->actingAs($user1)
-        ->patch('/user/' . $user2->id . '/edit', ['name' => 'New Name'])
+        ->patch('/user/' . $user2->id, ['name' => 'New Name'])
         ->assertForbidden();
     $this->assertDatabaseCount('users', 2);
 
@@ -21,7 +21,7 @@ test('admin user can edit other users', function () {
     $user = User::factory()->create();
 
     $this->actingAs($admin)
-        ->patch('/user/' . $user->id . '/edit', ['name' => 'New Name'])
+        ->patch('/user/' . $user->id, ['name' => 'New Name'])
         ->assertSessionHasNoErrors()
         ->assertRedirectToRoute('user.show', $user->id);
 
@@ -33,7 +33,7 @@ test('user can be made admin or be suspended', function () {
     $user = User::factory()->create();
 
     $this->actingAs($admin)
-        ->patch('/user/' . $user->id . '/edit', ['admin' => true, 'suspended' => true])
+        ->patch('/user/' . $user->id, ['admin' => true, 'suspended' => true])
         ->assertSessionHasNoErrors()
         ->assertRedirectToRoute('user.show', $user->id);
 
