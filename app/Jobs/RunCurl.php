@@ -17,17 +17,18 @@ class RunCurl implements ShouldQueue
 {
     use Batchable, Queueable;
 
+    protected $check_settings;
     /**
      * Create a new job instance.
      */
-    public function __construct(protected string $href, protected Server $server)
+    public function __construct(protected Server $server)
     {
         $this->onQueue('ServerTest');
-        $this->href = $href;
         $this->server = $server;
+        $this->check_settings = json_decode($this->server->check_settings);
     }
     /**
-     * Execute the job.
+     * Execute the job.x
      */
     public function handle(): void
     {
@@ -39,20 +40,29 @@ class RunCurl implements ShouldQueue
         curl_setopt($ch, CURLOPT_ENCODING, '');
         curl_setopt($ch, CURLOPT_CERTINFO, 1);
         curl_setopt($ch, CURLOPT_COOKIEFILE, '');
-        $this->href = preg_replace('/(.*)(%cachebuster%)/', '$0' . time(), $this->href);
+        $this->server->ip = preg_replace('/(.*)(%cachebuster%)/', '$0' . time(), $this->server->ip);
     
-        curl_setopt($ch, CURLOPT_URL, $this->href);
+        curl_setopt($ch, CURLOPT_URL, $this->server->ip);
     
         $result['exec'] = curl_exec($ch);
         $result['info'] = curl_getinfo($ch);
     
         curl_close($ch);
+
         Log::debug('Start tests for server. First curl website.', ['server' => $this->server, 'result' => $result]);
-        Bus::batch([
-            new StatusCode($result['info']),
-            new SSL($result['info']),
-        ])->name('Tests for server' . $this->server->id)->catch(function (Throwable $e) {
-            Log::error('Error in RunCurl', ['error' => $e]);
-        })->onQueue('ServerTest')->dispatch();
+        
+        $jobs = [
+            new SSL($this->check_settings, $result['info']),
+            new StatusCode($this->check_settings, $result['info'])
+        ];
+        
+        
+        
+        Bus::batch($jobs)->name('Tests for server ' . $this->server->id)
+            ->catch(function (Throwable $e) {
+                Log::error('Error in RunCurl', ['error' => $e]);
+            })
+            ->onQueue('ServerTest')
+            ->dispatch();
     }
 }

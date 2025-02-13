@@ -43,7 +43,8 @@ class Server extends Model
     protected $fillable = [
         'name',
         'ip',
-        'port'
+        'port',
+        'check_settings',
     ];
 
     /**

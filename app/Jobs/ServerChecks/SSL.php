@@ -14,10 +14,11 @@ class SSL implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(protected $result)
+    public function __construct(protected $check_settings, protected $curl_result)
     {
         $this->onQueue('ServerTest');
-        $this->result = $result;
+        $this->check_settings = $check_settings;
+        $this->curl_result = $curl_result;
     }
 
     /**
@@ -25,22 +26,47 @@ class SSL implements ShouldQueue
      */
     public function handle(): void
     {
-        $certinfo = $this->result['certinfo'];
-        if (!empty($certinfo)) {
-            $certinfo = openssl_x509_parse($certinfo[0]['Cert']);
-            $cert_expiration_date = $certinfo['validTo_time_t'];
-            $expiration_time = $this->result['certinfo'][0]['Expire date'];
-           
-            Log::debug('SSL Cert info', ['certinfo' => $certinfo]);
-
-            // Check if the SSL certificate is still valid
-            $cert_expiration_date > time() 
-                ? Log::info('SSL certificate is valid.', ['expiration_time' => $expiration_time])
-                : Log::warning('SSL certificate is not valid.', ['expiration_time' => $expiration_time]);
-            
+        if(!$this->check_settings->SSL->enabled) {
+            Log::debug('SSL check is not enabled for server.');
             return;
         }
-        Log::warning('No SSL certificate found.', ['info' => $certinfo]);
+        $certinfo = $this->curl_result['certinfo'];
+        if (empty($certinfo)) {
+            Log::warning('No SSL certificate found.', ['info' => $certinfo]);
+            return;
+        }
         
+        $certinfo = openssl_x509_parse($certinfo[0]['Cert']);
+        $cert_expiration_date = $certinfo['validTo_time_t'];
+        $expiration_time = $this->curl_result['certinfo'][0]['Expire date'];
+        
+        Log::debug('SSL Cert info', ['certinfo' => $certinfo]);
+
+        if ($this->check_settings->SSL->SSL_certificate_valid->enabled !== true) {
+            Log::debug('Checking for valid SSL certificate is not enabled.');
+        } else {
+            Log::debug('Validating SSL certificate.');
+            // Check if the SSL certificate is still valid
+            if ($cert_expiration_date > time()) {
+                Log::info('SSL certificate is valid.', ['expiration_time' => $expiration_time]);
+            } else {
+                Log::warning('SSL certificate is not valid.', ['expiration_time' => $expiration_time]);
+            }
+        }
+        if ($this->check_settings->SSL->SSL_expiration->enabled !== true) {
+            Log::debug('Checking for SSL expiration is not enabled.');
+        } else {
+            Log::debug('Checking for SSL expiration.');
+            $expiration_days = round(($cert_expiration_date - time()) / 86400);
+            if ($expiration_days < $this->check_settings->SSL->SSL_expiration->input->days) {
+                Log::warning('SSL certificate will expire in ' . (string) $expiration_days . ' days.', ['expiration_time' => $expiration_time]);
+            } else {
+                $days_to_expiration = $this->check_settings->SSL->SSL_expiration->input->days;
+                Log::info('SSL certificate will not expire in ' . $days_to_expiration . ' days. (' . $expiration_days . ')', ['expiration_time' => $expiration_time]);
+            }
+            
+        }
+
+        Log::debug('Completed SSL check for server.');
     }
 }

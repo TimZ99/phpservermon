@@ -12,12 +12,20 @@
                     {{ __('Edit server') }}
                 </button>
             </a>
+            <a href="{{route('server.runChecks', $server->id)}}">
+                <button class="btn btn-secondary mb-4">
+                    {{ __('Run tests') }}
+                </button>
+            </a>
             <br>
             <b>Server id</b> {{ $server->id }}<br>
             <b>Name</b> {{ $server->name }}<br>
             <b>IP</b> {{ $server->ip }}<br>
             <b>Port</b> {{ $server->port }}<br>
             @isset($server->users) <b>Users</b> @foreach($server->users as $user) {{ $user->name }}, @endforeach <br>@endisset
+            <b>Created at</b> {{ $server->created_at }}<br>
+            <b>Updated at</b> {{ $server->updated_at }}<br>
+            <b>Check settings</b>{{ $server->check_settings }}<br>
         </div>
     </div>
 </x-app-layout>
