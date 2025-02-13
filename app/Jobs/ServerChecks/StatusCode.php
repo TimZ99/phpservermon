@@ -11,13 +11,18 @@ class StatusCode implements ShouldQueue
 {
     use Batchable, Queueable;
 
+    protected $check_settings;
+    protected $id;
+
     /**
      * Create a new job instance.
      */
-    public function __construct(protected $check_settings,protected $curl_result)
+    public function __construct(protected $server,protected $curl_result)
     {
         $this->onQueue('ServerTest');
         $this->curl_result = $curl_result;
+        $this->check_settings = json_decode($this->server->check_settings);
+        $this->id = $server->id;
     }
 
     /**

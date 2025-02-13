@@ -17,7 +17,6 @@ class RunCurl implements ShouldQueue
 {
     use Batchable, Queueable;
 
-    protected $check_settings;
     /**
      * Create a new job instance.
      */
@@ -25,7 +24,6 @@ class RunCurl implements ShouldQueue
     {
         $this->onQueue('ServerTest');
         $this->server = $server;
-        $this->check_settings = json_decode($this->server->check_settings);
     }
     /**
      * Execute the job.x
@@ -52,8 +50,8 @@ class RunCurl implements ShouldQueue
         Log::debug('Start tests for server. First curl website.', ['server' => $this->server, 'result' => $result]);
         
         $jobs = [
-            new SSL($this->check_settings, $result['info']),
-            new StatusCode($this->check_settings, $result['info'])
+            new SSL($this->server, $result['info']),
+            new StatusCode($this->server, $result['info'])
         ];
         
         
