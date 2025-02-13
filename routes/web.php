@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\UserController;
 use App\Http\Controllers\ServerController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Route;
+use App\Jobs\RunCurl;
+use App\Models\Server;
 
 Route::get('/', function () {
     return view('welcome');
@@ -21,6 +23,16 @@ Route::middleware(['auth', 'can:not-suspended'])->group(function () {
     Route::get('/monitor', [ServerController::class, 'monitorPage'])->name('server.monitor');
     Route::get('/servers', [ServerController::class, 'index'])->name('server.index');
 
+    Route::get('/test', function () {
+        RunCurl::dispatch('https://github.com/phpservermon/phpservermon', Server::all()->first());
+        // Artisan::call('queue:work --once --queue ServerTest');
+        return 'Job dispatched and queue is processed.';
+    });
+
+    Route::get('/queue', function () {
+        Artisan::call('queue:listen');
+        return 'Queue is now listening.';
+    });
 
     /* User */
     Route::resource('user', UserController::class)->except(['index', 'create', 'store']);

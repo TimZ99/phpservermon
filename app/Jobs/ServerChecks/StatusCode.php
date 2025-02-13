@@ -25,10 +25,18 @@ class StatusCode implements ShouldQueue
      */
     public function handle(): void
     {
-        if ($this->result['http_code'] === 200) {
-            Log::info('Status code is OK.', ['result' => $this->result]);
-        } else {
-            Log::warning('Unexpected status code.', ['result' => $this->result]);
+        $code = $this->result['http_code'];
+
+        if ($code === 0) {
+            // somehow we dont have a proper response.
+            Log::warning('TIMEOUT ERROR: no response from server', ['exec' => $this->result]);
+            return;
         }
+
+        if ($code === 200) {
+            Log::info('Status code is OK ('. (string) $code .')', ['exec' => $this->result]);
+            return;
+        } 
+        Log::warning('Unexpected status code ('. (string) $code .')', ['exec' => $this->result]);
     }
 }

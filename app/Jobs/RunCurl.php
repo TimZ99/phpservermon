@@ -7,6 +7,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Bus\Batchable;
+use App\Models\Server;
 use Throwable;
 
 use App\Jobs\ServerChecks\StatusCode;
@@ -19,10 +20,11 @@ class RunCurl implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public string $href)
+    public function __construct(protected string $href, protected Server $server)
     {
         $this->onQueue('ServerTest');
         $this->href = $href;
+        $this->server = $server;
     }
     /**
      * Execute the job.
@@ -45,9 +47,12 @@ class RunCurl implements ShouldQueue
         $result['info'] = curl_getinfo($ch);
     
         curl_close($ch);
-        Log::debug('Hello there', $result['info']);
-        
-        $this->prependToChain(new SSL($result['info']));
-        $this->prependToChain(new StatusCode($result['info']));
+        Log::debug('Start tests for server. First curl website.', ['server' => $this->server, 'result' => $result]);
+        Bus::batch([
+            new StatusCode($result['info']),
+            new SSL($result['info']),
+        ])->name('Tests for server' . $this->server->id)->catch(function (Throwable $e) {
+            Log::error('Error in RunCurl', ['error' => $e]);
+        })->onQueue('ServerTest')->dispatch();
     }
 }
