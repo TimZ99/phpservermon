@@ -6,8 +6,10 @@ use App\Http\Requests\ServerUpdateRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Server;
+use App\Jobs\RunCurl;
 use App\Models\User;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Routing:
@@ -24,8 +26,7 @@ class ServerController extends Controller
      * This function will show a list of all servers.
      * 
      * @return \Illuminate\Http\Response
-     * 
-     * @todo Filter the servers by the ones that the user is attached to
+     *
      */
     public function monitorPage()
     {
@@ -44,8 +45,7 @@ class ServerController extends Controller
      * This function will show a list of all servers.
      * 
      * @return \Illuminate\Http\Response
-     * 
-     * @todo Filter the servers by the ones that the user is attached to
+     *
      */
     public function index()
     {
@@ -159,42 +159,54 @@ class ServerController extends Controller
         // Check if the user is an admin
         Gate::authorize('admin-only');
         
-        try {
-            // Find the server
-            $server = Server::findOrFail($id);
+        // Find the server
+        $server = Server::findOrFail($id);
 
-            /**
-             * Sync the users with the server
-             * If the request has users, filter the list of user ids
-             * and sync the list of user ids with the server's users
-             * 
-             * If no users are provided, detach all the server's users
-             */
-            if($request->has('users')) {
-                $user_ids = array_filter($request->input('users'), function($user_id) {
-                    return in_array((int) $user_id, User::pluck('id')->toArray());
-                });
-                // Filter out invalid user ids from the input
-                $server->users()->sync($user_ids);
-            }
-            else {
-                $server->users()->detach();
-            }
-            
-            /** 
-             * Update the server
-             * Fill the server with the validated data
-             */
-            $server->fill($request->validated());
-            $server->save();
-
-            // Return the server page with the updated server
-            return to_route('server.show', $server->id);
-        } catch (Exception $e) {
-            report($e);
-            // If an error occurs, return back to the server edit page with the input and errors
-            return back()->withInput()->withErrors(['general' => 'A problem occurred while updating the server. Please try again later.']);
+        /**
+         * Sync the users with the server
+         * If the request has users, filter the list of user ids
+         * and sync the list of user ids with the server's users
+         * 
+         * If no users are provided, detach all the server's users
+         */
+        if($request->has('users')) {
+            $user_ids = array_filter($request->input('users'), function($user_id) {
+                return in_array((int) $user_id, User::pluck('id')->toArray());
+            });
+            // Filter out invalid user ids from the input
+            $server->users()->sync($user_ids);
         }
+        else {
+            $server->users()->detach();
+        }
+        /** 
+         * Update the server
+         * Fill the server with the validated data
+         */
+        $server->fill($request->validated())->save();
+
+        // Return the server page with the updated server
+        return to_route('server.show', $server->id);
+    }
+
+    /**
+     * Run the job for the specified server
+     * Admin-only function
+     * 
+     * @param  \App\Models\Server  $server
+     * @return \Illuminate\Http\Response
+     * 
+     */
+    public function runJob(Server $server)
+    {
+        // Check if the user is an admin
+        Gate::authorize('admin-only');
+        // Dispatch the RunCurl job for the server
+        RunCurl::dispatch('https://github.com/phpservermon/phpservermon', $server);
+
+        return 'Job dispatched and queue is processed.';
+        // Return to the server page
+        return to_route('server.show', $server->id);
     }
 
     /**
