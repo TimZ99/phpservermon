@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UserUpdateRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Http\Response;
 use App\Models\Server;
 use App\Models\User;
 use Exception;
