@@ -185,6 +185,29 @@ class ServerController extends Controller
          */
         $server->fill($request->validated())->save();
 
+        $json = json_encode([
+            'SSL' => [
+                'enabled' => true,
+                'SSL_expiration' => [
+                    'enabled' => true,
+                    'type' => 'warning',
+                    'input' => ['days' => 5]
+                ],
+                'SSL_certificate_valid' => [
+                    'enabled' => true,
+                    'type' => 'error',
+                    'input' => []
+                ],
+            ],
+            'status_code' => [
+                'enabled' => true,
+                'type' => 'error',
+                'input' => []
+            ]
+        ]);
+
+        $server->fill(['check_settings' => $json])->save();
+
         // Return the server page with the updated server
         return to_route('server.show', $server->id);
     }
