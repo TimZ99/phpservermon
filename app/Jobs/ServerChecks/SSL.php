@@ -2,11 +2,11 @@
 
 namespace App\Jobs\ServerChecks;
 
-use App\Models\CheckHistory;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Bus\Batchable;
+use App\Models\CheckHistory;
 
 class SSL implements ShouldQueue
 {
@@ -53,8 +53,23 @@ class SSL implements ShouldQueue
             Log::debug('Validating SSL certificate.');
             // Check if the SSL certificate is still valid
             if ($cert_expiration_date > time()) {
+                CheckHistory::create([
+                    'server_id' => $this->server->id,
+                    //'batch_id' => $this->batch_id,
+                    'name' => 'SSL_certificate_valid',
+                    'status' => 'success',
+                    'message' => 'SSL certificate is valid',
+                    'check_settings' => json_encode($this->check_settings->SSL->SSL_expiration)]);
                 Log::info('SSL certificate is valid.', ['expiration_time' => $expiration_time]);
             } else {
+                CheckHistory::create([
+                    'server_id' => $this->server->id,
+                    //'batch_id' => $this->batch_id,
+                    'name' => 'SSL_certificate_valid',
+                    'status' => 'error',
+                    'message' => 'SSL certificate is not valid',
+                    'check_settings' => json_encode($this->check_settings->SSL->SSL_expiration)
+                ]);
                 Log::warning('SSL certificate is not valid.', ['expiration_time' => $expiration_time]);
             }
         }
@@ -64,8 +79,24 @@ class SSL implements ShouldQueue
             Log::debug('Checking for SSL expiration.');
             $expiration_days = round(($cert_expiration_date - time()) / 86400);
             if ($expiration_days < $this->check_settings->SSL->SSL_expiration->input->days) {
-                Log::warning('SSL certificate will expire in ' . (string) $expiration_days . ' days.', ['expiration_time' => $expiration_time]);
+                CheckHistory::create([
+                    'server_id' => $this->server->id,
+                    //'batch_id' => $this->batch_id,
+                    'name' => 'SSL_certificate_valid',
+                    'status' => 'warning',
+                    'message' => 'SSL certificate is about to expire in ' . (string) $expiration_days . ' days.',
+                    'check_settings' => json_encode($this->check_settings->SSL->SSL_certificate_valid)
+                ]);
+                Log::warning('SSL certificate is about to expire in ' . (string) $expiration_days . ' days.', ['expiration_time' => $expiration_time]);
             } else {
+                CheckHistory::create([
+                    'server_id' => $this->server->id,
+                    //'batch_id' => $this->batch_id,
+                    'name' => 'SSL_certificate_valid',
+                    'status' => 'success',
+                    'message' => 'SSL certificate won\'t expire soon, it will expire in ' . (string) $expiration_days . ' days.',
+                    'check_settings' => json_encode($this->check_settings->SSL->SSL_certificate_valid)
+                ]);
                 $days_to_expiration = $this->check_settings->SSL->SSL_expiration->input->days;
                 Log::info('SSL certificate will not expire in ' . $days_to_expiration . ' days. (' . $expiration_days . ')', ['expiration_time' => $expiration_time]);
             }

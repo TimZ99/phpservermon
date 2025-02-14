@@ -23,6 +23,7 @@
             <b>IP</b> {{ $server->ip }}<br>
             <b>Port</b> {{ $server->port }}<br>
             @isset($server->users) <b>Users</b> @foreach($server->users as $user) {{ $user->name }}, @endforeach <br>@endisset
+            <b>Ran checks</b><br> @foreach($server->check_histories as $check) {{ $check->Name }} - {{ $check->message }}<br> @endforeach<br>
             <b>Created at</b> {{ $server->created_at }}<br>
             <b>Updated at</b> {{ $server->updated_at }}<br>
             <b>Check settings</b>{{ $server->check_settings }}<br>

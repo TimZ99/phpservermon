@@ -16,9 +16,10 @@ class CheckHistory extends Model
         'name',
         'server_id',
         'batch_id',
-        'check_settings'
+        'check_settings',
+        'status',
+        'message',
     ];
-
     /**
      * The data type of the primary key.
      *

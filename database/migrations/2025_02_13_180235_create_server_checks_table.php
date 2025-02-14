@@ -14,8 +14,10 @@ return new class extends Migration
         Schema::create('check_history', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('server_id');
-            $table->uuid('batch_id');
+            $table->uuid('batch_id')->nullable();
             $table->string('name');
+            $table->string('status');
+            $table->string('message');
             $table->json('check_settings')->default(json_encode([]));
             $table->timestamps();
         });
@@ -30,7 +32,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('checkHistory');
+        Schema::dropIfExists('check_history');
         Schema::table('servers', function (Blueprint $table) {
             $table->dropColumn('check_settings');
         });
