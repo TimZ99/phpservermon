@@ -31,12 +31,59 @@ class ServerController extends Controller
     public function monitorPage()
     {
         $user = Auth::user();
-        foreach($user->servers as $server) {
-            $server->statusCss = 'danger';
-            $server->statusCssColor = '#dc3545';
+        $servers = $user->servers;
+        foreach ($servers as $server) {
+            $show_status = [];
+            $checkSettings = json_decode($server->check_settings, true);
+        
+            foreach ($checkSettings as $checkName => $check) {
+                if (!isset($check['enabled']) || !$check['enabled']) continue;
+                if (isset($check['nested']) && $check['nested']) {
+                    foreach ($check as $nestedKey => $nestedCheck) {
+                        if (!isset($nestedCheck['enabled']) || !$nestedCheck['enabled']) continue;
+                        $latestResult = $server->check_histories()
+                            ->where('name', $nestedKey)
+                            ->latest('created_at')
+                            ->first();
+                        if ($latestResult) {
+                            $statusCss = match ($latestResult->status) {
+                                'success' => ['css' => 'success', 'color' => '#28a745'],
+                                'warning' => ['css' => 'warning', 'color' => '#ffc107'],
+                                'danger' => ['css' => 'danger', 'color' => '#dc3545'],
+                                default => ['css' => 'secondary', 'color' => '#ddd'],
+                            };
+
+                            $show_status[] = [
+                                'name' => $nestedKey,
+                                'css' => $statusCss['css'],
+                                'color' => $statusCss['color']
+                            ];
+                        }
+                    }
+                }
+        
+                $latestResult = $server->check_histories()
+                    ->where('name', $checkName)
+                    ->latest('created_at')
+                    ->first();
+                if ($latestResult) {
+                    $statusCss = match ($latestResult->status) {
+                    'success' => ['css' => 'success', 'color' => '#28a745'],
+                    'warning' => ['css' => 'warning', 'color' => '#ffc107'],
+                    default => ['css' => 'danger', 'color' => '#dc3545'],
+                    };
+        
+                    $show_status[] = [
+                    'name' => $checkName,
+                    'css' => $statusCss['css'],
+                    'color' => $statusCss['color']
+                    ];
+                }
+            }
+            $server->show_status = $show_status;
         }
 
-        return view('server.monitor', ['servers' => $user->servers]);
+        return view('server.monitor', ['servers' => $servers]);
     }
 
     /**

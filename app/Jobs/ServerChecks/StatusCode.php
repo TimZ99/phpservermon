@@ -70,7 +70,7 @@ class StatusCode implements ShouldQueue
         CheckHistory::create([
             'server_id' => $this->server->id,
             'batch_id' => $this->batch_id,
-            'name' => 'status_code_check',
+            'name' => 'StatusCode',
             'status' => $status,
             'message' => $message,
             'check_settings' => isset($this->check_settings->StatusCode) ? json_encode($this->check_settings->StatusCode) : null

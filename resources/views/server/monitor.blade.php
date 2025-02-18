@@ -20,6 +20,11 @@
                                 {{ __('Last offline') }}: {{ $server->last_offline_nice }} {{ $server->last_offline_duration_nice }}<br>
                                 {{ __('Response time') }}: {{ (int) round($server->rtime * 1000) }} ms
                             @endif
+                            <br>
+                            @foreach ($server->show_status as $check)
+                                <div style="width: 10px; height: 10px; background-color: {{ $check['color'] }}; display: inline-block;" title="{{ $check['name'] }}"></div>
+                            @endforeach
+
                         </p>
                     </div>
                 </div>
