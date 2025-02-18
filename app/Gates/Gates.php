@@ -22,8 +22,7 @@ class Gates
              *
              * @return Response
              */
-            $user = Auth::user();
-            return User::find($user->id)->isAdmin()
+            return Auth::user()->isAdmin()
                 ? Response::allow()
                 : Response::deny('Sorry can\'t let you in.');
         });
@@ -34,8 +33,7 @@ class Gates
              *
              * @return Response
              */
-            $user = Auth::user();
-            return User::find($user->id)->isSuspended()
+            return Auth::user()->isSuspended()
                 ? Response::deny('Your account has been suspended.')
                 : Response::allow();
         });
@@ -48,7 +46,7 @@ class Gates
              * @param Server $server
              * @return Response
              */
-            return $server->users()->where('id', Auth::user()->id)->exists()
+            return $server->users()->where('id', Auth::id())->exists()
                 ? Response::allow()
                 : Response::deny('Sorry can\'t let you in.');
         });

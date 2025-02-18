@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ServerUpdateRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Bus;
 use App\Models\Server;
+use App\Jobs\RunCurl;
 use App\Models\User;
 use Exception;
 
@@ -24,18 +26,64 @@ class ServerController extends Controller
      * This function will show a list of all servers.
      * 
      * @return \Illuminate\Http\Response
-     * 
-     * @todo Filter the servers by the ones that the user is attached to
+     *
      */
     public function monitorPage()
     {
         $user = Auth::user();
-        foreach($user->servers as $server) {
-            $server->statusCss = 'danger';
-            $server->statusCssColor = '#dc3545';
+        $servers = $user->servers;
+        foreach ($servers as $server) {
+            $show_status = [];
+            $checkSettings = json_decode($server->check_settings, true);
+        
+            foreach ($checkSettings as $checkName => $check) {
+                if (!isset($check['enabled']) || !$check['enabled']) continue;
+                if (isset($check['nested']) && $check['nested']) {
+                    foreach ($check as $nestedKey => $nestedCheck) {
+                        if (!isset($nestedCheck['enabled']) || !$nestedCheck['enabled']) continue;
+                        $latestResult = $server->check_histories()
+                            ->where('name', $nestedKey)
+                            ->latest('created_at')
+                            ->first();
+                        if ($latestResult) {
+                            $statusCss = match ($latestResult->status) {
+                                'success' => ['css' => 'success', 'color' => '#28a745'],
+                                'warning' => ['css' => 'warning', 'color' => '#ffc107'],
+                                'danger' => ['css' => 'danger', 'color' => '#dc3545'],
+                                default => ['css' => 'secondary', 'color' => '#ddd'],
+                            };
+
+                            $show_status[] = [
+                                'name' => $nestedKey,
+                                'css' => $statusCss['css'],
+                                'color' => $statusCss['color']
+                            ];
+                        }
+                    }
+                }
+        
+                $latestResult = $server->check_histories()
+                    ->where('name', $checkName)
+                    ->latest('created_at')
+                    ->first();
+                if ($latestResult) {
+                    $statusCss = match ($latestResult->status) {
+                    'success' => ['css' => 'success', 'color' => '#28a745'],
+                    'warning' => ['css' => 'warning', 'color' => '#ffc107'],
+                    default => ['css' => 'danger', 'color' => '#dc3545'],
+                    };
+        
+                    $show_status[] = [
+                    'name' => $checkName,
+                    'css' => $statusCss['css'],
+                    'color' => $statusCss['color']
+                    ];
+                }
+            }
+            $server->show_status = $show_status;
         }
 
-        return view('server.monitor', ['servers' => $user->servers]);
+        return view('server.monitor', ['servers' => $servers]);
     }
 
     /**
@@ -44,8 +92,7 @@ class ServerController extends Controller
      * This function will show a list of all servers.
      * 
      * @return \Illuminate\Http\Response
-     * 
-     * @todo Filter the servers by the ones that the user is attached to
+     *
      */
     public function index()
     {
@@ -159,42 +206,100 @@ class ServerController extends Controller
         // Check if the user is an admin
         Gate::authorize('admin-only');
         
-        try {
-            // Find the server
-            $server = Server::findOrFail($id);
+        // Find the server
+        $server = Server::findOrFail($id);
 
-            /**
-             * Sync the users with the server
-             * If the request has users, filter the list of user ids
-             * and sync the list of user ids with the server's users
-             * 
-             * If no users are provided, detach all the server's users
-             */
-            if($request->has('users')) {
-                $user_ids = array_filter($request->input('users'), function($user_id) {
-                    return in_array((int) $user_id, User::pluck('id')->toArray());
-                });
-                // Filter out invalid user ids from the input
-                $server->users()->sync($user_ids);
-            }
-            else {
-                $server->users()->detach();
-            }
-            
-            /** 
-             * Update the server
-             * Fill the server with the validated data
-             */
-            $server->fill($request->validated());
-            $server->save();
-
-            // Return the server page with the updated server
-            return to_route('server.show', $server->id);
-        } catch (Exception $e) {
-            report($e);
-            // If an error occurs, return back to the server edit page with the input and errors
-            return back()->withInput()->withErrors(['general' => 'A problem occurred while updating the server. Please try again later.']);
+        /**
+         * Sync the users with the server
+         * If the request has users, filter the list of user ids
+         * and sync the list of user ids with the server's users
+         * 
+         * If no users are provided, detach all the server's users
+         */
+        if($request->has('users')) {
+            $user_ids = array_filter($request->input('users'), function($user_id) {
+                return in_array((int) $user_id, User::pluck('id')->toArray());
+            });
+            // Filter out invalid user ids from the input
+            $server->users()->sync($user_ids);
         }
+        else {
+            $server->users()->detach();
+        }
+        /** 
+         * Update the server
+         * Fill the server with the validated data
+         */
+        $server->fill($request->validated())->save();
+
+        $json = json_encode([
+            'SSL' => [
+                'enabled' => true,
+                'nested' => true,
+                'SSL_expiration' => [
+                    'enabled' => true,
+                    'type' => 'warning',
+                    'input' => ['days' => 5]
+                ],
+                'SSL_certificate_valid' => [
+                    'enabled' => true,
+                    'type' => 'error',
+                    'input' => []
+                ],
+            ],
+            'StatusCode' => [
+                'enabled' => true,
+                'type' => 'error',
+                'input' => []
+            ]
+        ]);
+
+        $server->fill(['check_settings' => $json])->save();
+
+        // Return the server page with the updated server
+        return to_route('server.show', $server->id);
+    }
+
+    /**
+     * Run the job for the specified server
+     * Admin-only function
+     * 
+     * @param  \App\Models\Server  $server
+     * @return \Illuminate\Http\Response
+     * 
+     */
+    public function runJob(Server $server)
+    {
+        return $this->runBatch([$server]);
+    }
+
+    /**
+     * Run a batch process on the given servers.
+     *
+     * @param array $servers An array of servers to run the batch process on.
+     *                       Each element should be an instance of \App\Models\Server.
+     * @return void
+     */
+    public function runBatch($servers = [])
+    {
+        // Check if the user is an admin
+        Gate::authorize('admin-only');
+        
+        if (empty($servers)) {
+            $servers = Auth::user()->servers;
+        }
+        
+        // Dispatch the RunCurl job for each server
+        $jobs = [];
+        foreach ($servers as $server) {
+            $jobs[] = new RunCurl($server);
+        }
+
+        Bus::batch($jobs)->name('CURL multiple servers')
+            ->onQueue('ServerTest')
+            ->dispatch();
+
+        return 'Jobs dispatched and the queue is being processed.';
     }
 
     /**

@@ -1,5 +1,10 @@
 <x-app-layout>
     <div class="row d-flex">
+        <a href="{{route('server.runBatch')}}">
+            <button class="btn btn-secondary mb-4">
+                {{ __('Run tests') }}
+            </button>
+        </a>
         @forelse ($servers as $server)
             <div class="col-sm-4 col-md-3 col-xl-2">
                 <div class="card text-bg-{{ $server->statusCss }} mb-4" onclick="window.location.href='{{ route('server.show', $server->id) }}'">
@@ -15,6 +20,11 @@
                                 {{ __('Last offline') }}: {{ $server->last_offline_nice }} {{ $server->last_offline_duration_nice }}<br>
                                 {{ __('Response time') }}: {{ (int) round($server->rtime * 1000) }} ms
                             @endif
+                            <br>
+                            @foreach ($server->show_status as $check)
+                                <div style="width: 10px; height: 10px; background-color: {{ $check['color'] }}; display: inline-block;" title="{{ $check['name'] }}"></div>
+                            @endforeach
+
                         </p>
                     </div>
                 </div>
