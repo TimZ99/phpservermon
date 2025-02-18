@@ -13,17 +13,16 @@ class StatusCode implements ShouldQueue
     use Batchable, Queueable;
 
     protected $check_settings;
-    protected $id;
 
     /**
      * Create a new job instance.
      */
-    public function __construct(protected $server,protected $curl_result)
+    public function __construct(protected $server, protected $curl_result, protected $batch_id)
     {
         $this->onQueue('ServerTest');
         $this->curl_result = $curl_result;
         $this->check_settings = json_decode($this->server->check_settings);
-        $this->id = $server->id;
+        $this->batch_id = $batch_id;
     }
 
     /**
@@ -70,7 +69,7 @@ class StatusCode implements ShouldQueue
 
         CheckHistory::create([
             'server_id' => $this->server->id,
-            //'batch_id' => $this->batch_id,
+            'batch_id' => $this->batch_id,
             'name' => 'SSL_certificate_valid',
             'status' => $status,
             'message' => $message,

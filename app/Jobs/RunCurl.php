@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Bus\Batchable;
 use App\Models\Server;
-use Throwable;
 
 class RunCurl implements ShouldQueue
 {
@@ -46,14 +45,14 @@ class RunCurl implements ShouldQueue
     
         curl_close($curl);
 
-        Log::debug('Start tests for server. First curl website.', ['server' => $this->server, 'result' => $result]);
+        Log::debug('Start tests for server. First curl website.', ['server' => $this->server, 'result' => $result, 'batch_id' => $this->batch()->id]);
         
         $jobs = [];
         
         foreach ($this->checks as $check) {
             $checkClass = 'App\Jobs\ServerChecks\\' . $check;
             if (class_exists($checkClass)) {
-                $jobs[] = new $checkClass($this->server, $result['info']);
+                $jobs[] = new $checkClass($this->server, $result['info'], $this->batch()->id);
             } else {
                 Log::warning('Check class does not exist', [$checkClass]);
             }

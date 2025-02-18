@@ -13,17 +13,16 @@ class SSL implements ShouldQueue
     use Batchable, Queueable;
 
     protected $check_settings;
-    protected $id;
 
     /**
      * Create a new job instance.
      */
-    public function __construct(protected $server, protected $curl_result)
+    public function __construct(protected $server, protected $curl_result, protected $batch_id)
     {
         $this->onQueue('ServerTest');
         $this->curl_result = $curl_result;
         $this->check_settings = json_decode($this->server->check_settings);
-        $this->id = $server->id;
+        $this->batch_id = $batch_id;
     }
 
     /**
@@ -64,7 +63,7 @@ class SSL implements ShouldQueue
             } else {
                 CheckHistory::create([
                     'server_id' => $this->server->id,
-                    //'batch_id' => $this->batch_id,
+                    'batch_id' => $this->batch_id,
                     'name' => 'SSL_certificate_valid',
                     'status' => 'error',
                     'message' => 'SSL certificate is not valid',
@@ -81,7 +80,7 @@ class SSL implements ShouldQueue
             if ($expiration_days < $this->check_settings->SSL->SSL_expiration->input->days) {
                 CheckHistory::create([
                     'server_id' => $this->server->id,
-                    //'batch_id' => $this->batch_id,
+                    'batch_id' => $this->batch_id,
                     'name' => 'SSL_certificate_valid',
                     'status' => 'warning',
                     'message' => 'SSL certificate is about to expire in ' . $expiration_days . ' days.',
@@ -91,7 +90,7 @@ class SSL implements ShouldQueue
             } else {
                 CheckHistory::create([
                     'server_id' => $this->server->id,
-                    //'batch_id' => $this->batch_id,
+                    'batch_id' => $this->batch_id,
                     'name' => 'SSL_certificate_valid',
                     'status' => 'success',
                     'message' => 'SSL certificate won\'t expire soon, it will expire in ' . $expiration_days . ' days.',
