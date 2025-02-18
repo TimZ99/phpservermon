@@ -30,12 +30,12 @@ class StatusCode implements ShouldQueue
      */
     public function handle(): void
     {
-        if(!$this->check_settings->StatusCode->enabled) {
+        if (!isset($this->check_settings->StatusCode) || !$this->check_settings->StatusCode->enabled) {
             Log::debug('Status code check is not enabled for server.');
             return;
         }
 
-        $code = $this->curl_result['http_code'];
+        $code = $this->curl_result['http_code'] ?? null;
         $status = 'error';
 
         switch ($code) {
@@ -70,10 +70,10 @@ class StatusCode implements ShouldQueue
         CheckHistory::create([
             'server_id' => $this->server->id,
             'batch_id' => $this->batch_id,
-            'name' => 'SSL_certificate_valid',
+            'name' => 'status_code_check',
             'status' => $status,
             'message' => $message,
-            'check_settings' => json_encode($this->check_settings->StatusCode)
+            'check_settings' => isset($this->check_settings->StatusCode) ? json_encode($this->check_settings->StatusCode) : null
         ]);
     }
 }

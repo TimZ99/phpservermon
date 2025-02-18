@@ -15,8 +15,13 @@ class RunCurl implements ShouldQueue
 
     protected $batch_id;
 
-    /**
+     /**
      * Create a new job instance.
+     *
+     * @param Server $server The server instance to be tested.
+     * @param array $checks An array of checks to be performed on the server.
+     *
+     * @return void
      */
     public function __construct(protected Server $server, protected array $checks = [])
     {
