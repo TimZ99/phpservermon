@@ -10,9 +10,6 @@ use Illuminate\Bus\Batchable;
 use App\Models\Server;
 use Throwable;
 
-use App\Jobs\ServerChecks\StatusCode;
-use App\Jobs\ServerChecks\SSL;
-
 class RunCurl implements ShouldQueue
 {
     use Batchable, Queueable;
@@ -20,46 +17,50 @@ class RunCurl implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(protected Server $server)
+    public function __construct(protected Server $server, protected array $checks)
     {
         $this->onQueue('ServerTest');
         $this->server = $server;
+        $this->checks = $checks;
     }
     /**
-     * Execute the job.x
+     * Execute the job.
      */
     public function handle(): void
     {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_setopt($ch, CURLOPT_ENCODING, '');
-        curl_setopt($ch, CURLOPT_CERTINFO, 1);
-        curl_setopt($ch, CURLOPT_COOKIEFILE, '');
-        $this->server->ip = preg_replace('/(.*)(%cachebuster%)/', '$0' . time(), $this->server->ip);
+        $this->server->ip = preg_replace('/^(.*)%cachebuster%/', '$1' . time(), $this->server->ip);
+
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($curl, CURLOPT_ENCODING, '');
+        curl_setopt($curl, CURLOPT_CERTINFO, 1);
+        curl_setopt($curl, CURLOPT_URL, $this->server->ip);
     
-        curl_setopt($ch, CURLOPT_URL, $this->server->ip);
+        $result = [
+            'exec' => curl_exec($curl),
+            'info' => curl_getinfo($curl),
+        ];
     
-        $result['exec'] = curl_exec($ch);
-        $result['info'] = curl_getinfo($ch);
-    
-        curl_close($ch);
+        curl_close($curl);
 
         Log::debug('Start tests for server. First curl website.', ['server' => $this->server, 'result' => $result]);
         
-        $jobs = [
-            new SSL($this->server, $result['info']),
-            new StatusCode($this->server, $result['info'])
-        ];
+        $jobs = [];
         
-        
-        
-        Bus::batch($jobs)->name('Tests for server ' . $this->server->id)
-            ->catch(function (Throwable $e) {
-                Log::error('Error in RunCurl', ['error' => $e]);
-            })
+        foreach ($this->checks as $check) {
+            $checkClass = 'App\Jobs\ServerChecks\\' . $check;
+            if (class_exists($checkClass)) {
+                $jobs[] = new $checkClass($this->server, $result['info']);
+            } else {
+                Log::warning('Check class does not exist', [$checkClass]);
+            }
+        }
+
+        Bus::batch($jobs)
+            ->name('Tests for server ' . $this->server->id)
             ->onQueue('ServerTest')
             ->dispatch();
     }

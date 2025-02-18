@@ -84,17 +84,17 @@ class SSL implements ShouldQueue
                     //'batch_id' => $this->batch_id,
                     'name' => 'SSL_certificate_valid',
                     'status' => 'warning',
-                    'message' => 'SSL certificate is about to expire in ' . (string) $expiration_days . ' days.',
+                    'message' => 'SSL certificate is about to expire in ' . $expiration_days . ' days.',
                     'check_settings' => json_encode($this->check_settings->SSL->SSL_certificate_valid)
                 ]);
-                Log::warning('SSL certificate is about to expire in ' . (string) $expiration_days . ' days.', ['expiration_time' => $expiration_time]);
+                Log::warning('SSL certificate is about to expire in ' . $expiration_days . ' days.', ['expiration_time' => $expiration_time]);
             } else {
                 CheckHistory::create([
                     'server_id' => $this->server->id,
                     //'batch_id' => $this->batch_id,
                     'name' => 'SSL_certificate_valid',
                     'status' => 'success',
-                    'message' => 'SSL certificate won\'t expire soon, it will expire in ' . (string) $expiration_days . ' days.',
+                    'message' => 'SSL certificate won\'t expire soon, it will expire in ' . $expiration_days . ' days.',
                     'check_settings' => json_encode($this->check_settings->SSL->SSL_certificate_valid)
                 ]);
                 $days_to_expiration = $this->check_settings->SSL->SSL_expiration->input->days;

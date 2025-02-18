@@ -225,7 +225,7 @@ class ServerController extends Controller
         // Check if the user is an admin
         Gate::authorize('admin-only');
         // Dispatch the RunCurl job for the server
-        RunCurl::dispatch($server);
+        RunCurl::dispatch($server, ['StatusCode', 'SSL']);
 
         return 'Job dispatched and queue is processed.';
         // Return to the server page
