@@ -1,5 +1,10 @@
 <x-app-layout>
     <div class="row d-flex">
+        <a href="{{route('server.runBatch')}}">
+            <button class="btn btn-secondary mb-4">
+                {{ __('Run tests') }}
+            </button>
+        </a>
         @forelse ($servers as $server)
             <div class="col-sm-4 col-md-3 col-xl-2">
                 <div class="card text-bg-{{ $server->statusCss }} mb-4" onclick="window.location.href='{{ route('server.show', $server->id) }}'">

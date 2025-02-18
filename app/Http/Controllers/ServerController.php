@@ -5,11 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ServerUpdateRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Bus;
 use App\Models\Server;
 use App\Jobs\RunCurl;
 use App\Models\User;
 use Exception;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Routing:
@@ -230,6 +230,33 @@ class ServerController extends Controller
         return 'Job dispatched and queue is processed.';
         // Return to the server page
         return to_route('server.show', $server->id);
+    }
+
+    /**
+     * Run a batch process on the given servers.
+     *
+     * @param array $servers An array of servers to run the batch process on.
+     *                       Each element should be an instance of \App\Models\Server.
+     * @return void
+     */
+    public function runBatch()
+    {
+        // Check if the user is an admin
+        Gate::authorize('admin-only');
+
+        $servers = Auth::user()->servers;
+
+        // Dispatch the RunCurl job for each server
+        $jobs = [];
+        foreach ($servers as $server) {
+            $jobs[] = new RunCurl($server, ['StatusCode', 'SSL']);
+        }
+
+        Bus::batch($jobs)->name('CURL multiple servers')
+            ->onQueue('ServerTest')
+            ->dispatch();
+
+        return 'Jobs dispatched and the queue is being processed.';
     }
 
     /**
