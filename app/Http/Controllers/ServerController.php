@@ -188,6 +188,7 @@ class ServerController extends Controller
         $json = json_encode([
             'SSL' => [
                 'enabled' => true,
+                'nested' => true,
                 'SSL_expiration' => [
                     'enabled' => true,
                     'type' => 'warning',
@@ -199,7 +200,7 @@ class ServerController extends Controller
                     'input' => []
                 ],
             ],
-            'status_code' => [
+            'StatusCode' => [
                 'enabled' => true,
                 'type' => 'error',
                 'input' => []
@@ -222,14 +223,7 @@ class ServerController extends Controller
      */
     public function runJob(Server $server)
     {
-        // Check if the user is an admin
-        Gate::authorize('admin-only');
-        // Dispatch the RunCurl job for the server
-        RunCurl::dispatch($server, ['StatusCode', 'SSL']);
-
-        return 'Job dispatched and queue is processed.';
-        // Return to the server page
-        return to_route('server.show', $server->id);
+        return $this->runBatch([$server]);
     }
 
     /**
@@ -239,17 +233,19 @@ class ServerController extends Controller
      *                       Each element should be an instance of \App\Models\Server.
      * @return void
      */
-    public function runBatch()
+    public function runBatch($servers = [])
     {
         // Check if the user is an admin
         Gate::authorize('admin-only');
-
-        $servers = Auth::user()->servers;
-
+        
+        if (empty($servers)) {
+            $servers = Auth::user()->servers;
+        }
+        
         // Dispatch the RunCurl job for each server
         $jobs = [];
         foreach ($servers as $server) {
-            $jobs[] = new RunCurl($server, ['StatusCode', 'SSL']);
+            $jobs[] = new RunCurl($server);
         }
 
         Bus::batch($jobs)->name('CURL multiple servers')
