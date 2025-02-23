@@ -16,10 +16,35 @@ class ServerFactory extends Factory
      */
     public function definition(): array
     {
+        $statuses = [200, 401, 403, 404];
+        $status = $statuses[array_rand($statuses)];
+
+        $json = json_encode([
+            'SSL' => [
+                'enabled' => true,
+                'nested' => true,
+                'SSL_expiration' => [
+                    'enabled' => true,
+                    'type' => 'warning',
+                    'input' => ['days' => 5],
+                ],
+                'SSL_certificate_valid' => [
+                    'enabled' => true,
+                    'type' => 'error',
+                    'input' => [],
+                ],
+            ],
+            'StatusCode' => [
+                'enabled' => true,
+                'type' => 'error',
+                'input' => [],
+            ],
+        ]);
+
         return [
-            'name' => fake()->word(),
-            'ip' => fake()->ipv4(),
-            'port' => fake()->numberBetween(1, 99999),
+            'name' => $status.' '.fake()->word(),
+            'ip' => 'https://httpstat.us/'.$status,
+            'check_settings' => $json,
         ];
     }
 }
