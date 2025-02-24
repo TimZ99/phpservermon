@@ -25,6 +25,7 @@ Route::middleware(['auth', 'can:not-suspended'])->group(function () {
 
     Route::get('/queue', function () {
         Artisan::call('queue:listen');
+
         return 'Queue is now listening.';
     });
 
@@ -35,7 +36,7 @@ Route::middleware(['auth', 'can:not-suspended'])->group(function () {
 
 Route::get('/run-seed', function () {
     try {
-        Artisan::call('migrate:fresh', ["--force" => true, '--schema-path' => 'do not run schema path']);
+        Artisan::call('migrate:fresh', ['--force' => true, '--schema-path' => 'do not run schema path']);
     } catch (Exception $e) {
         return $this->response($e->getMessage());
     }

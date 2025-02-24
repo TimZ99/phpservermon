@@ -9,7 +9,7 @@ test('admin can be deleted, but cannot delete the last admin', function () {
     $this->assertDatabaseCount('users', 2);
 
     $this->actingAs($admin1)
-        ->delete('/user/' . $admin2->id)
+        ->delete('/user/'.$admin2->id)
         ->assertSessionHasNoErrors()
         ->assertRedirectToRoute('user.index');
 
@@ -18,7 +18,7 @@ test('admin can be deleted, but cannot delete the last admin', function () {
 
     // prevent deleting the last admin
     $this->actingAs($admin1)
-        ->delete('/user/' . $admin1->id)
+        ->delete('/user/'.$admin1->id)
         ->assertSessionHasErrors('admindelete');
     $this->assertDatabaseCount('users', 1);
     $this->assertNotNull($admin1->fresh());
@@ -31,7 +31,7 @@ test('non-admin user cannot delete other users', function () {
     $this->assertDatabaseCount('users', 2);
 
     $this->actingAs($user1)
-        ->delete('/user/' . $user2->id)
+        ->delete('/user/'.$user2->id)
         ->assertForbidden();
 
     $this->assertDatabaseCount('users', 2);

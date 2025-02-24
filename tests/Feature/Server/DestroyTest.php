@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\User;
 use App\Models\Server;
+use App\Models\User;
 
 test('admin can delete a server', function () {
     $admin = User::factory()->create(['admin' => true]);

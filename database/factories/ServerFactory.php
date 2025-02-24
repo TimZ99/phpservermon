@@ -19,7 +19,7 @@ class ServerFactory extends Factory
         return [
             'name' => fake()->word(),
             'ip' => fake()->ipv4(),
-            'port' => fake()->numberBetween(1,99999)
+            'port' => fake()->numberBetween(1, 99999),
         ];
     }
 }
