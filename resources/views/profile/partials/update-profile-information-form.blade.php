@@ -42,6 +42,12 @@
             @endif
         </div>
 
+        <div>
+            <label for="telegram_user_id">{{ __('Telegram User ID') }}</label>
+            <input id="telegram_user_id" name="telegram_user_id" class="form-control mb-2" type="number" value="{{ old('telegram_user_id', $user->telegram_user_id) }}" required />
+            <x-input-error class="mt-2" :messages="$errors->get('telegram_user_id')" />
+        </div>
+
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
         </div>

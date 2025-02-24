@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Notifications\Notifiable;
 
@@ -25,6 +25,7 @@ class User extends Authenticatable
         'password',
         'admin',
         'suspended',
+        'telegram_user_id',
     ];
 
     /**
@@ -49,6 +50,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'admin' => 'boolean',
             'suspended' => 'boolean',
+            'telegram_user_id' => 'integer',
         ];
     }
 
