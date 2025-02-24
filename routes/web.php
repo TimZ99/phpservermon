@@ -49,9 +49,10 @@ Route::get('/run-seed', function () {
     return 'success';
 });
 
-Route::get('/notify', function () {;
-    Illuminate\Support\Facades\Notification::send(Illuminate\Support\Facades\Auth::user(), new App\Notifications\ServerUpdate());
+Route::get('/notify', function () {
+    Illuminate\Support\Facades\Notification::send(Illuminate\Support\Facades\Auth::user(), new App\Notifications\ServerUpdate);
+
     return 'Notification sent to users';
-});
+})->middleware(['auth']);
 
 require __DIR__.'/auth.php';
