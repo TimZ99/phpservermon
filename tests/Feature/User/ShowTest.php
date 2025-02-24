@@ -1,11 +1,11 @@
 <?php
 
-use App\Models\User;
 use App\Models\Server;
+use App\Models\User;
 
 test('all routes are covered by authorization', function () {
     $server = Server::factory()->create();
-    //guest
+    // guest
     $this->assertGuest();
     $this->get('/users')->assertRedirectToRoute('login');
     $this->get('/user')->assertNotFound();
@@ -14,23 +14,23 @@ test('all routes are covered by authorization', function () {
     $this->patch('/user/randomid')->assertRedirectToRoute('login');
     $this->delete('/user/randomid')->assertRedirectToRoute('login');
 
-    //user
+    // user
     $user = User::factory()->create();
     $this->actingAs($user)->get('/users')->assertOk();
     $this->actingAs($user)->get('/user')->assertNotFound();
-    $this->actingAs($user)->get('/user/' . $user->id)->assertOk();
-    $this->actingAs($user)->get('/user/' . $user->id . '/edit')->assertForbidden();
-    $this->actingAs($user)->patch('/user/' . $user->id)->assertForbidden();
-    $this->actingAs($user)->delete('/user/' . $user->id)->assertForbidden();
+    $this->actingAs($user)->get('/user/'.$user->id)->assertOk();
+    $this->actingAs($user)->get('/user/'.$user->id.'/edit')->assertForbidden();
+    $this->actingAs($user)->patch('/user/'.$user->id)->assertForbidden();
+    $this->actingAs($user)->delete('/user/'.$user->id)->assertForbidden();
 
-    //admin
+    // admin
     $admin = User::factory()->create(['admin' => true]);
     $this->actingAs($admin)->get('/users')->assertOk();
     $this->actingAs($admin)->get('/user')->assertNotFound();
-    $this->actingAs($admin)->get('/user/' . $user->id)->assertOk();
-    $this->actingAs($admin)->get('/user/' . $user->id . '/edit')->assertOk();
-    $this->actingAs($admin)->patch('/user/' . $user->id)->assertRedirectToRoute('user.show', ['user' => $user->id]);
-    $this->actingAs($admin)->delete('/user/' . $user->id)->assertRedirectToRoute('user.index');
+    $this->actingAs($admin)->get('/user/'.$user->id)->assertOk();
+    $this->actingAs($admin)->get('/user/'.$user->id.'/edit')->assertOk();
+    $this->actingAs($admin)->patch('/user/'.$user->id)->assertRedirectToRoute('user.show', ['user' => $user->id]);
+    $this->actingAs($admin)->delete('/user/'.$user->id)->assertRedirectToRoute('user.index');
 });
 
 test('users index can be displayed', function () {
@@ -46,7 +46,7 @@ test('user show can be displayed', function () {
     $user = User::factory()->create();
 
     $this->actingAs($user)
-        ->get('/user/' . $user->id)
+        ->get('/user/'.$user->id)
         ->assertOk()
         ->assertSee($user->name)
         ->assertSee($user->email);

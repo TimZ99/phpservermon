@@ -9,9 +9,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
-use Illuminate\Support\Facades\Log;
 
 class RegisteredUserController extends Controller
 {
@@ -45,13 +45,13 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        Log::info('New user registered with id:'. $user->id);
+        Log::info('New user registered with id:'.$user->id);
 
         /* check if there is an admin, if not, make user admin */
-        if(User::where(['admin' => true])->count() === 0) {
+        if (User::where(['admin' => true])->count() === 0) {
             $user->admin = true;
             $user->save();
-            Log::info('No admin found, making user '. $user->id .' administrator.');
+            Log::info('No admin found, making user '.$user->id.' administrator.');
         }
 
         event(new Registered($user));

@@ -1,6 +1,7 @@
 <?php
-use App\Models\User;
+
 use App\Models\Server;
+use App\Models\User;
 
 test('server monitor page is displayed', function () {
     $user = User::factory()->create();
@@ -12,7 +13,7 @@ test('server monitor page is displayed', function () {
 test('servers index page is displayed', function () {
     $user = User::factory()->create();
     $admin = User::factory()->create(['admin' => true]);
-    $server = Server::factory(10)->create()->last(); 
+    $server = Server::factory(10)->create()->last();
 
     $this->get('/servers')->assertRedirectToRoute('login');
     $this->actingAs($user)->get('/servers')->assertForbidden();
@@ -30,7 +31,7 @@ test('server show can be displayed', function () {
     $server = Server::factory()->create();
 
     $this->actingAs($admin)
-        ->get('/server/' . $server->id)
+        ->get('/server/'.$server->id)
         ->assertOk()
         ->assertSee($server->name)
         ->assertSee($server->port)

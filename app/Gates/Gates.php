@@ -3,18 +3,16 @@
 namespace App\Gates;
 
 use App\Models\User;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class Gates
 {
     /**
      * Register the application's gate definitions.
-     *
-     * @return void
      */
-    static function boot(): void
+    public static function boot(): void
     {
         Gate::define('admin-only', function (): Response {
             /**
@@ -42,8 +40,8 @@ class Gates
             /**
              * Check if the user is connected to the server.
              *
-             * @param User $user
-             * @param Server $server
+             * @param  User  $user
+             * @param  Server  $server
              * @return Response
              */
             return $server->users()->where('id', Auth::id())->exists()

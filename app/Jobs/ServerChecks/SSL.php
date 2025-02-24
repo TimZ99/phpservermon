@@ -2,11 +2,11 @@
 
 namespace App\Jobs\ServerChecks;
 
+use App\Models\CheckHistory;
+use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Bus\Batchable;
-use App\Models\CheckHistory;
 
 class SSL implements ShouldQueue
 {
@@ -19,10 +19,9 @@ class SSL implements ShouldQueue
      *
      * This job handles SSL checks for a given server.
      *
-     * @param object $server The server object containing server details and settings.
-     * @param mixed $curl_result The result from a cURL request.
-     * @param int $batch_id The ID of the batch this job belongs to.
-     *
+     * @param  object  $server  The server object containing server details and settings.
+     * @param  mixed  $curl_result  The result from a cURL request.
+     * @param  int  $batch_id  The ID of the batch this job belongs to.
      * @return void
      */
     public function __construct(protected $server, protected $curl_result, protected $batch_id)
@@ -35,15 +34,14 @@ class SSL implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
     public function handle(): void
     {
         // 1. Checks if SSL checks are enabled in the settings.
-        if (!$this->check_settings->SSL->enabled) {
+        if (! $this->check_settings->SSL->enabled) {
             // 2. Logs a debug message if SSL checks are not enabled and exits.
             Log::debug('SSL check is not enabled for server.');
+
             return;
         }
 
@@ -51,24 +49,25 @@ class SSL implements ShouldQueue
         $certinfo = $this->curl_result['certinfo'];
         // 4. Logs a warning if no SSL certificate is found and exits.
         if (empty($certinfo)) {
-        CheckHistory::create([
-            'server_id' => $this->server->id,
-            'batch_id' => $this->batch_id,
-            'name' => 'SSL_certificate_valid',
-            'status' => 'danger',
-            'message' => 'No SSL certificate found.',
-            'check_settings' => json_encode($this->check_settings->SSL->SSL_certificate_valid)
-        ]);
+            CheckHistory::create([
+                'server_id' => $this->server->id,
+                'batch_id' => $this->batch_id,
+                'name' => 'SSL_certificate_valid',
+                'status' => 'danger',
+                'message' => 'No SSL certificate found.',
+                'check_settings' => json_encode($this->check_settings->SSL->SSL_certificate_valid),
+            ]);
 
-        CheckHistory::create([
-            'server_id' => $this->server->id,
-            'batch_id' => $this->batch_id,
-            'name' => 'SSL_expiration',
-            'status' => 'fail',
-            'message' => 'Could not test because no SSL certificate found.',
-            'check_settings' => json_encode($this->check_settings->SSL->SSL_expiration)
-        ]);
+            CheckHistory::create([
+                'server_id' => $this->server->id,
+                'batch_id' => $this->batch_id,
+                'name' => 'SSL_expiration',
+                'status' => 'fail',
+                'message' => 'Could not test because no SSL certificate found.',
+                'check_settings' => json_encode($this->check_settings->SSL->SSL_expiration),
+            ]);
             Log::warning('No SSL certificate found.', ['info' => $certinfo]);
+
             return;
         }
 
@@ -95,15 +94,14 @@ class SSL implements ShouldQueue
      * This method checks if the SSL certificate is valid based on the provided expiration date.
      * It logs the validation process and stores the result in the CheckHistory.
      *
-     * @param int $cert_expiration_date The expiration date of the SSL certificate as a Unix timestamp.
-     * @param int $expiration_time The time remaining until the SSL certificate expires.
-     *
-     * @return void
+     * @param  int  $cert_expiration_date  The expiration date of the SSL certificate as a Unix timestamp.
+     * @param  int  $expiration_time  The time remaining until the SSL certificate expires.
      */
     protected function checkSSLCertificateValidity($cert_expiration_date, $expiration_time): void
     {
         if ($this->check_settings->SSL->SSL_certificate_valid->enabled !== true) {
             Log::debug('Checking for valid SSL certificate is not enabled.');
+
             return;
         }
 
@@ -117,7 +115,7 @@ class SSL implements ShouldQueue
             'name' => 'SSL_certificate_valid',
             'status' => $status,
             'message' => $message,
-            'check_settings' => json_encode($this->check_settings->SSL->SSL_certificate_valid)
+            'check_settings' => json_encode($this->check_settings->SSL->SSL_certificate_valid),
         ]);
 
         Log::log($status === 'success' ? 'info' : 'warning', $message, ['expiration_time' => $expiration_time]);
@@ -126,19 +124,18 @@ class SSL implements ShouldQueue
     /**
      * Check SSL expiration.
      *
-     * This method checks if the SSL certificate is about to expire based on the 
+     * This method checks if the SSL certificate is about to expire based on the
      * provided expiration date and the configured threshold for days to expiration.
      * It logs the status and creates a record in the check history.
      *
-     * @param int $cert_expiration_date The expiration date of the SSL certificate as a Unix timestamp.
-     * @param int $expiration_time The time when the expiration check was performed as a Unix timestamp.
-     *
-     * @return void
+     * @param  int  $cert_expiration_date  The expiration date of the SSL certificate as a Unix timestamp.
+     * @param  int  $expiration_time  The time when the expiration check was performed as a Unix timestamp.
      */
     protected function checkSSLExpiration($cert_expiration_date, $expiration_time): void
     {
         if ($this->check_settings->SSL->SSL_expiration->enabled !== true) {
             Log::debug('Checking for SSL expiration is not enabled.');
+
             return;
         }
 
@@ -147,23 +144,23 @@ class SSL implements ShouldQueue
 
         if ($expiration_days < 0) {
             $status = 'danger';
-            $message = 'SSL certificate expired ' . abs($expiration_days) . ' days ago.';
+            $message = 'SSL certificate expired '.abs($expiration_days).' days ago.';
             CheckHistory::create([
                 'server_id' => $this->server->id,
                 'batch_id' => $this->batch_id,
                 'name' => 'SSL_expiration',
                 'status' => 'danger',
                 'message' => $message,
-                'check_settings' => json_encode($this->check_settings->SSL->SSL_expiration)
+                'check_settings' => json_encode($this->check_settings->SSL->SSL_expiration),
             ]);
             Log::log('warning', $message, ['expiration_time' => $expiration_time]);
         }
-        
+
         $days_to_expiration = $this->check_settings->SSL->SSL_expiration->input->days;
         $status = $expiration_days < $days_to_expiration ? 'warning' : 'success';
-        $message = $status === 'warning' 
-            ? 'SSL certificate is about to expire in ' . $expiration_days . ' days.' 
-            : 'SSL certificate won\'t expire soon, it will expire in ' . $expiration_days . ' days.';
+        $message = $status === 'warning'
+            ? 'SSL certificate is about to expire in '.$expiration_days.' days.'
+            : 'SSL certificate won\'t expire soon, it will expire in '.$expiration_days.' days.';
 
         CheckHistory::create([
             'server_id' => $this->server->id,
@@ -171,7 +168,7 @@ class SSL implements ShouldQueue
             'name' => 'SSL_expiration',
             'status' => $status,
             'message' => $message,
-            'check_settings' => json_encode($this->check_settings->SSL->SSL_expiration)
+            'check_settings' => json_encode($this->check_settings->SSL->SSL_expiration),
         ]);
 
         Log::log($status === 'warning' ? 'warning' : 'info', $message, ['expiration_time' => $expiration_time]);

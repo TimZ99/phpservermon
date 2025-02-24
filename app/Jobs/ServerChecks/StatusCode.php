@@ -2,11 +2,11 @@
 
 namespace App\Jobs\ServerChecks;
 
+use App\Models\CheckHistory;
+use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Bus\Batchable;
-use App\Models\CheckHistory;
 
 class StatusCode implements ShouldQueue
 {
@@ -30,8 +30,9 @@ class StatusCode implements ShouldQueue
      */
     public function handle(): void
     {
-        if (!isset($this->check_settings->StatusCode) || !$this->check_settings->StatusCode->enabled) {
+        if (! isset($this->check_settings->StatusCode) || ! $this->check_settings->StatusCode->enabled) {
             Log::debug('Status code check is not enabled for server.');
+
             return;
         }
 
@@ -46,26 +47,26 @@ class StatusCode implements ShouldQueue
             case 200:
                 Log::info('Status code is OK', [$this->curl_result]);
                 $status = 'success';
-                $message = 'Status code is OK (' . $code . ')';
+                $message = 'Status code is OK ('.$code.')';
                 break;
             case 301:
                 Log::info('Resource moved permanently', [$this->curl_result]);
                 $status = 'warning';
-                $message = 'Resource moved permanently (' . $code . ')';
+                $message = 'Resource moved permanently ('.$code.')';
                 break;
             case 404:
                 Log::error('Resource not found', [$this->curl_result]);
-                $message = 'Resource not found (' . $code . ')';
+                $message = 'Resource not found ('.$code.')';
                 break;
             case 500:
                 Log::error('Internal server error', [$this->curl_result]);
-                $message = 'Internal server error (' . $code . ')';
+                $message = 'Internal server error ('.$code.')';
                 break;
             default:
-                Log::info('Unhandled status code: ' . (string) $code, [$this->curl_result]);
-                $message = 'Unhandled status code: ' . (string) $code;
+                Log::info('Unhandled status code: '.(string) $code, [$this->curl_result]);
+                $message = 'Unhandled status code: '.(string) $code;
                 break;
-            }
+        }
 
         CheckHistory::create([
             'server_id' => $this->server->id,
@@ -73,7 +74,7 @@ class StatusCode implements ShouldQueue
             'name' => 'StatusCode',
             'status' => $status,
             'message' => $message,
-            'check_settings' => isset($this->check_settings->StatusCode) ? json_encode($this->check_settings->StatusCode) : null
+            'check_settings' => isset($this->check_settings->StatusCode) ? json_encode($this->check_settings->StatusCode) : null,
         ]);
     }
 }

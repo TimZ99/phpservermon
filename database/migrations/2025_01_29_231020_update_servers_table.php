@@ -23,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropColumns("servers", ["name", "ip", "port"]);
+        Schema::dropColumns('servers', ['name', 'ip', 'port']);
     }
 };

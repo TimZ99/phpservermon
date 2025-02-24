@@ -2,12 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Notifications\Notifiable;
-use App\Models\Server;
 
 class User extends Authenticatable
 {
@@ -25,7 +24,7 @@ class User extends Authenticatable
         'phone',
         'password',
         'admin',
-        'suspended'
+        'suspended',
     ];
 
     /**
@@ -55,8 +54,6 @@ class User extends Authenticatable
 
     /**
      * Check if the user is an admin.
-     *
-     * @return bool
      */
     public function isAdmin(): bool
     {
@@ -65,8 +62,6 @@ class User extends Authenticatable
 
     /**
      * Check if the user is suspended.
-     *
-     * @return bool
      */
     public function isSuspended(): bool
     {
@@ -75,8 +70,6 @@ class User extends Authenticatable
 
     /**
      * Get the servers the user is attached to.
-     *
-     * @return BelongsToMany
      */
     public function servers(): BelongsToMany
     {
@@ -85,8 +78,6 @@ class User extends Authenticatable
 
     /**
      * Check if the user is the last admin.
-     *
-     * @return bool
      */
     public function isLastAdmin(): bool
     {
