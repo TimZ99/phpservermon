@@ -20,14 +20,28 @@ class TestMessage extends Notification implements ShouldQueue
 
     public function via($notifiable)
     {
-        return [
-            'telegram',
-            //'mail',
-        ];
+        if($notifiable instanceof \Illuminate\Notifications\AnonymousNotifiable) {
+            return array_keys($notifiable->routes);
+        }
+        $routes = [];
+        if(isset($notifiable->telegram_user_id)) {
+            $routes[] = 'telegram';
+        }
+        if(isset($notifiable->email)) {
+            $routes[] = 'mail';
+        }
+        
+        return $routes;
     }
 
     public function toMail(object $notifiable): MailMessage
     {
+        $notifiable->email = $notifiable instanceof \Illuminate\Notifications\AnonymousNotifiable
+        ? $notifiable->routeNotificationFor('mail')
+        : $notifiable->email;
+
+        Log::info('Sending email notification.', [$notifiable->email]);
+
         return (new MailMessage)
             ->greeting('Hello!')
             ->line('One of your invoices has been paid!')
@@ -36,15 +50,14 @@ class TestMessage extends Notification implements ShouldQueue
 
     public function toTelegram(object $notifiable)
     {
-        if (empty($notifiable->telegram_user_id)) {
-            Log::error('No Telegram ID found for user.', [$notifiable]);
+        $telegram_user_id = $notifiable instanceof \Illuminate\Notifications\AnonymousNotifiable
+        ? $notifiable->routeNotificationFor('telegram')
+        : $notifiable->telegram_user_id;
 
-            return null;
-        }
-        Log::info('Sending Telegram notification.', [$notifiable->telegram_user_id]);
+        Log::info('Sending Telegram notification.', [$telegram_user_id]);
 
         return TelegramMessage::create('Test message!')
-            ->to($notifiable->telegram_user_id)
+            ->to($telegram_user_id)
             ->onError(function ($data) {
                 Log::error('Failed to send Telegram notification', [
                     'chat_id' => $data['to'],

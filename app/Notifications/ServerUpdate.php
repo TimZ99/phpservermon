@@ -19,20 +19,27 @@ class ServerUpdate extends Notification implements ShouldQueue
 
     public function via($notifiable)
     {
-        return ['telegram'];
+        if($notifiable instanceof \Illuminate\Notifications\AnonymousNotifiable) {
+            return array_keys($notifiable->routes);
+        }
+        $routes = [];
+        if(isset($notifiable->telegram_user_id)) {
+            $routes[] = 'telegram';
+        }
+        
+        return $routes;
     }
 
     public function toTelegram($notifiable)
     {
-        if (is_null($notifiable->telegram_user_id)) {
-            Log::error('No Telegram ID found for user.', [$notifiable]);
+        $telegram_user_id = $notifiable instanceof \Illuminate\Notifications\AnonymousNotifiable
+        ? $notifiable->routeNotificationFor('telegram')
+        : $notifiable->telegram_user_id;
 
-            return null;
-        }
-        Log::info('Sending Telegram notification.', [$notifiable->telegram_user_id]);
+        Log::info('Sending Telegram notification.', [$telegram_user_id]);
 
         return TelegramMessage::create('Your server has been updated successfully!')
-            ->to($notifiable->telegram_user_id)
+            ->to($telegram_user_id)
             ->onError(function ($data) {
                 Log::error('Failed to send Telegram notification', [
                     'chat_id' => $data['to'],
