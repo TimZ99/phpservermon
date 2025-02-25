@@ -24,12 +24,12 @@ class SSL implements ShouldQueue
      * @param  int  $batch_id  The ID of the batch this job belongs to.
      * @return void
      */
-    public function __construct(protected $server, protected $curl_result, protected $batch_id)
+    public function __construct(protected $server, protected $curl_result, protected $run_curl_batch_id)
     {
         $this->onQueue('ServerTest');
         $this->curl_result = $curl_result;
         $this->check_settings = json_decode($this->server->check_settings);
-        $this->batch_id = $batch_id;
+        $this->run_curl_batch_id = $run_curl_batch_id;
     }
 
     /**
@@ -51,7 +51,8 @@ class SSL implements ShouldQueue
         if (empty($certinfo)) {
             CheckHistory::create([
                 'server_id' => $this->server->id,
-                'batch_id' => $this->batch_id,
+                'run_curl_batch_id' => $this->run_curl_batch_id,
+                'server_checks_batch_id' => $this->batch()->id,
                 'name' => 'SSL_certificate_valid',
                 'status' => 'danger',
                 'message' => 'No SSL certificate found.',
@@ -60,7 +61,8 @@ class SSL implements ShouldQueue
 
             CheckHistory::create([
                 'server_id' => $this->server->id,
-                'batch_id' => $this->batch_id,
+                'run_curl_batch_id' => $this->run_curl_batch_id,
+                'server_checks_batch_id' => $this->batch()->id,
                 'name' => 'SSL_expiration',
                 'status' => 'fail',
                 'message' => 'Could not test because no SSL certificate found.',
@@ -111,7 +113,8 @@ class SSL implements ShouldQueue
 
         CheckHistory::create([
             'server_id' => $this->server->id,
-            'batch_id' => $this->batch_id,
+            'run_curl_batch_id' => $this->run_curl_batch_id,
+            'server_checks_batch_id' => $this->batch()->id,
             'name' => 'SSL_certificate_valid',
             'status' => $status,
             'message' => $message,
@@ -147,7 +150,8 @@ class SSL implements ShouldQueue
             $message = 'SSL certificate expired '.abs($expiration_days).' days ago.';
             CheckHistory::create([
                 'server_id' => $this->server->id,
-                'batch_id' => $this->batch_id,
+                'run_curl_batch_id' => $this->run_curl_batch_id,
+                'server_checks_batch_id' => $this->batch()->id,
                 'name' => 'SSL_expiration',
                 'status' => 'danger',
                 'message' => $message,
@@ -164,7 +168,8 @@ class SSL implements ShouldQueue
 
         CheckHistory::create([
             'server_id' => $this->server->id,
-            'batch_id' => $this->batch_id,
+            'run_curl_batch_id' => $this->run_curl_batch_id,
+            'server_checks_batch_id' => $this->batch()->id,
             'name' => 'SSL_expiration',
             'status' => $status,
             'message' => $message,

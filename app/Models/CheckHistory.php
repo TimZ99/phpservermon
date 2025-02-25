@@ -15,7 +15,8 @@ class CheckHistory extends Model
     protected $fillable = [
         'name',
         'server_id',
-        'batch_id',
+        'run_curl_batch_id',
+        'server_checks_batch_id',
         'check_settings',
         'status',
         'message',

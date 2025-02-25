@@ -8,12 +8,11 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 class RunCurl implements ShouldQueue
 {
     use Batchable, Queueable;
-
-    protected $batch_id;
 
     /**
      * Create a new job instance.
@@ -27,7 +26,6 @@ class RunCurl implements ShouldQueue
         $this->onQueue('ServerTest');
         $this->server = $server;
         $this->checks = $checks;
-        $this->batch_id = $this->batch() ? $this->batch()->id : null;
     }
 
     /**
@@ -57,7 +55,7 @@ class RunCurl implements ShouldQueue
         curl_close($curl);
 
         // 4 Logs the start of tests for the server.
-        Log::debug('Start tests for server. First curl website.', ['server' => $this->server, 'result' => $result, 'batch_id' => $this->batch_id]);
+        Log::debug('Start tests for server. First curl website.', ['server' => $this->server, 'result' => $result, 'batch_id' => $this->batch()->id]);
         $jobs = [];
 
         // 5 Decodes and filters the server check settings if checks are not already set.
@@ -73,6 +71,7 @@ class RunCurl implements ShouldQueue
         foreach ($this->checks as $check) {
             $checkClass = 'App\Jobs\ServerChecks\\'.$check;
             if (class_exists($checkClass)) {
+                // class need the following properties: server, curl_result, run_curl_batch_id
                 $jobs[] = new $checkClass($this->server, $result['info'], $this->batch()->id);
             } else {
                 Log::warning('Server check class does not exist', ['checkClass' => $checkClass]);
