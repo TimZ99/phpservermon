@@ -20,17 +20,17 @@ class TestMessage extends Notification implements ShouldQueue
 
     public function via($notifiable)
     {
-        if($notifiable instanceof \Illuminate\Notifications\AnonymousNotifiable) {
+        if ($notifiable instanceof \Illuminate\Notifications\AnonymousNotifiable) {
             return array_keys($notifiable->routes);
         }
         $routes = [];
-        if(isset($notifiable->telegram_user_id)) {
+        if (isset($notifiable->telegram_user_id)) {
             $routes[] = 'telegram';
         }
-        if(isset($notifiable->email)) {
+        if (isset($notifiable->email)) {
             $routes[] = 'mail';
         }
-        
+
         return $routes;
     }
 

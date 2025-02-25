@@ -8,7 +8,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Notification;
 
 class RunCurl implements ShouldQueue
 {
@@ -23,7 +22,7 @@ class RunCurl implements ShouldQueue
      */
     public function __construct(protected Server $server, protected array $checks = [])
     {
-        $this->onQueue('ServerTest');
+        $this->onQueue('curl');
         $this->server = $server;
         $this->checks = $checks;
     }
@@ -85,10 +84,16 @@ class RunCurl implements ShouldQueue
             return;
         }
 
+        $context = ['server' => $this->server, 'run_curl_batch_id' => $this->batch()->id];
         // 9 Dispatches a batch of server check jobs to the 'ServerTest' queue.
         Bus::batch($jobs)
             ->name('Tests for server '.$this->server->id)
             ->onQueue('ServerTest')
+            ->finally(function ($batch) use ($context) {
+                Log::info('All server checks have been dispatched.', ['run_curl_batch_id' => $context['run_curl_batch_id'], 'server_checks_batch_id' => $batch->id]);
+
+                $context['server']->users()->first()->notify(new \App\Notifications\ServerUpdate($context['run_curl_batch_id'], $batch->id));
+            })
             ->dispatch();
     }
 }
