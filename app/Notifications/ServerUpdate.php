@@ -50,6 +50,11 @@ class ServerUpdate extends Notification implements ShouldQueue
             ->distinct('run_curl_batch_id')
             ->take(1)->pluck('run_curl_batch_id');
 
+        if (!isset($previousRunCurlBatchId[0])) {
+            $previousRunCurlBatchId[0] = '';
+            Log::debug('No previous run_curl_batch_id found, setting to empty string.');
+        }
+
         $server_checks_old = CheckHistory::where('run_curl_batch_id', $previousRunCurlBatchId[0])
             ->where('server_id', $this->server->id)
             ->orderBy('created_at', 'desc')->get()->toArray();
@@ -77,7 +82,7 @@ class ServerUpdate extends Notification implements ShouldQueue
                 
                 $old_check['status'] = str_replace(['success', 'warning', 'error'], ['🟢', '🟠', '🔴'], $old_check['status']);
             } else {
-                $old_check['status'] = '🔘';
+                $old_check['status'] = '⚪️';
             }
 
             $content .= $old_check['status'].'➡️'.$value['status'].' '.$value['name']."\n";
@@ -85,7 +90,7 @@ class ServerUpdate extends Notification implements ShouldQueue
 
         return TelegramMessage::create()
             ->to($telegram_user_id)
-            ->line('*'.$this->server->id.'*')
+            ->line('*'.$this->server->name.'*')
             ->line($this->run_curl_batch_id)
             ->line($this->server_checks_batch_id)
             ->escapedLine($content)
