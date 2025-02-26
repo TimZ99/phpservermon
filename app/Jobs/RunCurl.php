@@ -8,6 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 class RunCurl implements ShouldQueue
 {
@@ -90,9 +91,19 @@ class RunCurl implements ShouldQueue
             ->name('Tests for server '.$this->server->id)
             ->onQueue('ServerTest')
             ->finally(function ($batch) use ($context) {
-                Log::info('All server checks have been dispatched.', ['run_curl_batch_id' => $context['run_curl_batch_id'], 'server_checks_batch_id' => $batch->id]);
-
-                $context['server']->users()->first()->notify(new \App\Notifications\ServerUpdate($context['run_curl_batch_id'], $batch->id));
+                Log::debug('All server checks have been dispatched.', ['run_curl_batch_id' => $context['run_curl_batch_id'], 'server_checks_batch_id' => $batch->id]);
+                $server = Server::find($context['server']->id);
+                foreach ($server->users as $user) {
+                    if (empty($user->telegram_user_id)) {
+                        continue;
+                    }
+                    Notification::route('telegram', $user->telegram_user_id)
+                        ->notify(new \App\Notifications\ServerUpdate(
+                            $context['run_curl_batch_id'],
+                            $batch->id,
+                            $context['server']
+                        ));
+                }
             })
             ->dispatch();
     }

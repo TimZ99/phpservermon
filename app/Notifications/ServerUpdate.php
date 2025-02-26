@@ -8,15 +8,17 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
 use NotificationChannels\Telegram\TelegramMessage;
+use App\Models\Server;
 
 class ServerUpdate extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(protected string $run_curl_batch_id, protected string $server_checks_batch_id)
+    public function __construct(protected string $run_curl_batch_id, protected string $server_checks_batch_id, protected Server $server)
     {
         $this->run_curl_batch_id = $run_curl_batch_id;
         $this->server_checks_batch_id = $server_checks_batch_id;
+        $this->server = $server;
         $this->onQueue('notifications');
     }
 
@@ -41,18 +43,52 @@ class ServerUpdate extends Notification implements ShouldQueue
 
         Log::info('Sending Telegram notification.', [$notifiable]);
 
-        $checks = CheckHistory::where('run_curl_batch_id', $this->run_curl_batch_id)->where('server_checks_batch_id', $this->server_checks_batch_id)->get();
-        // $checks = CheckHistory::all();
-        Log::critical('Checks:', [
-            'run_curl_batch_id' => $this->run_curl_batch_id,
-            'server_checks_batch_id' => $this->server_checks_batch_id,
-            'checks' => $checks,
+        // Get previous run_curl_batch_id
+        $previousRunCurlBatchId = CheckHistory::where('server_id', $this->server->id)
+            ->where('run_curl_batch_id', '>', $this->run_curl_batch_id)
+            ->orderBy('created_at', 'desc')
+            ->distinct('run_curl_batch_id')
+            ->take(1)->pluck('run_curl_batch_id');
+
+        $server_checks_old = CheckHistory::where('run_curl_batch_id', $previousRunCurlBatchId[0])
+            ->where('server_id', $this->server->id)
+            ->orderBy('created_at', 'desc')->get()->toArray();
+
+        $server_checks_new = CheckHistory::where('run_curl_batch_id', $this->run_curl_batch_id)
+            ->where('server_id', $this->server->id)
+            ->orderBy('created_at', 'desc')->get()->toArray();
+
+        Log::error('test', [
+            'previousRunCurlBatchId' => $previousRunCurlBatchId[0],
+            'server_checks_old' => $server_checks_old,
+            'server_checks_new' => $server_checks_new,
         ]);
 
-        return TelegramMessage::create('Your server has been updated successfully!')
+        $content = '';
+        foreach ($server_checks_new as $value) {
+            $old_check = array_filter($server_checks_old, function ($check) use ($value) {
+                return $check['name'] === $value['name'];
+            });
+
+            $value['status'] = str_replace(['success', 'warning', 'error'], ['🟢', '🟠', '🔴'], $value['status']);
+
+            if (!empty($old_check)) {
+                $old_check = array_shift($old_check);
+                
+                $old_check['status'] = str_replace(['success', 'warning', 'error'], ['🟢', '🟠', '🔴'], $old_check['status']);
+            } else {
+                $old_check['status'] = '🔘';
+            }
+
+            $content .= $old_check['status'].'➡️'.$value['status'].' '.$value['name']."\n";
+        }
+
+        return TelegramMessage::create()
             ->to($telegram_user_id)
-            ->line('run\_curl\_batch\_id: ['.$this->run_curl_batch_id.'](http://localhost/telescope/batches/'.$this->run_curl_batch_id.')')
-            ->line('server\_checks\_batch\_id: ['.$this->server_checks_batch_id.'](http://localhost/telescope/batches/'.$this->server_checks_batch_id.')')
+            ->line('*'.$this->server->id.'*')
+            ->line($this->run_curl_batch_id)
+            ->line($this->server_checks_batch_id)
+            ->escapedLine($content)
             ->onError(function ($data) {
                 Log::error('Failed to send Telegram notification', [
                     'chat_id' => $data['to'],
