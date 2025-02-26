@@ -3,12 +3,12 @@
 namespace App\Notifications;
 
 use App\Models\CheckHistory;
+use App\Models\Server;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
 use NotificationChannels\Telegram\TelegramMessage;
-use App\Models\Server;
 
 class ServerUpdate extends Notification implements ShouldQueue
 {
@@ -50,7 +50,7 @@ class ServerUpdate extends Notification implements ShouldQueue
             ->distinct('run_curl_batch_id')
             ->take(1)->pluck('run_curl_batch_id');
 
-        if (!isset($previousRunCurlBatchId[0])) {
+        if (! isset($previousRunCurlBatchId[0])) {
             $previousRunCurlBatchId[0] = '';
             Log::debug('No previous run_curl_batch_id found, setting to empty string.');
         }
@@ -63,7 +63,7 @@ class ServerUpdate extends Notification implements ShouldQueue
             ->where('server_id', $this->server->id)
             ->orderBy('created_at', 'desc')->get()->toArray();
 
-        Log::error('test', [
+        Log::debug('Fetching server checks', [
             'previousRunCurlBatchId' => $previousRunCurlBatchId[0],
             'server_checks_old' => $server_checks_old,
             'server_checks_new' => $server_checks_new,
@@ -77,9 +77,9 @@ class ServerUpdate extends Notification implements ShouldQueue
 
             $value['status'] = str_replace(['success', 'warning', 'error'], ['🟢', '🟠', '🔴'], $value['status']);
 
-            if (!empty($old_check)) {
+            if (! empty($old_check)) {
                 $old_check = array_shift($old_check);
-                
+
                 $old_check['status'] = str_replace(['success', 'warning', 'error'], ['🟢', '🟠', '🔴'], $old_check['status']);
             } else {
                 $old_check['status'] = '⚪️';
