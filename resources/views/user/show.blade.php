@@ -19,6 +19,8 @@
             <b>Admin</b> {{ $user->admin }}<br>
             <b>Suspended</b> {{ $user->suspended }}<br>
             @isset($user->servers) <b>Servers</b> @foreach($user->servers  as $server) {{ $server->name }}, @endforeach <br>@endisset
+            
+            @foreach ($user->notifications as $notification) {{ $notification->type }} @endforeach
         </div>
     </div>
 </x-app-layout>

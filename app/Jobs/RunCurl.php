@@ -8,12 +8,11 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 class RunCurl implements ShouldQueue
 {
     use Batchable, Queueable;
-
-    protected $batch_id;
 
     /**
      * Create a new job instance.
@@ -24,10 +23,9 @@ class RunCurl implements ShouldQueue
      */
     public function __construct(protected Server $server, protected array $checks = [])
     {
-        $this->onQueue('ServerTest');
+        $this->onQueue('curl');
         $this->server = $server;
         $this->checks = $checks;
-        $this->batch_id = $this->batch() ? $this->batch()->id : null;
     }
 
     /**
@@ -57,7 +55,7 @@ class RunCurl implements ShouldQueue
         curl_close($curl);
 
         // 4 Logs the start of tests for the server.
-        Log::debug('Start tests for server. First curl website.', ['server' => $this->server, 'result' => $result, 'batch_id' => $this->batch_id]);
+        Log::debug('Start tests for server. First curl website.', ['server' => $this->server, 'result' => $result, 'batch_id' => $this->batch()->id]);
         $jobs = [];
 
         // 5 Decodes and filters the server check settings if checks are not already set.
@@ -73,6 +71,7 @@ class RunCurl implements ShouldQueue
         foreach ($this->checks as $check) {
             $checkClass = 'App\Jobs\ServerChecks\\'.$check;
             if (class_exists($checkClass)) {
+                // class need the following properties: server, curl_result, run_curl_batch_id
                 $jobs[] = new $checkClass($this->server, $result['info'], $this->batch()->id);
             } else {
                 Log::warning('Server check class does not exist', ['checkClass' => $checkClass]);
@@ -86,10 +85,26 @@ class RunCurl implements ShouldQueue
             return;
         }
 
+        $context = ['server' => $this->server, 'run_curl_batch_id' => $this->batch()->id];
         // 9 Dispatches a batch of server check jobs to the 'ServerTest' queue.
         Bus::batch($jobs)
             ->name('Tests for server '.$this->server->id)
             ->onQueue('ServerTest')
+            ->finally(function ($batch) use ($context) {
+                Log::debug('All server checks have been dispatched.', ['run_curl_batch_id' => $context['run_curl_batch_id'], 'server_checks_batch_id' => $batch->id]);
+                $server = Server::find($context['server']->id);
+                foreach ($server->users as $user) {
+                    if (empty($user->telegram_user_id)) {
+                        continue;
+                    }
+                    Notification::route('telegram', $user->telegram_user_id)
+                        ->notify(new \App\Notifications\ServerUpdate(
+                            $context['run_curl_batch_id'],
+                            $batch->id,
+                            $context['server']
+                        ));
+                }
+            })
             ->dispatch();
     }
 }

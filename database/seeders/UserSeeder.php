@@ -33,5 +33,13 @@ class UserSeeder extends Seeder
                 'name' => 'Non-admin',
                 'email' => 'regular@example.com',
             ]);
+
+        // Create a regular user with 5 associated servers
+        User::factory()->hasServers(5)
+            ->create([
+                'name' => 'suspended',
+                'email' => 'suspended@example.com',
+                'suspended' => true,
+            ]);
     }
 }

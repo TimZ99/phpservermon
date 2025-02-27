@@ -13,6 +13,7 @@ Route::get('/', function () {
 Route::middleware(['auth', 'can:not-suspended'])->group(function () {
     /* Profile */
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('/profile/test/telegram', [ProfileController::class, 'test_telegram'])->name('profile.test.telegram');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 

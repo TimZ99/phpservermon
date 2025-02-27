@@ -294,7 +294,7 @@ class ServerController extends Controller
         }
 
         Bus::batch($jobs)->name('CURL multiple servers')
-            ->onQueue('ServerTest')
+            ->onQueue('curl')
             ->dispatch();
 
         return 'Jobs dispatched and the queue is being processed.';

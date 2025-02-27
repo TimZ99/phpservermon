@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Notifications\Notification;
 
 class User extends Authenticatable
 {
@@ -25,6 +26,7 @@ class User extends Authenticatable
         'password',
         'admin',
         'suspended',
+        'telegram_user_id',
     ];
 
     /**
@@ -49,6 +51,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'admin' => 'boolean',
             'suspended' => 'boolean',
+            'telegram_user_id' => 'integer',
         ];
     }
 
@@ -82,5 +85,16 @@ class User extends Authenticatable
     public function isLastAdmin(): bool
     {
         return User::where('admin', true)->count() <= 1 && $this->admin;
+    }
+
+    /**
+     * Route notifications for the telegram channel.
+     *
+     * @return array<string, string>|string
+     */
+    public function routeNotificationForTelegram(Notification $notification): array|string
+    {
+        // Return telegram user ID only...
+        return $this->telegram_user_id;
     }
 }

@@ -57,4 +57,12 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+
+    public function test_telegram()
+    {
+        $user = \Illuminate\Support\Facades\Auth::user();
+        $user->notify(new \App\Notifications\TestMessage);
+
+        return 'Notification sent to user';
+    }
 }

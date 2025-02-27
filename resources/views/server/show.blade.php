@@ -34,13 +34,13 @@
             @php
                 $previousBatchId = null;
             @endphp
-            @foreach($server->check_histories->sortBy(['batch_id', 'created_at']) as $check)
-                @if($previousBatchId !== null && $previousBatchId !== $check->batch_id)
+            @foreach($server->check_histories->sortBy(['server_checks_batch_id', 'created_at']) as $check)
+                @if($previousBatchId !== null && $previousBatchId !== $check->server_checks_batch_id)
                     <br>
                 @endif
-                {{ $check->Name }} - {{ $check->message }}<br>
+                {{ $check->name }} - {{ $check->message }}<br>
                 @php
-                    $previousBatchId = $check->batch_id;
+                    $previousBatchId = $check->server_checks_batch_id;
                 @endphp
             @endforeach
             <br>
