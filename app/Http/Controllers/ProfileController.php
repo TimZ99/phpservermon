@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Notification;
 
 class ProfileController extends Controller
 {
@@ -61,7 +62,8 @@ class ProfileController extends Controller
     public function test_telegram()
     {
         $user = \Illuminate\Support\Facades\Auth::user();
-        $user->notify(new \App\Notifications\TestMessage);
+
+        Notification::route('telegram', $user->telegram_user_id)->notify(new \App\Notifications\TestMessage());
 
         return 'Notification sent to user';
     }

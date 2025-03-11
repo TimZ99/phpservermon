@@ -46,6 +46,9 @@
             <label for="telegram_user_id">{{ __('Telegram User ID') }}</label>
             <input id="telegram_user_id" name="telegram_user_id" class="form-control mb-2" type="number" value="{{ old('telegram_user_id', $user->telegram_user_id) }}" required />
             <x-input-error class="mt-2" :messages="$errors->get('telegram_user_id')" />
+            <a href="{{ route('profile.test.telegram') }}">
+                <x-secondary-button type="button" class="mb-2">{{ __('Test Telegram') }}</x-secondary-button>
+            </a>
         </div>
 
         <div class="flex items-center gap-4">
