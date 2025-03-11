@@ -8,7 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
 
-class StatusCode implements ShouldQueue
+class Template implements ShouldQueue
 {
     use Batchable, Queueable;
 

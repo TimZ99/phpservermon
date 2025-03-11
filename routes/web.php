@@ -2,8 +2,8 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ServerController;
+use App\Http\Controllers\ConfigController;
 use App\Http\Controllers\UserController;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -24,30 +24,13 @@ Route::middleware(['auth', 'can:not-suspended'])->group(function () {
     Route::get('/server/{server}/run', [ServerController::class, 'runJob'])->name('server.runChecks');
     Route::get('/servers/run', [ServerController::class, 'runBatch'])->name('server.runBatch');
 
-    Route::get('/queue', function () {
-        Artisan::call('queue:listen');
-
-        return 'Queue is now listening.';
-    });
-
     /* User */
     Route::resource('user', UserController::class)->except(['index', 'create', 'store']);
     Route::get('/users', [UserController::class, 'index'])->name('user.index');
-});
 
-Route::get('/run-seed', function () {
-    try {
-        Artisan::call('migrate:fresh', ['--force' => true, '--schema-path' => 'do not run schema path']);
-    } catch (Exception $e) {
-        return $this->response($e->getMessage());
-    }
-    try {
-        Artisan::call('db:seed');
-    } catch (Exception $e) {
-        return $this->response($e->getMessage());
-    }
-
-    return 'success';
+     /* Config */
+     Route::get('/config', [ConfigController::class, 'edit'])->name('config.edit');
+     Route::patch('/config', [ConfigController::class, 'update'])->name('config.update');
 });
 
 require __DIR__.'/auth.php';

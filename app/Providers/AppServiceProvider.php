@@ -4,6 +4,11 @@ namespace App\Providers;
 
 use App\Gates\Gates;
 use Illuminate\Database\Eloquent\Model;
+use \Illuminate\Support\Facades\Config;
+
+use \App\Settings\GeneralSettings;
+use \App\Settings\EmailSettings;
+use \App\Settings\NotificationSettings;
 
 class AppServiceProvider extends \Illuminate\Support\ServiceProvider
 {
@@ -33,5 +38,12 @@ class AppServiceProvider extends \Illuminate\Support\ServiceProvider
 
         // Register the application's gate definitions.
         Gates::boot();
+
+        // set config
+        Config::set('app.locale', app(GeneralSettings::class)->default_locale ?? Config::get('app.locale'));
+        Config::set('app.timezone', app(GeneralSettings::class)->timezone ?? Config::get('app.timezone'));
+        Config::set('email.from.name', app(EmailSettings::class)->from_name ?? Config::get('email.from.name'));
+        Config::set('email.from.address', app(EmailSettings::class)->from_address ?? Config::get('email.from.address'));
+        Config::set('notification.telegram_bot_token', app(NotificationSettings::class)->telegram_bot_token ?? Config::get('notification.telegram_bot_token'));
     }
 }

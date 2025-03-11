@@ -17,6 +17,11 @@
                     <x-nav-link :href="route('user.index')" :active="request()->routeIs('user.index')">
                         {{ __('Users') }}
                     </x-nav-link>
+                    @can('admin-only')
+                    <x-nav-link :href="route('config.edit')" :active="request()->routeIs('config.edit')">
+                        {{ __('Config') }}
+                    </x-nav-link>
+                    @endcan
                 </ul>
                 <li class="nav-item dropdown d-flex pe-4 text-bg-dark">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
