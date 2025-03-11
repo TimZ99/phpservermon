@@ -9,7 +9,7 @@ return [
     'settings' => [
         App\Settings\GeneralSettings::class,
         App\Settings\EmailSettings::class,
-        App\Settings\NotificationSettings::class
+        App\Settings\NotificationSettings::class,
     ],
 
     /*
@@ -75,7 +75,7 @@ return [
      */
     'global_casts' => [
         DateTimeInterface::class => Spatie\LaravelSettings\SettingsCasts\DateTimeInterfaceCast::class,
-        DateTimeZone::class => Spatie\LaravelSettings\SettingsCasts\DateTimeZoneCast::class
+        DateTimeZone::class => Spatie\LaravelSettings\SettingsCasts\DateTimeZoneCast::class,
     ],
 
     /*

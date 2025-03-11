@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ConfigUpdateRequest;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Log;
-use App\Settings\GeneralSettings;
 use App\Settings\EmailSettings;
+use App\Settings\GeneralSettings;
 use App\Settings\NotificationSettings;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Routing:

@@ -3,12 +3,11 @@
 namespace App\Providers;
 
 use App\Gates\Gates;
+use App\Settings\EmailSettings;
+use App\Settings\GeneralSettings;
+use App\Settings\NotificationSettings;
 use Illuminate\Database\Eloquent\Model;
-use \Illuminate\Support\Facades\Config;
-
-use \App\Settings\GeneralSettings;
-use \App\Settings\EmailSettings;
-use \App\Settings\NotificationSettings;
+use Illuminate\Support\Facades\Config;
 
 class AppServiceProvider extends \Illuminate\Support\ServiceProvider
 {
