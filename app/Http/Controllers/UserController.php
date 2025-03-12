@@ -29,7 +29,8 @@ class UserController extends Controller
      */
     public function index()
     {
-        // TODO: show only the users that the user is attached to
+        Gate::authorize('admin-only');
+
         return view('user.index', ['users' => User::all()]);
     }
 
@@ -43,7 +44,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        Gate::any(['admin-only'], [$user]);
+        Gate::authorize('admin-only');
 
         return view('user.show', [
             'user' => User::find($user->id),
