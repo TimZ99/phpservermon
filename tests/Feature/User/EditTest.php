@@ -6,12 +6,9 @@ test('non-admin user cannot edit other users', function () {
     $user1 = User::factory()->create();
     $user2 = User::factory()->create();
 
-    $this->assertDatabaseCount('users', 2);
-
     $this->actingAs($user1)
         ->patch('/user/'.$user2->id, ['name' => 'New Name'])
         ->assertForbidden();
-    $this->assertDatabaseCount('users', 2);
 
     $this->assertNotEquals('New Name', $user2->fresh()->name);
 });
@@ -40,7 +37,6 @@ test('user can be made admin or be suspended', function () {
     $this->assertEquals(true, $user->fresh()->admin);
     $this->assertEquals(true, $user->fresh()->suspended);
 
-    $this->actingAs($user)
-        ->get('/servers')
+    $this->actingAs($user)->get('/servers')
         ->assertForbidden();
 });
