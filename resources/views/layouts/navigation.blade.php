@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
-        <a class="navbar-brand ps-2" href="#">PHPServerMonitor</a>
+        <a class="navbar-brand ps-2" href="{{ route('server.monitor') }}">PHPServerMonitor</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -8,6 +8,7 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             @auth
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    @can('admin-only')
                     <x-nav-link :href="route('server.monitor')" :active="request()->routeIs('server.monitor')">
                         {{ __('Monitor') }}
                     </x-nav-link>
@@ -17,7 +18,6 @@
                     <x-nav-link :href="route('user.index')" :active="request()->routeIs('user.index')">
                         {{ __('Users') }}
                     </x-nav-link>
-                    @can('admin-only')
                     <x-nav-link :href="route('config.edit')" :active="request()->routeIs('config.edit')">
                         {{ __('Config') }}
                     </x-nav-link>
