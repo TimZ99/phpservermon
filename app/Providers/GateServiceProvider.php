@@ -1,14 +1,23 @@
 <?php
 
-namespace App\Gates;
+namespace App\Providers;
 
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\ServiceProvider;
 
-class Gates
+class GateServiceProvider extends ServiceProvider
 {
+    /**
+     * Register services.
+     */
+    public function register(): void
+    {
+        //
+    }
+
     /**
      * Register the application's gate definitions.
      */
