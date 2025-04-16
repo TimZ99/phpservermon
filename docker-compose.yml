@@ -1,5 +1,5 @@
 services:
-    laravel.test:
+    PSM-test:
         build:
             context: './docker/8.4'
             dockerfile: Dockerfile
