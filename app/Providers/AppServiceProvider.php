@@ -2,14 +2,7 @@
 
 namespace App\Providers;
 
-use App\Gates\Gates;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Eloquent\Model;
-use \Illuminate\Support\Facades\Config;
-
-use \App\Settings\GeneralSettings;
-use \App\Settings\EmailSettings;
-use \App\Settings\NotificationSettings;
 
 class AppServiceProvider extends \Illuminate\Support\ServiceProvider
 {
@@ -36,8 +29,5 @@ class AppServiceProvider extends \Illuminate\Support\ServiceProvider
         // If the environment is local, prevent models from silently discarding
         // attributes that are not present in the database.
         Model::preventSilentlyDiscardingAttributes($this->app->environment('local'));
-
-        // Register the application's gate definitions.
-        Gates::boot();
     }
 }
