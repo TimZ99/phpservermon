@@ -4,7 +4,6 @@ namespace App\Gates;
 
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 
 class Gates
@@ -14,24 +13,24 @@ class Gates
      */
     public static function boot(): void
     {
-        Gate::define('admin-only', function (): Response {
+        Gate::define('admin-only', function ($user): Response {
             /**
              * Check if the user is an admin.
              *
              * @return Response
              */
-            return Auth::user()->isAdmin()
+            return $user->isAdmin()
                 ? Response::allow()
                 : Response::deny('Sorry can\'t let you in.');
         });
 
-        Gate::define('not-suspended', function (): Response {
+        Gate::define('not-suspended', function ($user): Response {
             /**
              * Check if the user is suspended.
              *
              * @return Response
              */
-            return Auth::user()->isSuspended()
+            return $user->isSuspended()
                 ? Response::deny('Your account has been suspended.')
                 : Response::allow();
         });
@@ -44,7 +43,7 @@ class Gates
              * @param  Server  $server
              * @return Response
              */
-            return $server->users()->where('id', Auth::id())->exists()
+            return $server->users()->where('id', $user->id)->exists()
                 ? Response::allow()
                 : Response::deny('Sorry can\'t let you in.');
         });
