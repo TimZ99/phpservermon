@@ -34,3 +34,15 @@ it('can route notifications for Telegram', function () {
     $user = User::factory()->create(['telegram_user_id' => 123456]);
     expect($user->routeNotificationForTelegram())->toBe(123456);
 });
+
+// setScopes function and getScopes function
+it('can set and check scopes for a user', function () {
+    $user = User::factory()->create();
+
+    expect($user->hasScope('edit:server'))->toBeFalse();
+
+    $user->setScopes(['edit:server', 'invalid:server']);
+
+    expect($user->hasScope('edit:server'))->toBeTrue();
+    expect($user->hasScope('invalid:scope'))->toBeFalse();
+});

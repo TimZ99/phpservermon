@@ -7,7 +7,7 @@ use Illuminate\Auth\Access\Response;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
-class GateServiceProvider extends ServiceProvider
+class AuthServiceProvider extends ServiceProvider
 {
     /**
      * Register services.
@@ -56,5 +56,15 @@ class GateServiceProvider extends ServiceProvider
                 ? Response::allow()
                 : Response::deny('Sorry can\'t let you in.');
         });
+
+        /**
+         * Define a gate for each scope.
+         * Use list of scopes from user model.
+         *
+         * @uses \App\Models\User;
+         */
+        foreach (\App\Models\User::validScopes() as $scope) {
+            Gate::define($scope, fn ($user) => $user->hasScope($scope));
+        }
     }
 }

@@ -61,6 +61,15 @@ class UserUpdateRequest extends FormRequest
                 'required', // The field is required
                 'boolean', // The field must be a boolean
             ],
+            'scopes' => [
+                'sometimes', // Only validate if the field is present
+                'array', // The field must be an array
+            ],
+            'scopes.*' => [
+                'sometimes', // Only validate if the field is present
+                'string', // The field must be a string
+                'in:'.implode(',', User::validScopes()), // The field must be one of the valid scopes
+            ],
         ];
     }
 }

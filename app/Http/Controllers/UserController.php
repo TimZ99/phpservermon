@@ -67,6 +67,7 @@ class UserController extends Controller
         // Return the edit page with the user and servers
         return view('user.edit', [
             'user' => $user,
+            'validScopes' => User::validScopes(),
             'servers' => Server::select('id', 'name')->get(),
         ]);
     }
@@ -76,7 +77,7 @@ class UserController extends Controller
      *
      * Admin-only function
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  App\Http\Requests\UserUpdateRequest  $request
      * @return \Illuminate\Http\Response
      */
     public function update(UserUpdateRequest $request, User $user)
