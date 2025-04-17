@@ -52,6 +52,7 @@ class User extends Authenticatable
         'admin',
         'suspended',
         'telegram_user_id',
+        'scopes',
     ];
 
     /**
@@ -77,6 +78,7 @@ class User extends Authenticatable
             'admin' => 'boolean',
             'suspended' => 'boolean',
             'telegram_user_id' => 'integer',
+            'scopes' => 'json',
         ];
     }
 
@@ -120,5 +122,59 @@ class User extends Authenticatable
     public function routeNotificationForTelegram(): int
     {
         return $this->telegram_user_id;
+    }
+
+    /**
+     * The scopes that the user has.
+     *
+     * @var list<string>
+     */
+    public function hasScope(string $scope): bool
+    {
+        $scopes = $this->scopes ?? [];
+
+        if (is_string($scopes)) {
+            $scopes = json_decode($scopes, true);
+        }
+
+        return in_array($scope, $scopes ?? []);
+    }
+
+    /**
+     * Set the scopes that the user has.
+     *
+     * @var list<string>
+     */
+    public function setScopes(array $scopes): void
+    {
+        $valid = self::validScopes();
+
+        $filtered = array_values(array_unique(array_filter($scopes, fn ($s) => in_array($s, $valid))));
+
+        $this->scopes = $filtered;
+        $this->save();
+    }
+
+    /**
+     * List of valid scopes.
+     *
+     * @var list<string>
+     */
+    public static function validScopes(): array
+    {
+        return [
+            // server
+            'read:server',
+            'create:server',
+            'edit:server',
+            'delete:server',
+            // config
+            'manage:config',
+            // user
+            'read:user',
+            'create:user',
+            'edit:user',
+            'delete:user',
+        ];
     }
 }
