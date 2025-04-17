@@ -3,26 +3,38 @@
 use App\Models\Server;
 use App\Models\User;
 
-test('admin can view server list', function () {
+test('only admin can view server list', function () {
     $user = User::factory()->create();
     $admin = User::factory()->create(['admin' => true]);
-    $server = Server::factory(2)->create()->last();
+    $servers = Server::factory(2)->create();
 
+    // Guest cannot access server list
     $this->get('/servers')->assertRedirectToRoute('login');
-    $this->actingAs($user)->get('/servers')->assertForbidden();
-    $this->actingAs($admin)->get('/servers')->assertOk()->assertSee($server->name);
+
+    // Regular user cannot access server list
+    $this->actingAs($user)
+        ->get('/servers')
+        ->assertForbidden();
+
+    // Admin can access server list and see server details
+    $this->actingAs($admin)
+        ->get('/servers')
+        ->assertOk()
+        ->assertSee($servers->last()->name);
 });
 
-test('user can view server', function () {
+test('user and admin can view server they are assigned to, guest cannot', function () {
+    // Guest cannot access server details
+    $server = Server::factory()->create()->first();
     $this->assertGuest();
-    $response = $this->get('/servers');
-    $response->assertRedirectToRoute('login');
+    $this->get('/server/'.$server->id)->assertRedirectToRoute('login');
 
     $user = User::factory()->has(Server::factory())->create();
     $server = $user->servers()->first();
 
+    // Assigned user can view server details
     $this->actingAs($user)
-        ->get('/server/'.$server->id)
+        ->get('/server/' . $server->id)
         ->assertOk()
         ->assertSee($server->name)
         ->assertSee($server->port)

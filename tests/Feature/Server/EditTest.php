@@ -2,42 +2,52 @@
 
 use App\Models\Server;
 use App\Models\User;
-
-test('forbidden when non-admin user tries to edit server ', function () {
-    $user = User::factory()->has(Server::factory())->create();
-
-    $server = $user->servers()->first();
-
-    // check for user with relationship to server
-    $this->actingAs($user)->patch('/server/'.$server->id, ['name' => 'Test Server Name'])
-        ->assertForbidden();
-
-    // check for user without relationship to server
+test('guest cannot edit a server', function () {
     $server = Server::factory()->create();
-    $this->actingAs($user)->patch('/server/'.$server->id, ['name' => 'Test Server Name'])
-        ->assertForbidden();
-
+    
+    $this->assertGuest();
+    $this->patch('/server/' . $server->id, ['name' => 'Test Server Name'])
+        ->assertRedirect('/login');
 });
 
-test('server information can be updated by admin', function () {
+test('non-admin user cannot edit a server they own', function () {
+    $user = User::factory()->has(Server::factory())->create();
+    $server = $user->servers()->first();
+
+    $this->actingAs($user)
+        ->patch('/server/' . $server->id, ['name' => 'Test Server Name'])
+        ->assertForbidden();
+});
+
+test('non-admin user cannot edit a server they do not own', function () {
+    $user = User::factory()->create();
+    $server = Server::factory()->create();
+
+    $this->actingAs($user)
+        ->patch('/server/' . $server->id, ['name' => 'Test Server Name'])
+        ->assertForbidden();
+});
+
+test('admin can update server information', function () {
     $admin = User::factory()->create(['admin' => true]);
     $server = Server::factory()->create();
 
-    $this->actingAs($admin)->patch('/server/'.$server->id, ['name' => 'Test Server Name'])
+    $this->actingAs($admin)
+        ->patch('/server/' . $server->id, ['name' => 'Updated Server Name'])
         ->assertSessionHasNoErrors()
-        ->assertRedirect('/server/'.$server->id);
+        ->assertRedirect('/server/' . $server->id);
 
     $server->refresh();
-    $this->assertSame('Test Server Name', $server->name);
+    $this->assertSame('Updated Server Name', $server->name);
 });
 
-test('edit page can be rendered', function () {
+test('admin can view the edit page for a server', function () {
     $admin = User::factory()->has(Server::factory())->create(['admin' => true]);
+    $server = $admin->servers()->first();
 
-    $response = $this->actingAs($admin)->get('/server/'.$admin->servers()->first()->id.'/edit');
+    $response = $this->actingAs($admin)->get('/server/' . $server->id . '/edit');
 
-    $response->assertStatus(200);
-
-    $response->assertSee($admin->servers()->first()->name);
-    $response->assertSee($admin->servers()->first()->ip);
+    $response->assertOk()
+        ->assertSee($server->name)
+        ->assertSee($server->ip);
 });
