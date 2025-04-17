@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Notifications\Notification;
-
 
 /**
  * User Model
@@ -32,7 +30,7 @@ use Illuminate\Notifications\Notification;
  * - servers(): Defines a many-to-many relationship with the Server model.
  * - isLastAdmin(): Checks if the user is the last admin in the system.
  * - routeNotificationForTelegram(): Routes notifications to the user's Telegram account.
- * 
+ *
  * @var admin boolean
  * @var suspended boolean
  */
@@ -84,8 +82,6 @@ class User extends Authenticatable
 
     /**
      * Check if the user is an admin.
-     * 
-     * @return bool
      */
     public function isAdmin(): bool
     {
@@ -94,8 +90,6 @@ class User extends Authenticatable
 
     /**
      * Check if the user is suspended.
-     * 
-     * @return bool
      */
     public function isSuspended(): bool
     {
@@ -104,7 +98,7 @@ class User extends Authenticatable
 
     /**
      * Get the servers the user is attached to.
-     * 
+     *
      * @return BelongsToMany<\App\Models\Server>
      */
     public function servers(): BelongsToMany
@@ -114,8 +108,6 @@ class User extends Authenticatable
 
     /**
      * Check if the user is the last admin.
-     * 
-     * @return bool
      */
     public function isLastAdmin(): bool
     {
@@ -124,8 +116,6 @@ class User extends Authenticatable
 
     /**
      * Route notifications for the telegram channel.
-     *
-     * @return integer
      */
     public function routeNotificationForTelegram(): int
     {

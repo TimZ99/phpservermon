@@ -34,7 +34,7 @@ test('user and admin can view server they are assigned to, guest cannot', functi
 
     // Assigned user can view server details
     $this->actingAs($user)
-        ->get('/server/' . $server->id)
+        ->get('/server/'.$server->id)
         ->assertOk()
         ->assertSee($server->name)
         ->assertSee($server->port)

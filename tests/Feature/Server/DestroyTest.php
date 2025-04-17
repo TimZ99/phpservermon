@@ -8,7 +8,7 @@ test('guest cannot delete a server', function () {
     $server = Server::factory()->create();
 
     $this->assertGuest();
-    $this->delete('/server/' . $server->id)
+    $this->delete('/server/'.$server->id)
         ->assertRedirectToRoute('login');
     $this->assertDatabaseCount('servers', 1);
 });
