@@ -1,8 +1,8 @@
 <?php
 
+use App\Http\Controllers\ConfigController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ServerController;
-use App\Http\Controllers\ConfigController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,9 +28,9 @@ Route::middleware(['auth', 'can:not-suspended'])->group(function () {
     Route::resource('user', UserController::class)->except(['index', 'create', 'store']);
     Route::get('/users', [UserController::class, 'index'])->name('user.index');
 
-     /* Config */
-     Route::get('/config', [ConfigController::class, 'edit'])->name('config.edit');
-     Route::patch('/config', [ConfigController::class, 'update'])->name('config.update');
+    /* Config */
+    Route::get('/config', [ConfigController::class, 'edit'])->name('config.edit');
+    Route::patch('/config', [ConfigController::class, 'update'])->name('config.update');
 });
 
 require __DIR__.'/auth.php';

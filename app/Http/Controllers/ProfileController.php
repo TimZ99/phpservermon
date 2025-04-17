@@ -6,9 +6,9 @@ use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
-use Illuminate\Support\Facades\Notification;
 
 class ProfileController extends Controller
 {
@@ -63,7 +63,7 @@ class ProfileController extends Controller
     {
         $user = \Illuminate\Support\Facades\Auth::user();
 
-        Notification::route('telegram', $user->telegram_user_id)->notify(new \App\Notifications\TestMessage());
+        Notification::route('telegram', $user->telegram_user_id)->notify(new \App\Notifications\TestMessage);
 
         return 'Notification sent to user';
     }

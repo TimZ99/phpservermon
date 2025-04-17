@@ -4,7 +4,7 @@ use App\Models\Server;
 use App\Models\User;
 
 test('all routes are covered by authorization', function () {
-    $server = Server::factory()->create();
+    Server::factory()->create();
     // guest
     $this->assertGuest();
     $this->get('/users')->assertRedirectToRoute('login');
@@ -16,9 +16,9 @@ test('all routes are covered by authorization', function () {
 
     // user
     $user = User::factory()->create();
-    $this->actingAs($user)->get('/users')->assertOk();
+    $this->actingAs($user)->get('/users')->assertForbidden();
     $this->actingAs($user)->get('/user')->assertNotFound();
-    $this->actingAs($user)->get('/user/'.$user->id)->assertOk();
+    $this->actingAs($user)->get('/user/'.$user->id)->assertForbidden();
     $this->actingAs($user)->get('/user/'.$user->id.'/edit')->assertForbidden();
     $this->actingAs($user)->patch('/user/'.$user->id)->assertForbidden();
     $this->actingAs($user)->delete('/user/'.$user->id)->assertForbidden();
@@ -34,18 +34,20 @@ test('all routes are covered by authorization', function () {
 });
 
 test('users index can be displayed', function () {
+    $admin = User::factory()->create(['admin' => true]);
     $user = User::factory()->create();
 
-    $this->actingAs($user)
+    $this->actingAs($admin)
         ->get('/users')
         ->assertOk()
         ->assertSee($user->name);
 });
 
 test('user show can be displayed', function () {
+    $admin = User::factory()->create(['admin' => true]);
     $user = User::factory()->create();
 
-    $this->actingAs($user)
+    $this->actingAs($admin)
         ->get('/user/'.$user->id)
         ->assertOk()
         ->assertSee($user->name)

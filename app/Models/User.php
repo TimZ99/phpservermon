@@ -7,8 +7,33 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Notifications\Notification;
 
+/**
+ * User Model
+ *
+ * This class represents the User model, which extends the Authenticatable class.
+ * It includes traits for factory creation and notifications, and defines various
+ * attributes, relationships, and utility methods for user management.
+ *
+ * Traits:
+ * - HasFactory: Provides factory methods for creating model instances.
+ * - Notifiable: Enables sending notifications to the user.
+ *
+ * Properties:
+ * - $fillable: Specifies the attributes that can be mass-assigned.
+ * - $hidden: Specifies the attributes that should be hidden during serialization.
+ * - $casts: Defines the data type casting for specific attributes.
+ *
+ * Methods:
+ * - isAdmin(): Checks if the user has admin privileges.
+ * - isSuspended(): Checks if the user is suspended.
+ * - servers(): Defines a many-to-many relationship with the Server model.
+ * - isLastAdmin(): Checks if the user is the last admin in the system.
+ * - routeNotificationForTelegram(): Routes notifications to the user's Telegram account.
+ *
+ * @var admin boolean
+ * @var suspended boolean
+ */
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -73,6 +98,8 @@ class User extends Authenticatable
 
     /**
      * Get the servers the user is attached to.
+     *
+     * @return BelongsToMany<\App\Models\Server>
      */
     public function servers(): BelongsToMany
     {
@@ -89,12 +116,9 @@ class User extends Authenticatable
 
     /**
      * Route notifications for the telegram channel.
-     *
-     * @return array<string, string>|string
      */
-    public function routeNotificationForTelegram(Notification $notification): array|string
+    public function routeNotificationForTelegram(): int
     {
-        // Return telegram user ID only...
         return $this->telegram_user_id;
     }
 }
