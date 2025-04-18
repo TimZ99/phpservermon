@@ -39,7 +39,7 @@ class AuthServiceProvider extends ServiceProvider
              *
              * @return Response
              */
-            return $user->isSuspended()
+            return $user->is_suspended()
                 ? Response::deny('Your account has been suspended.')
                 : Response::allow();
         });
@@ -62,9 +62,20 @@ class AuthServiceProvider extends ServiceProvider
          * Use list of scopes from user model.
          *
          * @uses \App\Models\User;
+         *
+         * @example
+         *
+         *  @can('edit:server')
+         *  <button>Edit Post</button>
+         *
+         *  @endcan
+         *
+         * @example if (auth()->user()->can('edit:server')) {}
+         * @example
+         * @example User::has_scope('edit:server')
          */
-        foreach (\App\Models\User::validScopes() as $scope) {
-            Gate::define($scope, fn ($user) => $user->hasScope($scope));
+        foreach (\App\Models\User::valid_scopes() as $scope) {
+            Gate::define($scope, fn ($user) => $user->has_scope($scope));
         }
     }
 }

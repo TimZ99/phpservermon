@@ -67,7 +67,7 @@ class UserController extends Controller
         // Return the edit page with the user and servers
         return view('user.edit', [
             'user' => $user,
-            'validScopes' => User::validScopes(),
+            'valid_scopes' => User::valid_scopes(),
             'servers' => Server::select('id', 'name')->get(),
         ]);
     }

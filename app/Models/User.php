@@ -26,10 +26,12 @@ use Illuminate\Notifications\Notifiable;
  *
  * Methods:
  * - isAdmin(): Checks if the user has admin privileges.
- * - isSuspended(): Checks if the user is suspended.
+ * - is_suspended(): Checks if the user is suspended.
  * - servers(): Defines a many-to-many relationship with the Server model.
  * - isLastAdmin(): Checks if the user is the last admin in the system.
  * - routeNotificationForTelegram(): Routes notifications to the user's Telegram account.
+ * - has_scope(): Checks if the user has a specific scope.
+ * - set_scopes(): Sets the scopes for the user.
  *
  * @var admin boolean
  * @var suspended boolean
@@ -93,7 +95,7 @@ class User extends Authenticatable
     /**
      * Check if the user is suspended.
      */
-    public function isSuspended(): bool
+    public function is_suspended(): bool
     {
         return $this->suspended === null ? false : $this->suspended;
     }
@@ -129,7 +131,7 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    public function hasScope(string $scope): bool
+    public function has_scope(string $scope): bool
     {
         $scopes = $this->scopes ?? [];
 
@@ -145,9 +147,9 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    public function setScopes(array $scopes): void
+    public function set_scopes(array $scopes): void
     {
-        $valid = self::validScopes();
+        $valid = self::valid_scopes();
 
         $filtered = array_values(array_unique(array_filter($scopes, fn ($s) => in_array($s, $valid))));
 
@@ -160,7 +162,7 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    public static function validScopes(): array
+    public static function valid_scopes(): array
     {
         return [
             // server

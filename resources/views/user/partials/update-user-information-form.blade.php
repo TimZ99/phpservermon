@@ -21,10 +21,11 @@
         <input id="suspended" name="suspended" class="form-check-input mb-2" type="checkbox" class="mt-1" value="1" autocomplete="off" @if (old('suspended', $user->suspended)) checked @endif/>
         <label for="suspended" class="form-check-label">{{ __('Suspended') }}</label>
         <x-input-error class="mt-2" :messages="$errors->get('suspended')" />
+        
         <br><br>
         <label>Scopes</label><br>
 
-        @foreach ($validScopes as $scope)
+        @foreach ($valid_scopes as $scope)
             <input id="scope-{{$loop->index}}" name="scopes[]" class="form-check-input mb-2" type="checkbox" class="mt-1" value="{{ $scope }}" autocomplete="off" @if (in_array($scope, $user->scopes ?? [])) checked @endif/>
             <label for="scope-{{$loop->index}}" class="form-check-label">{{ $scope }}</label>
             <x-input-error class="mt-2" :messages="$errors->get('scopes.'.$loop->index)" />

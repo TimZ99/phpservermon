@@ -11,13 +11,13 @@ it('can check if a user is an admin', function () {
     expect($nonAdminUser->isAdmin())->toBeFalse();
 });
 
-// isSuspended function
+// is_suspended function
 it('can check if a user is suspended', function () {
     $user = User::factory()->create(['suspended' => true]);
-    expect($user->isSuspended())->toBeTrue();
+    expect($user->is_suspended())->toBeTrue();
 
     $activeUser = User::factory()->create(['suspended' => false]);
-    expect($activeUser->isSuspended())->toBeFalse();
+    expect($activeUser->is_suspended())->toBeFalse();
 });
 
 // isLastAdmin function
@@ -35,14 +35,14 @@ it('can route notifications for Telegram', function () {
     expect($user->routeNotificationForTelegram())->toBe(123456);
 });
 
-// setScopes function and getScopes function
+// set_scopes function and getScopes function
 it('can set and check scopes for a user', function () {
     $user = User::factory()->create();
 
-    expect($user->hasScope('edit:server'))->toBeFalse();
+    expect($user->has_scope('edit:server'))->toBeFalse();
 
-    $user->setScopes(['edit:server', 'invalid:server']);
+    $user->set_scopes(['edit:server', 'invalid:server']);
 
-    expect($user->hasScope('edit:server'))->toBeTrue();
-    expect($user->hasScope('invalid:scope'))->toBeFalse();
+    expect($user->has_scope('edit:server'))->toBeTrue();
+    expect($user->has_scope('invalid:scope'))->toBeFalse();
 });
