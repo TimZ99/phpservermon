@@ -22,17 +22,6 @@ class AuthServiceProvider extends ServiceProvider
      */
     public static function boot(): void
     {
-        Gate::define('admin-only', function ($user): Response {
-            /**
-             * Check if the user is an admin.
-             *
-             * @return Response
-             */
-            return $user->isAdmin()
-                ? Response::allow()
-                : Response::deny('Sorry can\'t let you in.');
-        });
-
         Gate::define('not-suspended', function ($user): Response {
             /**
              * Check if the user is suspended.

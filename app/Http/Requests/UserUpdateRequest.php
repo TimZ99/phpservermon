@@ -12,14 +12,13 @@ class UserUpdateRequest extends FormRequest
     /**
      * Prepare the data for validation.
      *
-     * This will convert the admin and suspended fields
+     * This will convert the suspended fields
      * to boolean values.
      */
     protected function prepareForValidation(): void
     {
-        // Convert the admin and suspended fields to boolean
+        // Convert the suspended fields to boolean
         $this->merge([
-            'admin' => (bool) $this->input('admin', false),
             'suspended' => (bool) $this->input('suspended', false),
         ]);
     }
@@ -52,10 +51,6 @@ class UserUpdateRequest extends FormRequest
                 'nullable', // The field is not required
                 'string', // The field must be a string
                 'max:20', // The field must not be longer than 20 characters
-            ],
-            'admin' => [
-                'required', // The field is required
-                'boolean', // The field must be a boolean
             ],
             'suspended' => [
                 'required', // The field is required

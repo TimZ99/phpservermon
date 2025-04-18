@@ -23,14 +23,15 @@ class ConfigController extends Controller
 {
     /**
      * Show the form for editing the specified resource.
-     * Admin-only function
+     *
+     * @scope manage:config
      *
      * @return \Illuminate\Http\Response
      */
     public function edit()
     {
-        // Check if the user is an admin
-        Gate::authorize('admin-only');
+        // Check user scope
+        Gate::authorize('manage:config');
 
         // Return the config edit page
         return view('config.edit', [
@@ -44,7 +45,8 @@ class ConfigController extends Controller
 
     /**
      * Update the specified resource in storage.
-     * Admin-only function
+     *
+     * @scope manage:config
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
@@ -55,8 +57,8 @@ class ConfigController extends Controller
         EmailSettings $emailSettings,
         NotificationSettings $notificationSettings)
     {
-        // Check if the user is an admin
-        Gate::authorize('admin-only');
+        // Check user scope
+        Gate::authorize('manage:config');
 
         $request->validated();
 
