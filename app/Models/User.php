@@ -25,15 +25,13 @@ use Illuminate\Notifications\Notifiable;
  * - $casts: Defines the data type casting for specific attributes.
  *
  * Methods:
- * - isAdmin(): Checks if the user has admin privileges.
  * - is_suspended(): Checks if the user is suspended.
  * - servers(): Defines a many-to-many relationship with the Server model.
- * - isLastAdmin(): Checks if the user is the last admin in the system.
+ * - is_last_powerful_user(): Checks if the user is the last with edit:user scope.
  * - routeNotificationForTelegram(): Routes notifications to the user's Telegram account.
  * - has_scope(): Checks if the user has a specific scope.
  * - set_scopes(): Sets the scopes for the user.
  *
- * @var admin boolean
  * @var suspended boolean
  */
 class User extends Authenticatable
@@ -51,7 +49,6 @@ class User extends Authenticatable
         'email',
         'phone',
         'password',
-        'admin',
         'suspended',
         'telegram_user_id',
         'scopes',
@@ -77,19 +74,10 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'admin' => 'boolean',
             'suspended' => 'boolean',
             'telegram_user_id' => 'integer',
             'scopes' => 'json',
         ];
-    }
-
-    /**
-     * Check if the user is an admin.
-     */
-    public function isAdmin(): bool
-    {
-        return $this->admin === null ? false : $this->admin;
     }
 
     /**
@@ -111,11 +99,16 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if the user is the last admin.
+     * Check if the user is the last powerful user.
      */
-    public function isLastAdmin(): bool
+    public function is_last_powerful_user(): bool
     {
-        return User::where('admin', true)->count() <= 1 && $this->admin;
+        // check how many users have edit:user in there scopes
+        $users_with_edit_user_scope = User::all()->filter(function ($user) {
+            return $user->has_scope('edit:user');
+        })->count();
+
+        return $users_with_edit_user_scope <= 1 && $this->has_scope('edit:user');
     }
 
     /**
@@ -166,17 +159,18 @@ class User extends Authenticatable
     {
         return [
             // server
-            'read:server',
-            'create:server',
-            'edit:server',
-            'delete:server',
+            'view:server', // index and view individual
+            'create:server', // create
+            'edit:server', // edit
+            'delete:server', // delete
+            'check:server', // run server checks
             // config
-            'manage:config',
+            'manage:config', // change global config
             // user
-            'read:user',
-            'create:user',
-            'edit:user',
-            'delete:user',
+            'view:user', // index and view individual
+            'create:user', // create
+            'edit:user', // edit
+            'delete:user', // delete
         ];
     }
 }

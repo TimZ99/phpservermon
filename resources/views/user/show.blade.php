@@ -16,7 +16,7 @@
             <b>User id</b> {{ $user->id }}<br>
             <b>Name</b> {{ $user->name }}<br>
             <b>Email</b> {{ $user->email }}<br>
-            <b>Admin</b> {{ $user->admin }}<br>
+            @isset($user->servers) <b>Scopes</b> @foreach($user->scopes  as $scope) {{ $scope }}, @endforeach <br>@endisset
             <b>Suspended</b> {{ $user->suspended }}<br>
             @isset($user->servers) <b>Servers</b> @foreach($user->servers  as $server) {{ $server->name }}, @endforeach <br>@endisset
             

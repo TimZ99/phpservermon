@@ -25,11 +25,13 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      *
+     * @scope view:user
+     *
      * @todo Filter the users by the ones that the user is attached to
      */
     public function index()
     {
-        Gate::authorize('admin-only');
+        Gate::authorize('view:user');
 
         return view('user.index', ['users' => User::all()]);
     }
@@ -37,14 +39,13 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      *
-     * Allow users that are attached to the users
-     * Allow admins
+     * @scope view:user
      *
      * @return \Illuminate\Http\Response
      */
     public function show(User $user)
     {
-        Gate::authorize('admin-only');
+        Gate::authorize('view:user');
 
         return view('user.show', [
             'user' => User::find($user->id),
@@ -54,15 +55,14 @@ class UserController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * Admin-only function
-     * Allows an admin to edit a user
+     * @scope edit:user
      *
      * @return \Illuminate\Http\Response
      */
     public function edit(User $user)
     {
-        // Check for admin permissions
-        Gate::authorize('admin-only');
+        // Check user scope
+        Gate::authorize('edit:user');
 
         // Return the edit page with the user and servers
         return view('user.edit', [
@@ -75,14 +75,14 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * Admin-only function
+     * @scope edit:user
      *
      * @param  App\Http\Requests\UserUpdateRequest  $request
      * @return \Illuminate\Http\Response
      */
     public function update(UserUpdateRequest $request, User $user)
     {
-        Gate::authorize('admin-only');
+        Gate::authorize('edit:user');
 
         try {
             /**
@@ -103,13 +103,18 @@ class UserController extends Controller
             }
 
             /**
-             * Check if the user is the last admin
-             * If the user is the last admin, do not allow to remove the admin role
+             * Check if the user is last user with edit:user scope
+             * If the user is the one, don't allow the update
              */
-            if ($user->isLastAdmin() && ! $request->input('admin')) {
-                Log::notice('User update failed, tried removing the last admin', ['user_id' => $user->id]);
+            Log::critical('input is', $request->input('scopes'));
 
-                return back()->withInput()->withErrors(['admin' => 'Cannot delete the last admin.']);
+            if ($user->is_last_powerful_user() &&
+                ! (is_array($request->input('scopes')) && in_array('edit:user', $request->input('scopes')))
+            ) {
+                $error_message = 'User update failed, tried removing the last user with edit:user privileges';
+                Log::notice($error_message, ['user_id' => $user->id]);
+
+                return back()->withInput()->withErrors(['lastedit:userscope' => $error_message]);
             }
 
             /**
@@ -133,19 +138,20 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage
      * Before deleting the user, detach all users from the user to prevent a foreign key error
-     * Admin-only function
+     *
+     * @scope delete:user
      *
      * @return \Illuminate\Http\Response
      */
     public function destroy(User $user)
     {
-        Gate::authorize('admin-only');
+        Gate::authorize('delete:user');
 
-        // Cannot delete the last admin
-        if ($user->isLastAdmin()) {
-            Log::notice('User deleted failed, tried removing the last admin', ['user_id' => $user->id]);
+        // Cannot delete the user with edit:user scope
+        if ($user->is_last_powerful_user()) {
+            Log::notice('User deleted failed, tried removing the last user with edit:user scope', ['user_id' => $user->id]);
 
-            return back()->withErrors(['admindelete' => 'Cannot delete the last admin.']);
+            return back()->withErrors(['edit:userdelete' => 'Cannot delete the last user with edit:user scope.']);
         }
 
         $user->servers()->detach();

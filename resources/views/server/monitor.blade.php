@@ -32,7 +32,7 @@
         @empty
             <p class="text-center">{{ __('No servers defined.') }}</p>
             <div class="w-100"></div>
-            @can('admin-only')
+            @can('create:server')
                 <button class="btn btn-primary" onclick="window.location.href='{{ route('server.create') }}'">{{ __('Add server') }}</button>
             @endcan
         @endforelse
