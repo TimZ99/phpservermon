@@ -3,27 +3,30 @@
 use App\Models\Server;
 use App\Models\User;
 
-test('only admin can view server list', function () {
+test('onlyuser with view:server can view server list', function () {
     $user = User::factory()->create();
-    $admin = User::factory()->create(['admin' => true]);
+    $userWithScope = User::factory()->create();
+    $userWithScope->set_scopes(['view:server']);
     $servers = Server::factory(2)->create();
 
     // Guest cannot access server list
-    $this->get('/servers')->assertRedirectToRoute('login');
+    $this->assertGuest()
+        ->get('/servers')
+        ->assertRedirectToRoute('login');
 
     // Regular user cannot access server list
     $this->actingAs($user)
         ->get('/servers')
         ->assertForbidden();
 
-    // Admin can access server list and see server details
-    $this->actingAs($admin)
+    // User with scope can access server list and see server details
+    $this->actingAs($userWithScope)
         ->get('/servers')
         ->assertOk()
         ->assertSee($servers->last()->name);
 });
 
-test('user and admin can view server they are assigned to, guest cannot', function () {
+test('user can view server they are assigned to, guest cannot', function () {
     // Guest cannot access server details
     $server = Server::factory()->create()->first();
     $this->assertGuest();

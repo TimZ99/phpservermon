@@ -2,17 +2,18 @@
 
 use App\Models\User;
 
-test('admin can create user ', function () {
+test('user with create:user scope can create user ', function () {
     $this->markTestIncomplete('Create and store controller is not implemented yet.');
 
     $user = User::factory()->create();
-    $admin = User::factory()->create(['admin' => true]);
+    $userWithScope = User::factory()->create();
+    $userWithScope->set_scopes(['create:user']);
 
     $this->get('/user/create')->assertRedirectToRoute('login');
     $this->actingAs($user)->get('/user/create')->assertForbidden();
-    $this->actingAs($admin)->get('/user/create')->assertOk();
+    $this->actingAs($userWithScope)->get('/user/create')->assertOk();
 
-    $this->actingAs($admin)->post('/user', ['name' => 'New User', 'email' => 'newuser@example.com'])
+    $this->actingAs($userWithScope)->post('/user', ['name' => 'New User', 'email' => 'newuser@example.com'])
         ->assertSessionHasNoErrors()
         ->assertRedirect('/users');
 

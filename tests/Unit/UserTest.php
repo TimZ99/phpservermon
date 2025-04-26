@@ -2,15 +2,6 @@
 
 use App\Models\User;
 
-// isAdmin function
-it('can check if a user is an admin', function () {
-    $user = User::factory()->create(['admin' => true]);
-    expect($user->isAdmin())->toBeTrue();
-
-    $nonAdminUser = User::factory()->create(['admin' => false]);
-    expect($nonAdminUser->isAdmin())->toBeFalse();
-});
-
 // is_suspended function
 it('can check if a user is suspended', function () {
     $user = User::factory()->create(['suspended' => true]);
@@ -20,13 +11,15 @@ it('can check if a user is suspended', function () {
     expect($activeUser->is_suspended())->toBeFalse();
 });
 
-// isLastAdmin function
-it('can check if a user is the last admin', function () {
-    $adminUser = User::factory()->create(['admin' => true]);
-    expect($adminUser->isLastAdmin())->toBeTrue();
+// is_last_powerful_user function
+it('can check if a user is the last with edit:user scope', function () {
+    $user = User::factory()->create();
+    $user->set_scopes(['edit:user']);
+    expect($user->is_last_powerful_user())->toBeTrue();
 
-    $anotherAdmin = User::factory()->create(['admin' => true]);
-    expect($adminUser->isLastAdmin())->toBeFalse();
+    $user1 = User::factory()->create();
+    $user1->set_scopes(['edit:user']);
+    expect($user1->is_last_powerful_user())->toBeFalse();
 });
 
 // routeNotificationForTelegram function
