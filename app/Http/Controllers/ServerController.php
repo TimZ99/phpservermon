@@ -31,6 +31,9 @@ class ServerController extends Controller
      */
     public function monitorPage()
     {
+        // check user scope
+        Gate::authorize('server:monitor');
+
         $user = Auth::user();
         $servers = $user->servers;
         foreach ($servers as $server) {

@@ -8,7 +8,7 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             @auth
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    @can('view:server')
+                    @can('server:monitor')
                     <x-nav-link :href="route('server.monitor')" :active="request()->routeIs('server.monitor')">
                         {{ __('Monitor') }}
 </x-nav-link>

@@ -173,6 +173,7 @@ class User extends Authenticatable
             'edit:server', // edit
             'delete:server', // delete
             'check:server', // run server checks
+            'server:monitor', // monitor page
             // config
             'manage:config', // change global config
             // user
