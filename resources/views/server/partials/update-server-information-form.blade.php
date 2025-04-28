@@ -1,10 +1,10 @@
 @php
-    $ports = [
-        80 => 'HTTP (80)', 443 => 'HTTPS (443)', 21 => 'FTP (21)', 25 => 'SMTP (25)', 465 => 'SMTP Secure (465)',
-        110 => 'POP3 (110)', 995 => 'POP3 Secure (995)', 143 => 'IMAP (143)', 993 => 'IMAP over SSL (993)',
-        22 => 'SSH (22)', 389 => 'LDAP (389)', 3306 => 'MySQL (3306)', 115 => 'SFTP (115)', 43 => 'WHOIS (43)',
-        53 => 'BIND (53)', 3389 => 'RDP (3389)'
-    ];
+$ports = [
+80 => 'HTTP (80)', 443 => 'HTTPS (443)', 21 => 'FTP (21)', 25 => 'SMTP (25)', 465 => 'SMTP Secure (465)',
+110 => 'POP3 (110)', 995 => 'POP3 Secure (995)', 143 => 'IMAP (143)', 993 => 'IMAP over SSL (993)',
+22 => 'SSH (22)', 389 => 'LDAP (389)', 3306 => 'MySQL (3306)', 115 => 'SFTP (115)', 43 => 'WHOIS (43)',
+53 => 'BIND (53)', 3389 => 'RDP (3389)'
+];
 @endphp
 
 <section>
@@ -22,14 +22,14 @@
         <label for="ip">{{ __('IP') }}</label>
         <input id="ip" name="ip" class="form-control mb-2" type="text" class="mt-1" value="{{ old('ip', $server->ip) }}" required autocomplete="off" />
         <x-input-error class="mt-2" :messages="$errors->get('ip')" />
-        
+
         <label for="popular_ports">{{ __('Port') }}</label>
         <select id="popular_ports" name="popular_ports" class="form-select mb-2">
             <option @empty(old('port', $server->port)) selected @endempty disabled>{{ __('Select a port') }}</option>
             <option @if (in_array(old('port', $server->port), array_keys($ports))) selected @endif value="custom">{{ __('Custom port') }}</option>
             <optgroup label="{{ __('Popular ports') }}">
                 @foreach ($ports as $value => $label)
-                    <option @if (old('port', $server->port) == $value) selected @endif value="{{ $value }}">{{ $label }}</option>
+                <option @if (old('port', $server->port) == $value) selected @endif value="{{ $value }}">{{ $label }}</option>
                 @endforeach
             </optgroup>
         </select>
@@ -42,12 +42,12 @@
             <label for="users">{{ __('Users') }}</label>
             <select class="form-select mb-2" id="users" name="users[]" multiple>
                 @foreach ($users as $user)
-                    <option
-                        value="{{ $user->id }}"
-                        @if(in_array($user->id, $server->users->pluck('id')->toArray())) selected @endif
-                    > 
-                        {{ $user->name }}
-                    </option>
+                <option
+                    value="{{ $user->id }}"
+                    @if(in_array($user->id, $server->users->pluck('id')->toArray())) selected @endif
+                    >
+                    {{ $user->name }}
+                </option>
                 @endforeach
             </select>
         </div>
@@ -56,10 +56,32 @@
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 
             @if (session('status') === 'server-updated')
-                <p x-data="{ show: true }" x-show="show">
-                    {{ __('Server updated successfully.') }}
-                </p>
+            <p x-data="{ show: true }" x-show="show">
+                {{ __('Server updated successfully.') }}
+            </p>
             @endif
         </div>
     </form>
 </section>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const popularPortsSelect = document.getElementById('popular_ports');
+        const portInput = document.getElementById('port');
+        const portLabel = document.querySelector('label[for="port"]');
+
+        popularPortsSelect.addEventListener("change", function() {
+            if (popularPortsSelect.value === 'custom') {
+                portInput.classList.remove('d-none');
+                portLabel.classList.remove('d-none');
+                portInput.focus();
+            } else {
+                portInput.value = popularPortsSelect.value;
+                portInput.classList.add('d-none');
+                portLabel.classList.add('d-none');
+            }
+        });
+
+        // Trigger the change event manually to set the initial state
+        popularPortsSelect.dispatchEvent(new Event('change'));
+    });
+</script>
