@@ -17,27 +17,36 @@
         <input id="suspended" name="suspended" class="form-check-input mb-2" type="checkbox" class="mt-1" value="1" autocomplete="off" @if (old('suspended', $user->suspended)) checked @endif/>
         <label for="suspended" class="form-check-label">{{ __('Suspended') }}</label>
         <x-input-error class="mt-2" :messages="$errors->get('suspended')" />
-        
+
         <br><br>
         <label>Scopes</label><br>
         <x-input-error class="mt-2" :messages="$errors->get('lastedit:userscope')" />
         @foreach ($valid_scopes as $scope)
-            <input id="scope-{{$loop->index}}" name="scopes[]" class="form-check-input mb-2" type="checkbox" class="mt-1" value="{{ $scope }}" autocomplete="off" @if (in_array($scope, $user->scopes ?? [])) checked @endif/>
-            <label for="scope-{{$loop->index}}" class="form-check-label">{{ $scope }}</label>
-            <x-input-error class="mt-2" :messages="$errors->get('scopes.'.$loop->index)" />
-            <br>
+        <input
+            id="scope-{{ $loop->index }}"
+            name="scopes[]"
+            type="checkbox"
+            class="form-check-input scope-checkbox mb-2 mt-1"
+            value="{{ $scope }}"
+            autocomplete="off"
+            @if (in_array($scope, old('scopes', $user->scopes ?? []))) checked @endif />
+        <label for="scope-{{ $loop->index }}" class="form-check-label">
+            {{ $scope }}
+        </label>
+        <x-input-error class="mt-2" :messages="$errors->get('scopes.'.$loop->index)" />
+        <br>
         @endforeach
         <br>
 
         <label for="servers">{{ __('Servers') }}</label>
         <select class="form-select mb-2" id="users" name="servers[]" multiple>
             @foreach ($servers as $server)
-                <option
-                    value="{{ $server->id }}"
-                    @if(in_array($server->id, $user->servers->pluck('id')->toArray())) selected @endif
-                > 
-                    {{ $server->name }}
-                </option>
+            <option
+                value="{{ $server->id }}"
+                @if(in_array($server->id, $user->servers->pluck('id')->toArray())) selected @endif
+                >
+                {{ $server->name }}
+            </option>
             @endforeach
         </select>
 
@@ -47,3 +56,48 @@
         </div>
     </form>
 </section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // define which CRUD boxes imply the views
+        const userTriggers = new Set(['create:user', 'edit:user', 'delete:user']);
+        const serverTriggers = new Set(['create:server', 'edit:server', 'delete:server']);
+
+        function syncViews() {
+            const boxes = Array.from(document.querySelectorAll('input.scope-checkbox'));
+            const checked = new Set(boxes.filter(cb => cb.checked).map(cb => cb.value));
+
+            // do we need to force view:user or view:server?
+            const lockUserView = Array.from(checked).some(v => userTriggers.has(v));
+            const lockServerView = Array.from(checked).some(v => serverTriggers.has(v));
+
+            boxes.forEach(cb => {
+                // only touch the two view:* boxes
+                if (cb.value === 'view:user') {
+                    if (lockUserView) {
+                        cb.checked = true;
+                        cb.disabled = true;
+                    } else {
+                        cb.disabled = false;
+                        // leave cb.checked as the user last set it
+                    }
+                } else if (cb.value === 'view:server') {
+                    if (lockServerView) {
+                        cb.checked = true;
+                        cb.disabled = true;
+                    } else {
+                        cb.disabled = false;
+                    }
+                }
+                // **all other checkboxes** remain exactly as the user left them
+            });
+        }
+
+        // wire up change listeners
+        document.querySelectorAll('input.scope-checkbox')
+            .forEach(cb => cb.addEventListener('change', syncViews));
+
+        // run once on load
+        syncViews();
+    });
+</script>

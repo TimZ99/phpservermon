@@ -31,6 +31,8 @@ use Illuminate\Notifications\Notifiable;
  * - routeNotificationForTelegram(): Routes notifications to the user's Telegram account.
  * - has_scope(): Checks if the user has a specific scope.
  * - set_scopes(): Sets the scopes for the user.
+ * - valid_scopes(): Returns a list of valid scopes.
+ * - expand_scopes(): Expands the scopes based on implied relationships.
  *
  * @var suspended boolean
  */
@@ -78,6 +80,13 @@ class User extends Authenticatable
             'telegram_user_id' => 'integer',
             'scopes' => 'json',
         ];
+    }
+
+    public static function booted()
+    {
+        static::saving(function (self $user) {
+            $user->scopes = self::expand_scopes($user->scopes ?? []);
+        });
     }
 
     /**
@@ -172,5 +181,29 @@ class User extends Authenticatable
             'edit:user', // edit
             'delete:user', // delete
         ];
+    }
+
+    protected static function expand_scopes(array $scopes): array
+    {
+        // Apply implied scopes
+        $scopes = collect($scopes);
+
+        if ($scopes->intersect([
+            'create:user',
+            'edit:user',
+            'delete:user',
+        ])->isNotEmpty()) {
+            $scopes = $scopes->merge(['view:user', 'create:user', 'edit:user', 'delete:user']);
+        }
+
+        if ($scopes->intersect([
+            'create:server',
+            'edit:server',
+            'delete:server',
+        ])->isNotEmpty()) {
+            $scopes = $scopes->merge(['view:server', 'create:server', 'edit:server', 'delete:server']);
+        }
+
+        return $scopes->flatten()->unique()->values()->all();
     }
 }
