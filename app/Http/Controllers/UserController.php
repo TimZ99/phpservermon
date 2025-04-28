@@ -25,13 +25,13 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      *
-     * @scope view:user
+     * @scope user:view
      *
      * @todo Filter the users by the ones that the user is attached to
      */
     public function index()
     {
-        Gate::authorize('view:user');
+        Gate::authorize('user:view');
 
         return view('user.index', ['users' => User::all()]);
     }
@@ -39,13 +39,13 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      *
-     * @scope view:user
+     * @scope user:view
      *
      * @return \Illuminate\Http\Response
      */
     public function show(User $user)
     {
-        Gate::authorize('view:user');
+        Gate::authorize('user:view');
 
         return view('user.show', [
             'user' => User::find($user->id),
@@ -55,14 +55,14 @@ class UserController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @scope edit:user
+     * @scope user:edit
      *
      * @return \Illuminate\Http\Response
      */
     public function edit(User $user)
     {
         // Check user scope
-        Gate::authorize('edit:user');
+        Gate::authorize('user:edit');
 
         // Return the edit page with the user and servers
         return view('user.edit', [
@@ -75,14 +75,14 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @scope edit:user
+     * @scope user:edit
      *
      * @param  App\Http\Requests\UserUpdateRequest  $request
      * @return \Illuminate\Http\Response
      */
     public function update(UserUpdateRequest $request, User $user)
     {
-        Gate::authorize('edit:user');
+        Gate::authorize('user:edit');
 
         try {
             /**
@@ -103,16 +103,16 @@ class UserController extends Controller
             }
 
             /**
-             * Check if the user is last user with edit:user scope
+             * Check if the user is last user with user:edit scope
              * If the user is the one, don't allow the update
              */
             if ($user->is_last_powerful_user() &&
-                ! (is_array($request->input('scopes')) && in_array('edit:user', $request->input('scopes')))
+                ! (is_array($request->input('scopes')) && in_array('user:edit', $request->input('scopes')))
             ) {
-                $error_message = 'User update failed, tried removing the last user with edit:user privileges';
+                $error_message = 'User update failed, tried removing the last user with user:edit privileges';
                 Log::notice($error_message, ['user_id' => $user->id]);
 
-                return back()->withInput()->withErrors(['lastedit:userscope' => $error_message]);
+                return back()->withInput()->withErrors(['lastuser:editscope' => $error_message]);
             }
 
             /**
@@ -137,19 +137,19 @@ class UserController extends Controller
      * Remove the specified resource from storage
      * Before deleting the user, detach all users from the user to prevent a foreign key error
      *
-     * @scope delete:user
+     * @scope user:delete
      *
      * @return \Illuminate\Http\Response
      */
     public function destroy(User $user)
     {
-        Gate::authorize('delete:user');
+        Gate::authorize('user:delete');
 
-        // Cannot delete the user with edit:user scope
+        // Cannot delete the user with user:edit scope
         if ($user->is_last_powerful_user()) {
-            Log::notice('User deleted failed, tried removing the last user with edit:user scope', ['user_id' => $user->id]);
+            Log::notice('User deleted failed, tried removing the last user with user:edit scope', ['user_id' => $user->id]);
 
-            return back()->withErrors(['edit:userdelete' => 'Cannot delete the last user with edit:user scope.']);
+            return back()->withErrors(['user:editdelete' => 'Cannot delete the last user with user:edit scope.']);
         }
 
         $user->servers()->detach();

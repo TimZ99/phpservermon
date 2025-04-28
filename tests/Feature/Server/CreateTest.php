@@ -2,12 +2,12 @@
 
 use App\Models\User;
 
-test('user with create:server scope can create server ', function () {
+test('user with server:create scope can create server ', function () {
     $this->markTestIncomplete('Create and store controller is not implemented yet.');
 
     $user = User::factory()->create();
     $userWithScope = User::factory()->create();
-    $userWithScope->set_scopes(['create:server']);
+    $userWithScope->set_scopes(['server:create']);
 
     // Test unauthenticated user
     $this->assertGuest();

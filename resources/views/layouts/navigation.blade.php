@@ -11,17 +11,19 @@
                     @can('server:monitor')
                     <x-nav-link :href="route('server.monitor')" :active="request()->routeIs('server.monitor')">
                         {{ __('Monitor') }}
-</x-nav-link>
+                    </x-nav-link>
+                    @endcan
+                    @can('server:view')
                     <x-nav-link :href="route('server.index')" :active="request()->routeIs('server.index')">
                         {{ __('Servers') }}
                     </x-nav-link>
                     @endcan
-                    @can('view:user')
+                    @can('user:view')
                     <x-nav-link :href="route('user.index')" :active="request()->routeIs('user.index')">
                         {{ __('Users') }}
                     </x-nav-link>
                     @endcan
-                    @can('manage:config')
+                    @can('config:manage')
                     <x-nav-link :href="route('config.edit')" :active="request()->routeIs('config.edit')">
                         {{ __('Config') }}
                     </x-nav-link>

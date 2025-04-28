@@ -27,7 +27,7 @@ use Illuminate\Notifications\Notifiable;
  * Methods:
  * - is_suspended(): Checks if the user is suspended.
  * - servers(): Defines a many-to-many relationship with the Server model.
- * - is_last_powerful_user(): Checks if the user is the last with edit:user scope.
+ * - is_last_powerful_user(): Checks if the user is the last with user:edit scope.
  * - routeNotificationForTelegram(): Routes notifications to the user's Telegram account.
  * - has_scope(): Checks if the user has a specific scope.
  * - set_scopes(): Sets the scopes for the user.
@@ -112,12 +112,12 @@ class User extends Authenticatable
      */
     public function is_last_powerful_user(): bool
     {
-        // check how many users have edit:user in there scopes
+        // check how many users have user:edit in there scopes
         $users_with_edit_user_scope = User::all()->filter(function ($user) {
-            return $user->has_scope('edit:user');
+            return $user->has_scope('user:edit');
         })->count();
 
-        return $users_with_edit_user_scope <= 1 && $this->has_scope('edit:user');
+        return $users_with_edit_user_scope <= 1 && $this->has_scope('user:edit');
     }
 
     /**
@@ -168,19 +168,19 @@ class User extends Authenticatable
     {
         return [
             // server
-            'view:server', // index and view individual
-            'create:server', // create
-            'edit:server', // edit
-            'delete:server', // delete
-            'check:server', // run server checks
             'server:monitor', // monitor page
+            'server:view', // index and view individual
+            'server:create', // create
+            'server:edit', // edit
+            'server:delete', // delete
+            'server:check', // run server checks
             // config
-            'manage:config', // change global config
+            'config:manage', // change global config
             // user
-            'view:user', // index and view individual
-            'create:user', // create
-            'edit:user', // edit
-            'delete:user', // delete
+            'user:view', // index and view individual
+            'user:create', // create
+            'user:edit', // edit
+            'user:delete', // delete
         ];
     }
 
@@ -190,19 +190,19 @@ class User extends Authenticatable
         $scopes = collect($scopes);
 
         if ($scopes->intersect([
-            'create:user',
-            'edit:user',
-            'delete:user',
+            'user:create',
+            'user:edit',
+            'user:delete',
         ])->isNotEmpty()) {
-            $scopes = $scopes->merge(['view:user', 'create:user', 'edit:user', 'delete:user']);
+            $scopes = $scopes->merge(['user:view', 'user:create', 'user:edit', 'user:delete']);
         }
 
         if ($scopes->intersect([
-            'create:server',
-            'edit:server',
-            'delete:server',
+            'server:create',
+            'server:edit',
+            'server:delete',
         ])->isNotEmpty()) {
-            $scopes = $scopes->merge(['view:server', 'create:server', 'edit:server', 'delete:server']);
+            $scopes = $scopes->merge(['server:view', 'server:create', 'server:edit', 'server:delete']);
         }
 
         return $scopes->flatten()->unique()->values()->all();

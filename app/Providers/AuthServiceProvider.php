@@ -54,14 +54,14 @@ class AuthServiceProvider extends ServiceProvider
          *
          * @example
          *
-         *  @can('edit:server')
+         *  @can('server:edit')
          *  <button>Edit Post</button>
          *
          *  @endcan
          *
-         * @example if (auth()->user()->can('edit:server')) {}
+         * @example if (auth()->user()->can('server:edit')) {}
          * @example
-         * @example User::has_scope('edit:server')
+         * @example User::has_scope('server:edit')
          */
         foreach (\App\Models\User::valid_scopes() as $scope) {
             Gate::define($scope, fn ($user) => $user->has_scope($scope));

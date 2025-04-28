@@ -7,12 +7,14 @@
             User details
         </div>
         <div class="card-body">
+            @can('user:edit')
             <a href="{{route('user.edit', $user->id)}}">
                 <button class="btn btn-secondary mb-4">
                     {{ __('Edit user') }}
                 </button>
             </a>
             <br>
+            @endcan
             <b>User id</b> {{ $user->id }}<br>
             <b>Name</b> {{ $user->name }}<br>
             <b>Email</b> {{ $user->email }}<br>

@@ -26,7 +26,7 @@ test('all routes are covered by authorization', function () {
 
 test('users index can be displayed', function () {
     $userWithScope = User::factory()->create();
-    $userWithScope->set_scopes(['view:user']);
+    $userWithScope->set_scopes(['user:view']);
     $user = User::factory()->create();
 
     $this->actingAs($userWithScope)
@@ -37,7 +37,7 @@ test('users index can be displayed', function () {
 
 test('user show can be displayed', function () {
     $userWithScope = User::factory()->create();
-    $userWithScope->set_scopes(['view:user']);
+    $userWithScope->set_scopes(['user:view']);
     $user = User::factory()->create();
 
     $this->actingAs($userWithScope)

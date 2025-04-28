@@ -20,7 +20,7 @@
 
         <br><br>
         <label>Scopes</label><br>
-        <x-input-error class="mt-2" :messages="$errors->get('lastedit:userscope')" />
+        <x-input-error class="mt-2" :messages="$errors->get('lastuser:editscope')" />
         @foreach ($valid_scopes as $scope)
         <input
             id="scope-{{ $loop->index }}"
@@ -60,20 +60,20 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         // define which CRUD boxes imply the views
-        const userTriggers = new Set(['create:user', 'edit:user', 'delete:user']);
-        const serverTriggers = new Set(['create:server', 'edit:server', 'delete:server']);
+        const userTriggers = new Set(['user:create', 'user:edit', 'user:delete']);
+        const serverTriggers = new Set(['server:create', 'server:edit', 'server:delete']);
 
         function syncViews() {
             const boxes = Array.from(document.querySelectorAll('input.scope-checkbox'));
             const checked = new Set(boxes.filter(cb => cb.checked).map(cb => cb.value));
 
-            // do we need to force view:user or view:server?
+            // do we need to force user:view or server:view?
             const lockUserView = Array.from(checked).some(v => userTriggers.has(v));
             const lockServerView = Array.from(checked).some(v => serverTriggers.has(v));
 
             boxes.forEach(cb => {
-                // only touch the two view:* boxes
-                if (cb.value === 'view:user') {
+                // only touch the two *:view boxes
+                if (cb.value === 'user:view') {
                     if (lockUserView) {
                         cb.checked = true;
                         cb.disabled = true;
@@ -81,7 +81,7 @@
                         cb.disabled = false;
                         // leave cb.checked as the user last set it
                     }
-                } else if (cb.value === 'view:server') {
+                } else if (cb.value === 'server:view') {
                     if (lockServerView) {
                         cb.checked = true;
                         cb.disabled = true;

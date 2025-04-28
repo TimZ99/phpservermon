@@ -99,14 +99,14 @@ class ServerController extends Controller
      *
      * This function will show a list of all servers.
      *
-     * @scope view:server
+     * @scope server:view
      *
      * @return \Illuminate\Http\Response
      */
     public function index()
     {
         // Check user scope
-        Gate::authorize('view:server');
+        Gate::authorize('server:view');
 
         $servers = Server::all();
         foreach ($servers as $server) {
@@ -120,16 +120,16 @@ class ServerController extends Controller
     /**
      * Display the specified resource.
      *
-     * @scope view:server
+     * @scope server:view
      *
-     * @todo user-connected-to-server should be replaced with view:server
+     * @todo user-connected-to-server should be replaced with server:view
      *
      * @return \Illuminate\Http\Response
      */
     public function show(Server $server)
     {
         // Check user scope or attached to the server
-        Gate::any(['view:server', 'user-connected-to-server'], [$server]);
+        Gate::any(['server:view', 'user-connected-to-server'], [$server]);
 
         // Return the server page with the server and users
         return view('server.show', [
@@ -140,14 +140,14 @@ class ServerController extends Controller
     /**
      * Show the form for creating a new resource.
      *
-     * @scope create:server
+     * @scope server:create
      *
      * @return \Illuminate\Http\Response
      */
     public function create()
     {
         // Check user scope
-        Gate::authorize('create:server');
+        Gate::authorize('server:create');
 
         // Return the server create page with a list of users with id and name
         return view('server.create');
@@ -156,7 +156,7 @@ class ServerController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @scope create:server
+     * @scope server:create
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
@@ -164,7 +164,7 @@ class ServerController extends Controller
     public function store(ServerUpdateRequest $request)
     {
         // Check user scope
-        Gate::authorize('create:server');
+        Gate::authorize('server:create');
 
         try {
             // Create the server
@@ -185,14 +185,14 @@ class ServerController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @scope edit:server
+     * @scope server:edit
      *
      * @return \Illuminate\Http\Response
      */
     public function edit(Server $server)
     {
         // Check user scope
-        Gate::authorize('edit:server');
+        Gate::authorize('server:edit');
 
         // Return the server edit page with the server and list of users with id and name
         return view('server.edit', [
@@ -205,7 +205,7 @@ class ServerController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @scope edit:server
+     * @scope server:edit
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\Server  $server
@@ -214,7 +214,7 @@ class ServerController extends Controller
     public function update(ServerUpdateRequest $request, $id)
     {
         // Check user scope
-        Gate::authorize('edit:server');
+        Gate::authorize('server:edit');
 
         // Find the server
         $server = Server::findOrFail($id);
@@ -289,7 +289,7 @@ class ServerController extends Controller
     public function runBatch($servers = [])
     {
         // Check user scope
-        Gate::authorize('check:server');
+        Gate::authorize('server:check');
 
         if (empty($servers)) {
             $servers = Auth::user()->servers;
@@ -312,14 +312,14 @@ class ServerController extends Controller
      * Remove the specified resource from storage
      * Before deleting the server, detach all users from the server to prevent a foreign key error
      *
-     * @scope delete:server
+     * @scope server:delete
      *
      * @return \Illuminate\Http\Response
      */
     public function destroy(Server $server)
     {
         // Check user scope
-        Gate::authorize('delete:server');
+        Gate::authorize('server:delete');
         // Detach all users from the server
         $server->users()->detach();
         // Delete the server

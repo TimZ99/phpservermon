@@ -2,12 +2,12 @@
 
 use App\Models\User;
 
-test('user with create:user scope can create user ', function () {
+test('user with user:create scope can create user ', function () {
     $this->markTestIncomplete('Create and store controller is not implemented yet.');
 
     $user = User::factory()->create();
     $userWithScope = User::factory()->create();
-    $userWithScope->set_scopes(['create:user']);
+    $userWithScope->set_scopes(['user:create']);
 
     $this->get('/user/create')->assertRedirectToRoute('login');
     $this->actingAs($user)->get('/user/create')->assertForbidden();

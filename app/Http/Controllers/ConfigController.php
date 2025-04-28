@@ -24,14 +24,14 @@ class ConfigController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @scope manage:config
+     * @scope config:manage
      *
      * @return \Illuminate\Http\Response
      */
     public function edit()
     {
         // Check user scope
-        Gate::authorize('manage:config');
+        Gate::authorize('config:manage');
 
         // Return the config edit page
         return view('config.edit', [
@@ -46,7 +46,7 @@ class ConfigController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @scope manage:config
+     * @scope config:manage
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
@@ -58,7 +58,7 @@ class ConfigController extends Controller
         NotificationSettings $notificationSettings)
     {
         // Check user scope
-        Gate::authorize('manage:config');
+        Gate::authorize('config:manage');
 
         $request->validated();
 
