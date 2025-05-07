@@ -13,12 +13,12 @@
                         {{ __('Monitor') }}
                     </x-nav-link>
                     @endcan
-                    @can('server:view')
+                    @can('server:index')
                     <x-nav-link :href="route('server.index')" :active="request()->routeIs('server.index')">
                         {{ __('Servers') }}
                     </x-nav-link>
                     @endcan
-                    @can('user:view')
+                    @can('user:index')
                     <x-nav-link :href="route('user.index')" :active="request()->routeIs('user.index')">
                         {{ __('Users') }}
                     </x-nav-link>

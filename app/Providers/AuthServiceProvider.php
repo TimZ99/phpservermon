@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\Server;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -56,15 +58,63 @@ class AuthServiceProvider extends ServiceProvider
          *
          *  @can('server:edit')
          *  <button>Edit Post</button>
-         *
          *  @endcan
          *
          * @example if (auth()->user()->can('server:edit')) {}
          * @example
          * @example User::has_scope('server:edit')
          */
-        foreach (\App\Models\User::valid_scopes() as $scope) {
-            Gate::define($scope, fn ($user) => $user->has_scope($scope));
-        }
+        // Valid_scopes returns a list of scopes without a dynamic part
+        // example: server:index, server:monitor
+        // We need to define a gate for each scope
+        collect(User::valid_scopes())->each(fn ($scope) => Gate::define($scope, fn (User $user) => $user->has_scope($scope)));
+
+
+        // View
+        Gate::define('server:view', function (User $user, Server $server) {
+            if ($user->has_scope('server:index')) {
+                Log::info("User {$user->id} used server:index to view");
+                return true;
+            }
+            $dynamicGate = "server:{$server->uuid}:view";
+            if ($user->has_scope($dynamicGate)) {
+                Log::info("User {$user->id} used {$dynamicGate}");
+                return true;
+            }
+
+            return false;
+        });
+
+        // Edit
+        Gate::define('server:edit', function (User $user, Server $server) {
+            if ($user->has_scope('server:index')) {
+                Log::info("User {$user->id} used server:index for editing");
+                return true;
+            }
+            $dynamicGate = "server:{$server->uuid}:edit";
+            if ($user->has_scope($dynamicGate)) {
+                Log::info("User {$user->id} used {$dynamicGate}");
+                return true;
+            }
+
+            return false;
+        });
+
+        // Delete
+        Gate::define('server:delete', function (User $user, Server $server) {
+            if ($user->has_scope('server:index')) {
+                Log::info("User {$user->id} used server:index for deleting");
+
+                return true;
+            }
+            $dynamicGate = "server:{$server->uuid}:delete";
+            if ($user->has_scope($dynamicGate)) {
+                Log::info("User {$user->id} used {$dynamicGate}");
+
+                return true;
+            }
+
+            return false;
+        });
     }
 }

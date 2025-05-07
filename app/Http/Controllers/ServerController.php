@@ -99,14 +99,14 @@ class ServerController extends Controller
      *
      * This function will show a list of all servers.
      *
-     * @scope server:view
+     * @scope server:index
      *
      * @return \Illuminate\Http\Response
      */
     public function index()
     {
         // Check user scope
-        Gate::authorize('server:view');
+        Gate::authorize('server:index');
 
         $servers = Server::all();
         foreach ($servers as $server) {
@@ -129,7 +129,7 @@ class ServerController extends Controller
     public function show(Server $server)
     {
         // Check user scope or attached to the server
-        Gate::any(['server:view', 'user-connected-to-server'], [$server]);
+        Gate::authorize('server:view', [$server]);
 
         // Return the server page with the server and users
         return view('server.show', [

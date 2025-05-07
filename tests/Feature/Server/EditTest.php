@@ -11,7 +11,7 @@ test('guest cannot edit a server', function () {
         ->assertRedirect('/login');
 });
 
-test('user without user:edit scope cannot edit servers', function () {
+test('user without user:edit:all scope cannot edit servers', function () {
     $user = User::factory()->has(Server::factory())->create();
     $serverConnectedToUser = $user->servers()->first();
     $server = Server::factory()->create();
@@ -31,7 +31,7 @@ test('user without user:edit scope cannot edit servers', function () {
         ->assertForbidden();
 });
 
-test('user with user:edit can update server information', function () {
+test('user with user:edit:all can update server information', function () {
     $userWithScope = User::factory()->create();
     $userWithScope->set_scopes(['server:edit']);
     $server = Server::factory()->create();

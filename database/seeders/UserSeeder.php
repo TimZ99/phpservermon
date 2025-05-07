@@ -26,6 +26,7 @@ class UserSeeder extends Seeder
                 'email' => 'adminuser@example.com',
             ]);
         $admin->set_scopes($admin->valid_scopes());
+        $admin->save();
         // Create a regular user with 5 associated servers
         User::factory()->hasServers(5)
             ->create([
