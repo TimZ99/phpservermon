@@ -6,7 +6,6 @@ use App\Http\Requests\UserUpdateRequest;
 use App\Models\Server;
 use App\Models\User;
 use Exception;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -31,6 +30,7 @@ class UserController extends Controller
      */
     public function index()
     {
+        $this->authorize('index', [User::class]);
         return view('user.index', ['users' => User::all()]);
     }
 
@@ -43,6 +43,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
+        $this->authorize('view', [User::class]);
         return view('user.show', [
             'user' => User::find($user->id),
         ]);
@@ -57,6 +58,7 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
+        $this->authorize('update', [User::class]);
         // Return the edit page with the user and servers
         return view('user.edit', [
             'user' => $user,
@@ -75,6 +77,7 @@ class UserController extends Controller
      */
     public function update(UserUpdateRequest $request, User $user)
     {
+        $this->authorize('update', [User::class]);
         try {
             /**
              * Sync the servers with the user
@@ -134,6 +137,7 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
+        $this->authorize('delete', [User::class]);
         // Cannot delete the user with user:edit:any scope
         if ($user->is_last_powerful_user()) {
             Log::notice('User deleted failed, tried removing the last user with user:edit:any scope', ['user_id' => $user->id]);

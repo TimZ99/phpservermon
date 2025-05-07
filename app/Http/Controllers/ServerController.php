@@ -9,7 +9,6 @@ use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Gate;
 
 /**
  * Routing:
@@ -31,6 +30,7 @@ class ServerController extends Controller
      */
     public function monitorPage()
     {
+        $this->authorize('monitor', [Server::class]);
         $user = Auth::user();
         $servers = $user->servers;
         foreach ($servers as $server) {
@@ -96,12 +96,13 @@ class ServerController extends Controller
      *
      * This function will show a list of all servers.
      *
-     * @scope server:index
+     * @scope server:view:any
      *
      * @return \Illuminate\Http\Response
      */
     public function index()
     {
+        $this->authorize('index', [Server::class]);
         $servers = Server::all();
         foreach ($servers as $server) {
             $server->statusCss = 'danger';
@@ -121,6 +122,7 @@ class ServerController extends Controller
      */
     public function show(Server $server)
     {
+        $this->authorize('view', $server);
         // Return the server page with the server and users
         return view('server.show', [
             'server' => Server::find($server->id),
@@ -136,6 +138,7 @@ class ServerController extends Controller
      */
     public function create()
     {
+        $this->authorize('create');
         // Return the server create page with a list of users with id and name
         return view('server.create');
     }
@@ -150,6 +153,7 @@ class ServerController extends Controller
      */
     public function store(ServerUpdateRequest $request)
     {
+        $this->authorize('create', [Server::class]);
         try {
             // Create the server
             $server = Server::create($request->validated());
@@ -175,6 +179,7 @@ class ServerController extends Controller
      */
     public function edit(Server $server)
     {
+        $this->authorize('update', $server);
         // Return the server edit page with the server and list of users with id and name
         return view('server.edit', [
             'server' => Server::find($server->id),
@@ -194,6 +199,7 @@ class ServerController extends Controller
      */
     public function update(ServerUpdateRequest $request, $id)
     {
+        $this->authorize('update', Server::findOrFail($id));
         // Find the server
         $server = Server::findOrFail($id);
 
@@ -254,6 +260,7 @@ class ServerController extends Controller
      */
     public function runJob(Server $server)
     {
+        $this->authorize('check', $server);
         return $this->runBatch([$server]);
     }
 
@@ -266,6 +273,7 @@ class ServerController extends Controller
      */
     public function runBatch($servers = [])
     {
+        $this->authorize('checkAny', [Server::class]);
         if (empty($servers)) {
             $servers = Auth::user()->servers;
         }
@@ -293,6 +301,7 @@ class ServerController extends Controller
      */
     public function destroy(Server $server)
     {
+        $this->authorize('delete', $server);
         // Detach all users from the server
         $server->users()->detach();
         // Delete the server

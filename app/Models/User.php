@@ -239,11 +239,12 @@ class User extends Authenticatable
     {
         return [
             // servers
-            'server:index',
+            'server:view:any',
+            'server:edit:any',
+            'server:delete:any',
             'server:create',
             'server:monitor',
             // users
-            'user:index',
             'user:view:any',
             'user:edit:any',
             'user:create',

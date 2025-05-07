@@ -11,26 +11,24 @@ class UserPolicy
      */
     public function index(user $user): bool
     {
-        return $user->has_scope('user:index');
+        return $user->has_any_scope([
+            'user:index',
+            'user:view:any',
+            'user:edit:any',
+            'user:delete:any'
+        ]);
     }
 
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(user $user): bool
-    {
-        return $user->has_scope('user:view:any');
-    }
-
-    /**
-     * Determine whether the user can view the model.
-     */
-    public function view(User $user, User $other_user): bool
+    public function view(user $user): bool
     {
         return $user->has_any_scope([
-            'user:'.$other_user->id.':view',
-            'user:'.$other_user->id.':edit',
-            'user:'.$other_user->id.':delete'
+            'user:index',
+            'user:view:any',
+            'user:edit:any',
+            'user:delete:any'
         ]);
     }
 
@@ -45,22 +43,22 @@ class UserPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(user $user, User $other_user): bool
+    public function update(user $user): bool
     {
         return $user->has_any_scope([
-            'user:'.$other_user->id.':edit',
-            'user:'.$other_user->id.':delete'
+            'user:edit:any',
+            'user:delete:any'
         ]);
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(user $user, User $other_user): bool
+    public function delete(user $user): bool
     {
         return $user->has_any_scope([
-            'user:'.$other_user->id.':edit',
-            'user:'.$other_user->id.':delete'
+            'user:edit:any',
+            'user:delete:any'
         ]);
     }
 }

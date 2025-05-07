@@ -20,13 +20,6 @@ class ServerPolicy
      */
     public function index(User $user): bool
     {
-        return $user->has_scope('server:index');
-    }
-    /**
-     * Determine whether the user can view any models.
-     */
-    public function viewAny(User $user): bool
-    {
         return $user->has_scope('server:view:any');
     }
 
@@ -36,6 +29,9 @@ class ServerPolicy
     public function view(User $user, Server $server): bool
     {
         return $user->has_any_scope([
+            'server:view:any',
+            'server:edit:any',
+            'server:delete:any',
             'server:'.$server->uuid.':view',
             'server:'.$server->uuid.':edit',
             'server:'.$server->uuid.':delete',
@@ -49,6 +45,8 @@ class ServerPolicy
     public function check(User $user, Server $server): bool
     {
         return $user->has_any_scope([
+            'server:edit:any',
+            'server:delete:any',
             'server:'.$server->uuid.':check',
             'server:'.$server->uuid.':edit',
             'server:'.$server->uuid.':delete'
@@ -77,6 +75,8 @@ class ServerPolicy
     public function update(User $user, Server $server): bool
     {
         return $user->has_any_scope([
+            'server:edit:any',
+            'server:delete:any',
             'server:'.$server->uuid.':edit',
             'server:'.$server->uuid.':delete'
         ]);

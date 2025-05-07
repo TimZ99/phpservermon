@@ -29,7 +29,7 @@ class ConfigController extends Controller
      */
     public function edit()
     {
-
+        $this->authorize('config:manage');
         // Return the config edit page
         return view('config.edit', [
             'locale' => Config::get('app.locale'),
@@ -54,6 +54,7 @@ class ConfigController extends Controller
         EmailSettings $emailSettings,
         NotificationSettings $notificationSettings)
     {
+        $this->authorize('config:manage');
         $request->validated();
 
         // Update the config

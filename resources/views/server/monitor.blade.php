@@ -9,7 +9,7 @@
         @endcan
         @forelse ($servers as $server)
             <div class="col-sm-4 col-md-3 col-xl-2">
-                <div class="card text-bg-{{ $server->statusCss }} mb-4" @can('monitor', $server) onclick="window.location.href='{{ route('server.show', $server->id) }}'" @endcan>
+                <div class="card text-bg-{{ $server->statusCss }} mb-4" @can('view', $server) onclick="window.location.href='{{ route('server.show', $server->id) }}'" @endcan>
                     <div class="card-header">
                         <a href="{{ route('server.show', $server->id) }}">{{ $server->name }}</a>
                     </div>
