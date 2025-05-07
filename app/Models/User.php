@@ -27,7 +27,7 @@ use Illuminate\Notifications\Notifiable;
  * Methods:
  * - is_suspended(): Checks if the user is suspended.
  * - servers(): Defines a many-to-many relationship with the Server model.
- * - is_last_powerful_user(): Checks if the user is the last with user:edit:all scope.
+ * - is_last_powerful_user(): Checks if the user is the last with user:edit:any scope.
  * - routeNotificationForTelegram(): Routes notifications to the user's Telegram account.
  * - has_scope(): Checks if the user has a specific scope.
  * - set_scopes(): Sets the scopes for the user.
@@ -112,12 +112,12 @@ class User extends Authenticatable
      */
     public function is_last_powerful_user(): bool
     {
-        // check how many users have user:edit:all in there scopes
+        // check how many users have user:edit:any in there scopes
         $users_with_edit_user_scope = User::all()->filter(function ($user) {
-            return $user->has_scope('user:edit:all');
+            return $user->has_scope('user:edit:any');
         })->count();
 
-        return $users_with_edit_user_scope <= 1 && $this->has_scope('user:edit:all');
+        return $users_with_edit_user_scope <= 1 && $this->has_scope('user:edit:any');
     }
 
     /**
@@ -142,6 +142,23 @@ class User extends Authenticatable
         }
 
         return in_array($scope, $scopes ?? []);
+    }
+
+    /**
+     * Check if the user has any of the given scopes.
+     *
+     * @param array<string> $scopes
+     * @return bool
+     */
+    public function has_any_scope(array $scopes): bool
+    {
+        foreach ($scopes as $scope) {
+            if ($this->has_scope($scope)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -227,10 +244,10 @@ class User extends Authenticatable
             'server:monitor',
             // users
             'user:index',
-            'user:view:all',
-            'user:edit:all',
+            'user:view:any',
+            'user:edit:any',
             'user:create',
-            'user:delete:all',
+            'user:delete:any',
             // config
             'config:manage',
         ];
@@ -244,7 +261,7 @@ class User extends Authenticatable
 
         // server-specific scopes: server:{uuid}:view|edit|delete
         return (bool) preg_match(
-            '/^server:[0-9a-fA-F\-]{36}:(view|edit|delete)$/',
+            '/^server:[0-9a-fA-F\-]{36}:(view|edit|delete|check)$/',
             $scope
         );
     }
@@ -259,10 +276,10 @@ class User extends Authenticatable
 
         if ($scopes->intersect([
             'user:create',
-            'user:edit:all',
+            'user:edit:any',
             'user:delete',
         ])->isNotEmpty()) {
-            $scopes = $scopes->merge(['user:view:all', 'user:create', 'user:edit:all', 'user:delete']);
+            $scopes = $scopes->merge(['user:view:any', 'user:create', 'user:edit:any', 'user:delete']);
         }
 
         if ($scopes->intersect([

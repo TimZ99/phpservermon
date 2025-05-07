@@ -25,28 +25,24 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      *
-     * @scope user:view:all
+     * @scope user:view:any
      *
      * @todo Filter the users by the ones that the user is attached to
      */
     public function index()
     {
-        Gate::authorize('user:index');
-
         return view('user.index', ['users' => User::all()]);
     }
 
     /**
      * Display the specified resource.
      *
-     * @scope user:view:all
+     * @scope user:view:any
      *
      * @return \Illuminate\Http\Response
      */
     public function show(User $user)
     {
-        Gate::authorize('user:view:all');
-
         return view('user.show', [
             'user' => User::find($user->id),
         ]);
@@ -55,15 +51,12 @@ class UserController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @scope user:edit:all
+     * @scope user:edit:any
      *
      * @return \Illuminate\Http\Response
      */
     public function edit(User $user)
     {
-        // Check user scope
-        Gate::authorize('user:edit:all');
-
         // Return the edit page with the user and servers
         return view('user.edit', [
             'user' => $user,
@@ -75,15 +68,13 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @scope user:edit:all
+     * @scope user:edit:any
      *
      * @param  App\Http\Requests\UserUpdateRequest  $request
      * @return \Illuminate\Http\Response
      */
     public function update(UserUpdateRequest $request, User $user)
     {
-        Gate::authorize('user:edit:all');
-
         try {
             /**
              * Sync the servers with the user
@@ -103,13 +94,13 @@ class UserController extends Controller
             }
 
             /**
-             * Check if the user is last user with user:edit:all scope
+             * Check if the user is last user with user:edit:any scope
              * If the user is the one, don't allow the update
              */
             if ($user->is_last_powerful_user() &&
-                ! (is_array($request->input('scopes')) && in_array('user:edit:all', $request->input('scopes')))
+                ! (is_array($request->input('scopes')) && in_array('user:edit:any', $request->input('scopes')))
             ) {
-                $error_message = 'User update failed, tried removing the last user with user:edit:all privileges';
+                $error_message = 'User update failed, tried removing the last user with user:edit:any privileges';
                 Log::notice($error_message, ['user_id' => $user->id]);
 
                 return back()->withInput()->withErrors(['lastuser:editscope' => $error_message]);
@@ -143,13 +134,11 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        Gate::authorize('user:delete');
-
-        // Cannot delete the user with user:edit:all scope
+        // Cannot delete the user with user:edit:any scope
         if ($user->is_last_powerful_user()) {
-            Log::notice('User deleted failed, tried removing the last user with user:edit:all scope', ['user_id' => $user->id]);
+            Log::notice('User deleted failed, tried removing the last user with user:edit:any scope', ['user_id' => $user->id]);
 
-            return back()->withErrors(['user:editdelete' => 'Cannot delete the last user with user:edit:all scope.']);
+            return back()->withErrors(['user:editdelete' => 'Cannot delete the last user with user:edit:any scope.']);
         }
 
         $user->servers()->detach();

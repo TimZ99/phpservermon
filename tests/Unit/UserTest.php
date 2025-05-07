@@ -12,13 +12,13 @@ it('can check if a user is suspended', function () {
 });
 
 // is_last_powerful_user function
-it('can check if a user is the last with user:edit:all scope', function () {
+it('can check if a user is the last with user:edit:any scope', function () {
     $user = User::factory()->create();
-    $user->set_scopes(['user:edit:all']);
+    $user->set_scopes(['user:edit:any']);
     expect($user->is_last_powerful_user())->toBeTrue();
 
     $user1 = User::factory()->create();
-    $user1->set_scopes(['user:edit:all']);
+    $user1->set_scopes(['user:edit:any']);
     expect($user1->is_last_powerful_user())->toBeFalse();
 });
 

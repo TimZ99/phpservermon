@@ -31,9 +31,6 @@ class ServerController extends Controller
      */
     public function monitorPage()
     {
-        // check user scope
-        Gate::authorize('server:monitor');
-
         $user = Auth::user();
         $servers = $user->servers;
         foreach ($servers as $server) {
@@ -105,9 +102,6 @@ class ServerController extends Controller
      */
     public function index()
     {
-        // Check user scope
-        Gate::authorize('server:index');
-
         $servers = Server::all();
         foreach ($servers as $server) {
             $server->statusCss = 'danger';
@@ -122,15 +116,11 @@ class ServerController extends Controller
      *
      * @scope server:view
      *
-     * @todo user-connected-to-server should be replaced with server:view
-     *
+     * @todo server:view
      * @return \Illuminate\Http\Response
      */
     public function show(Server $server)
     {
-        // Check user scope or attached to the server
-        Gate::authorize('server:view', [$server]);
-
         // Return the server page with the server and users
         return view('server.show', [
             'server' => Server::find($server->id),
@@ -146,9 +136,6 @@ class ServerController extends Controller
      */
     public function create()
     {
-        // Check user scope
-        Gate::authorize('server:create');
-
         // Return the server create page with a list of users with id and name
         return view('server.create');
     }
@@ -163,9 +150,6 @@ class ServerController extends Controller
      */
     public function store(ServerUpdateRequest $request)
     {
-        // Check user scope
-        Gate::authorize('server:create');
-
         try {
             // Create the server
             $server = Server::create($request->validated());
@@ -191,9 +175,6 @@ class ServerController extends Controller
      */
     public function edit(Server $server)
     {
-        // Check user scope
-        Gate::authorize('server:edit');
-
         // Return the server edit page with the server and list of users with id and name
         return view('server.edit', [
             'server' => Server::find($server->id),
@@ -213,9 +194,6 @@ class ServerController extends Controller
      */
     public function update(ServerUpdateRequest $request, $id)
     {
-        // Check user scope
-        Gate::authorize('server:edit');
-
         // Find the server
         $server = Server::findOrFail($id);
 
@@ -288,9 +266,6 @@ class ServerController extends Controller
      */
     public function runBatch($servers = [])
     {
-        // Check user scope
-        Gate::authorize('server:check');
-
         if (empty($servers)) {
             $servers = Auth::user()->servers;
         }
@@ -318,8 +293,6 @@ class ServerController extends Controller
      */
     public function destroy(Server $server)
     {
-        // Check user scope
-        Gate::authorize('server:delete');
         // Detach all users from the server
         $server->users()->detach();
         // Delete the server

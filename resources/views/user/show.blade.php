@@ -7,7 +7,7 @@
             User details
         </div>
         <div class="card-body">
-            @can('user:edit:all')
+            @can('edit', App\Models\User::class)
             <a href="{{route('user.edit', $user->id)}}">
                 <button class="btn btn-secondary mb-4">
                     {{ __('Edit user') }}

@@ -7,7 +7,6 @@ use App\Settings\EmailSettings;
 use App\Settings\GeneralSettings;
 use App\Settings\NotificationSettings;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -30,8 +29,6 @@ class ConfigController extends Controller
      */
     public function edit()
     {
-        // Check user scope
-        Gate::authorize('config:manage');
 
         // Return the config edit page
         return view('config.edit', [
@@ -57,9 +54,6 @@ class ConfigController extends Controller
         EmailSettings $emailSettings,
         NotificationSettings $notificationSettings)
     {
-        // Check user scope
-        Gate::authorize('config:manage');
-
         $request->validated();
 
         // Update the config

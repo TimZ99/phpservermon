@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="row d-flex">
-        @can('server:check')
+    @can('checkAny', App\Models\Server::class)
         <a href="{{route('server.runBatch')}}">
             <button class="btn btn-secondary mb-4">
                 {{ __('Run tests') }}
@@ -9,7 +9,7 @@
         @endcan
         @forelse ($servers as $server)
             <div class="col-sm-4 col-md-3 col-xl-2">
-                <div class="card text-bg-{{ $server->statusCss }} mb-4" @can('server:monitor') onclick="window.location.href='{{ route('server.show', $server->id) }}'" @endcan>
+                <div class="card text-bg-{{ $server->statusCss }} mb-4" @can('monitor', $server) onclick="window.location.href='{{ route('server.show', $server->id) }}'" @endcan>
                     <div class="card-header">
                         <a href="{{ route('server.show', $server->id) }}">{{ $server->name }}</a>
                     </div>
@@ -34,7 +34,7 @@
         @empty
             <p class="text-center">{{ __('No servers defined.') }}</p>
             <div class="w-100"></div>
-            @can('server:create')
+            @can('create', App\Models\Server::class)
                 <button class="btn btn-primary" onclick="window.location.href='{{ route('server.create') }}'">{{ __('Add server') }}</button>
             @endcan
         @endforelse

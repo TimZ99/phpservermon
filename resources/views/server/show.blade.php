@@ -7,14 +7,14 @@
             Server details
         </div>
         <div class="card-body">
-            @can('server:edit')
+            @can('edit', $server)
             <a href="{{route('server.edit', $server->id)}}">
                 <button class="btn btn-secondary mb-4">
                     {{ __('Edit server') }}
                 </button>
             </a>
             @endcan
-            @can('server:check')
+            @can('check', $server)
             <a href="{{route('server.runChecks', $server->id)}}">
                 <button class="btn btn-secondary mb-4">
                     {{ __('Run tests') }}
