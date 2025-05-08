@@ -6,7 +6,7 @@ use App\Models\User;
 test('onlyuser with server:view can view server list', function () {
     $user = User::factory()->create();
     $userWithScope = User::factory()->create();
-    $userWithScope->set_scopes(['server:view']);
+    $userWithScope->setScope(['server:view']);
     $servers = Server::factory(2)->create();
 
     // Guest cannot access server list

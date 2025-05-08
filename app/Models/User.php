@@ -25,13 +25,13 @@ use Illuminate\Notifications\Notifiable;
  * - $casts: Defines the data type casting for specific attributes.
  *
  * Methods:
- * - is_suspended(): Checks if the user is suspended.
+ * - isSuspended(): Checks if the user is suspended.
  * - servers(): Defines a many-to-many relationship with the Server model.
- * - is_last_powerful_user(): Checks if the user is the last with user:edit:any scope.
+ * - isLastPowerfulUser(): Checks if the user is the last with user:edit:any scope.
  * - routeNotificationForTelegram(): Routes notifications to the user's Telegram account.
- * - has_scope(): Checks if the user has a specific scope.
- * - set_scopes(): Sets the scopes for the user.
- * - valid_scopes(): Returns a list of valid scopes.
+ * - hasScope(): Checks if the user has a specific scope.
+ * - setScope(): Sets the scopes for the user.
+ * - validScopes(): Returns a list of valid scopes.
  * - expand_scopes(): Expands the scopes based on implied relationships.
  *
  * @var suspended boolean
@@ -47,13 +47,8 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
-        'email',
-        'phone',
-        'password',
-        'suspended',
-        'telegram_user_id',
-        'scopes',
+        'name', 'email', 'phone', 'password', 'suspended',
+        'telegram_user_id', 'scopes',
     ];
 
     /**
@@ -62,8 +57,7 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $hidden = [
-        'password',
-        'remember_token',
+        'password', 'remember_token',
     ];
 
     /**
@@ -82,17 +76,10 @@ class User extends Authenticatable
         ];
     }
 
-    public static function booted()
-    {
-        static::saving(function (self $user) {
-            $user->scopes = self::expand_scopes($user->scopes ?? []);
-        });
-    }
-
     /**
      * Check if the user is suspended.
      */
-    public function is_suspended(): bool
+    public function isSuspended(): bool
     {
         return $this->suspended === null ? false : $this->suspended;
     }
@@ -110,14 +97,14 @@ class User extends Authenticatable
     /**
      * Check if the user is the last powerful user.
      */
-    public function is_last_powerful_user(): bool
+    public function isLastPowerfulUser(): bool
     {
         // check how many users have user:edit:any in there scopes
         $users_with_edit_user_scope = User::all()->filter(function ($user) {
-            return $user->has_scope('user:edit:any');
+            return $user->hasScope('user:edit:any');
         })->count();
 
-        return $users_with_edit_user_scope <= 1 && $this->has_scope('user:edit:any');
+        return $users_with_edit_user_scope <= 1 && $this->hasScope('user:edit:any');
     }
 
     /**
@@ -129,31 +116,22 @@ class User extends Authenticatable
     }
 
     /**
-     * The scopes that the user has.
+     * Expand the scopes based on implied relationships.
      *
-     * @var list<string>
+     * @param  string|array<string>  $scopes
      */
-    public function has_scope(string $scope): bool
+    public function hasScope(string|array $scope): bool
     {
         $scopes = $this->scopes ?? [];
 
         if (is_string($scopes)) {
-            $scopes = json_decode($scopes, true);
+            $scopes = json_decode($scopes, true) ?? [];
         }
 
-        return in_array($scope, $scopes ?? []);
-    }
+        $scopes = is_array($scopes) ? $scopes : [];
 
-    /**
-     * Check if the user has any of the given scopes.
-     *
-     * @param array<string> $scopes
-     * @return bool
-     */
-    public function has_any_scope(array $scopes): bool
-    {
-        foreach ($scopes as $scope) {
-            if ($this->has_scope($scope)) {
+        foreach ((array) $scope as $check) {
+            if (in_array($check, $scopes, true)) {
                 return true;
             }
         }
@@ -163,16 +141,16 @@ class User extends Authenticatable
 
     /**
      * Overrides the scopes that the user has.
-     * 
+     *
      * You need to run ->save() afterwards
      *
-     * @var list<string>
+     * @var array<string>
      */
-    public function set_scopes(array $scopes): void
+    public function setScope(array $scopes): void
     {
         $filtered = array_values(array_unique(array_filter(
             $scopes,
-            fn ($scope) => self::is_valid_scope($scope)
+            fn ($scope) => self::isValidScope($scope)
         )));
 
         $this->scopes = $filtered;
@@ -180,54 +158,50 @@ class User extends Authenticatable
 
     /**
      * Add one scope to the user.
-     * 
+     *
      * You need to run ->save() afterwards
      *
-     * @var list<string>
+     * @var string|array<string>
+     *
+     * @throws \InvalidArgumentException
      */
-    public function add_scope(string $scope): void
+    public function addScope(string|array $scopes): void
     {
-        // Check if the scope is valid
-        // If not, we don't need to do anything
-        if($this->is_valid_scope($scope) === false) {
-            throw new \InvalidArgumentException("Invalid scope: {$scope}");
+        foreach ((array) $scopes as $scope) {
+            if (! $this->isValidScope($scope)) {
+                throw new \InvalidArgumentException("Invalid scope: {$scope}");
+            }
+
+            if (! $this->hasScope($scope)) {
+                $this->scopes[] = $scope;
+            }
         }
 
-        // Check if the user has the scope
-        // If so, we don't need to do anything
-        if ($this->has_scope($scope)) {
-            return;
-        }
-
-        // Add the scope to the list and return the new list
-        array_push($this->scopes, $scope);
+        $this->scopes = array_values(array_unique($this->scopes));
     }
 
     /**
      * Remove one scope to the user.
-     * 
+     *
      * You need to run ->save() afterwards
      *
-     * @var list<string>
+     * @var string|array<string>
+     *
+     * @throws \InvalidArgumentException
      */
-    public function remove_scope(string $scope): void
+    public function removeScope(string|array $scopes): void
     {
-        // Check if the scope is valid
-        // If not, we don't need to do anything
-        if($this->is_valid_scope($scope) === false) {
-            throw new \InvalidArgumentException("Invalid scope: {$scope}");
+        foreach ((array) $scopes as $scope) {
+            if (! $this->isValidScope($scope)) {
+                throw new \InvalidArgumentException("Invalid scope: {$scope}");
+            }
+
+            if ($this->hasScope($scope)) {
+                $this->scopes = array_filter($this->scopes, fn ($val) => $val !== $scope);
+            }
         }
 
-        // Check if the user has the scope
-        // If not, we don't need to do anything
-        if (!$this->has_scope($scope)) {
-            return;
-        }
-
-        // Remove the scope from the list and return the new list
-        $this->scopes = array_values(array_unique(array_filter($this->scopes, function ($value) use ($scope) {
-            return $value !== $scope;
-        })));
+        $this->scopes = array_values(array_unique($this->scopes));
     }
 
     /**
@@ -235,62 +209,32 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    public static function valid_scopes(): array
+    public static function validScopes(): array
     {
         return [
-            // servers
-            'server:view:any',
-            'server:edit:any',
-            'server:delete:any',
-            'server:create',
-            'server:monitor',
-            // users
-            'user:view:any',
-            'user:edit:any',
-            'user:create',
-            'user:delete:any',
-            // config
+            'server:view:*',
+            'server:manage:*',
+            'server:check:*',
+            'user:view:*',
+            'user:manage:*',
             'config:manage',
         ];
     }
 
-    public static function is_valid_scope(string $scope): bool
+    public static function isValidScope(string $scope): bool
     {
-        if (in_array($scope, self::valid_scopes(), true)) {
+        if (in_array($scope, self::validScopes(), true)) {
             return true;
         }
 
-        // server-specific scopes: server:{uuid}:view|edit|delete
-        return (bool) preg_match(
-            '/^server:[0-9a-fA-F\-]{36}:(view|edit|delete|check)$/',
-            $scope
-        );
-    }
+        [$model, $action, $target] = explode(':', $scope) + [null, null, null];
 
-    // @todo: remove this method
-    protected static function expand_scopes(array $scopes): array
-    {
-        return $scopes;
-
-        // Apply implied scopes
-        $scopes = collect($scopes);
-
-        if ($scopes->intersect([
-            'user:create',
-            'user:edit:any',
-            'user:delete',
-        ])->isNotEmpty()) {
-            $scopes = $scopes->merge(['user:view:any', 'user:create', 'user:edit:any', 'user:delete']);
-        }
-
-        if ($scopes->intersect([
-            'server:create',
-            'server:edit',
-            'server:delete',
-        ])->isNotEmpty()) {
-            $scopes = $scopes->merge(['server:view', 'server:create', 'server:edit', 'server:delete']);
-        }
-
-        return $scopes->flatten()->unique()->values()->all();
+        return match (true) {
+            // server:action:uuid
+            $model === 'server' && in_array($action, ['view', 'manage', 'check']) => preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i', $target),
+            // user:action:id
+            $model === 'user' && in_array($action, ['view', 'manage']) => ctype_digit($target),
+            default => false,
+        };
     }
 }

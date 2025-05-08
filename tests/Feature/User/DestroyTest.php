@@ -4,9 +4,9 @@ use App\Models\User;
 
 test('user with user:delete scope can delete a user, but not the last one', function () {
     $userWithScope1 = User::factory()->create();
-    $userWithScope1->set_scopes(['user:edit:any', 'user:delete']);
+    $userWithScope1->setScope(['user:edit:any', 'user:delete']);
     $userWithScope2 = User::factory()->create();
-    $userWithScope2->set_scopes(['user:edit:any', 'user:delete']);
+    $userWithScope2->setScope(['user:edit:any', 'user:delete']);
 
     $this->assertDatabaseCount('users', 2);
 

@@ -33,7 +33,7 @@ test('user without user:edit:any scope cannot edit servers', function () {
 
 test('user with user:edit:any can update server information', function () {
     $userWithScope = User::factory()->create();
-    $userWithScope->set_scopes(['server:edit']);
+    $userWithScope->setScope(['server:edit']);
     $server = Server::factory()->create();
 
     $this->actingAs($userWithScope)->get('/server/'.$server->id.'/edit')

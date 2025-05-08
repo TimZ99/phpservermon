@@ -96,8 +96,6 @@ class ServerController extends Controller
      *
      * This function will show a list of all servers.
      *
-     * @scope server:view:any
-     *
      * @return \Illuminate\Http\Response
      */
     public function index()
@@ -115,14 +113,12 @@ class ServerController extends Controller
     /**
      * Display the specified resource.
      *
-     * @scope server:view
-     *
-     * @todo server:view
      * @return \Illuminate\Http\Response
      */
     public function show(Server $server)
     {
         $this->authorize('view', $server);
+
         // Return the server page with the server and users
         return view('server.show', [
             'server' => Server::find($server->id),
@@ -132,21 +128,18 @@ class ServerController extends Controller
     /**
      * Show the form for creating a new resource.
      *
-     * @scope server:create
-     *
      * @return \Illuminate\Http\Response
      */
     public function create()
     {
         $this->authorize('create');
+
         // Return the server create page with a list of users with id and name
         return view('server.create');
     }
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @scope server:create
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
@@ -173,13 +166,12 @@ class ServerController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @scope server:edit
-     *
      * @return \Illuminate\Http\Response
      */
     public function edit(Server $server)
     {
         $this->authorize('update', $server);
+
         // Return the server edit page with the server and list of users with id and name
         return view('server.edit', [
             'server' => Server::find($server->id),
@@ -190,8 +182,6 @@ class ServerController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
-     * @scope server:edit
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\Server  $server
@@ -261,6 +251,7 @@ class ServerController extends Controller
     public function runJob(Server $server)
     {
         $this->authorize('check', $server);
+
         return $this->runBatch([$server]);
     }
 
@@ -294,8 +285,6 @@ class ServerController extends Controller
     /**
      * Remove the specified resource from storage
      * Before deleting the server, detach all users from the server to prevent a foreign key error
-     *
-     * @scope server:delete
      *
      * @return \Illuminate\Http\Response
      */

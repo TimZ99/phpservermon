@@ -51,7 +51,7 @@ class RegisteredUserController extends Controller
 
         /* check if there is a user that has every scope enabled */
         if (User::count() === 1) {
-            $user->set_scopes($user->valid_scopes());
+            $user->setScope($user->validScopes());
             $user->save();
             Log::info('No user found, making user '.$user->id.' very powerful.');
         }

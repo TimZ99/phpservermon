@@ -16,7 +16,7 @@ test('guest cannot delete a server', function () {
 test('only user with server:delete scope can delete a server', function () {
     $user = User::factory()->create();
     $userWithScope = User::factory()->create();
-    $userWithScope->set_scopes(['server:delete']);
+    $userWithScope->setScope(['server:delete']);
     $server = Server::factory(3)->create()->last();
 
     // check if user with server:delete scope can delete a server

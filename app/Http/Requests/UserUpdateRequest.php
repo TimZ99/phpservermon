@@ -63,7 +63,7 @@ class UserUpdateRequest extends FormRequest
             'scopes.*' => [
                 'sometimes', // Only validate if the field is present
                 'string', // The field must be a string
-                'in:'.implode(',', User::valid_scopes()), // The field must be one of the valid scopes
+                'in:'.implode(',', User::validScopes()), // The field must be one of the valid scopes
             ],
         ];
     }

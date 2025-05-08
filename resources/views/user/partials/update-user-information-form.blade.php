@@ -21,7 +21,7 @@
         <br><br>
         <label>Scopes</label><br>
         <x-input-error class="mt-2" :messages="$errors->get('lastuser:editscope')" />
-        @foreach ($valid_scopes as $scope)
+        @foreach ($validScopes as $scope)
         <input
             id="scope-{{ $loop->index }}"
             name="scopes[]"

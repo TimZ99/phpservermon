@@ -15,7 +15,7 @@ test('cannot edit other users without user:edit:any scope', function () {
 
 test('user can edit other users with the user:edit:any scope', function () {
     $userWithScope = User::factory()->create();
-    $userWithScope->set_scopes(['user:edit:any']);
+    $userWithScope->setScope(['user:edit:any']);
     $user = User::factory()->create();
 
     $this->actingAs($userWithScope)

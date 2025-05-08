@@ -2,24 +2,24 @@
 
 use App\Models\User;
 
-// is_suspended function
+// isSuspended function
 it('can check if a user is suspended', function () {
     $user = User::factory()->create(['suspended' => true]);
-    expect($user->is_suspended())->toBeTrue();
+    expect($user->isSuspended())->toBeTrue();
 
     $activeUser = User::factory()->create(['suspended' => false]);
-    expect($activeUser->is_suspended())->toBeFalse();
+    expect($activeUser->isSuspended())->toBeFalse();
 });
 
-// is_last_powerful_user function
+// isLastPowerfulUser function
 it('can check if a user is the last with user:edit:any scope', function () {
     $user = User::factory()->create();
-    $user->set_scopes(['user:edit:any']);
-    expect($user->is_last_powerful_user())->toBeTrue();
+    $user->setScope(['user:edit:any']);
+    expect($user->isLastPowerfulUser())->toBeTrue();
 
     $user1 = User::factory()->create();
-    $user1->set_scopes(['user:edit:any']);
-    expect($user1->is_last_powerful_user())->toBeFalse();
+    $user1->setScope(['user:edit:any']);
+    expect($user1->isLastPowerfulUser())->toBeFalse();
 });
 
 // routeNotificationForTelegram function
@@ -28,14 +28,14 @@ it('can route notifications for Telegram', function () {
     expect($user->routeNotificationForTelegram())->toBe(123456);
 });
 
-// set_scopes function and getScopes function
+// setScope function and getScopes function
 it('can set and check scopes for a user', function () {
     $user = User::factory()->create();
 
-    expect($user->has_scope('server:edit'))->toBeFalse();
+    expect($user->hasScope('server:edit'))->toBeFalse();
 
-    $user->set_scopes(['server:edit', 'invalid:server']);
+    $user->setScope(['server:edit', 'invalid:server']);
 
-    expect($user->has_scope('server:edit'))->toBeTrue();
-    expect($user->has_scope('invalid:scope'))->toBeFalse();
+    expect($user->hasScope('server:edit'))->toBeTrue();
+    expect($user->hasScope('invalid:scope'))->toBeFalse();
 });

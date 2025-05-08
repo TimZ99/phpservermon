@@ -23,13 +23,12 @@ class ConfigController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @scope config:manage
-     *
      * @return \Illuminate\Http\Response
      */
     public function edit()
     {
         $this->authorize('config:manage');
+
         // Return the config edit page
         return view('config.edit', [
             'locale' => Config::get('app.locale'),
@@ -42,8 +41,6 @@ class ConfigController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
-     * @scope config:manage
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response

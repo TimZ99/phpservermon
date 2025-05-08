@@ -25,7 +25,7 @@ class AuthServiceProvider extends ServiceProvider
     public static function boot(): void
     {
         Gate::define('config:manage', function (\App\Models\User $user): Response {
-            return $user->has_scope('config:manage')
+            return $user->hasScope('config:manage')
                 ? Response::allow()
                 : Response::deny('Sorry can\'t let you in.');
         });
@@ -36,7 +36,7 @@ class AuthServiceProvider extends ServiceProvider
              *
              * @return Response
              */
-            return $user->is_suspended()
+            return $user->isSuspended()
                 ? Response::deny('Your account has been suspended.')
                 : Response::allow();
         });

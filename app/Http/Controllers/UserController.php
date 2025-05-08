@@ -24,26 +24,24 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      *
-     * @scope user:view:any
-     *
      * @todo Filter the users by the ones that the user is attached to
      */
     public function index()
     {
         $this->authorize('index', [User::class]);
+
         return view('user.index', ['users' => User::all()]);
     }
 
     /**
      * Display the specified resource.
      *
-     * @scope user:view:any
-     *
      * @return \Illuminate\Http\Response
      */
     public function show(User $user)
     {
         $this->authorize('view', [User::class]);
+
         return view('user.show', [
             'user' => User::find($user->id),
         ]);
@@ -52,25 +50,22 @@ class UserController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @scope user:edit:any
-     *
      * @return \Illuminate\Http\Response
      */
     public function edit(User $user)
     {
         $this->authorize('update', [User::class]);
+
         // Return the edit page with the user and servers
         return view('user.edit', [
             'user' => $user,
-            'valid_scopes' => User::valid_scopes(),
+            'validScopes' => User::validScopes(),
             'servers' => Server::select('id', 'name')->get(),
         ]);
     }
 
     /**
      * Update the specified resource in storage.
-     *
-     * @scope user:edit:any
      *
      * @param  App\Http\Requests\UserUpdateRequest  $request
      * @return \Illuminate\Http\Response
@@ -100,7 +95,7 @@ class UserController extends Controller
              * Check if the user is last user with user:edit:any scope
              * If the user is the one, don't allow the update
              */
-            if ($user->is_last_powerful_user() &&
+            if ($user->isLastPowerfulUser() &&
                 ! (is_array($request->input('scopes')) && in_array('user:edit:any', $request->input('scopes')))
             ) {
                 $error_message = 'User update failed, tried removing the last user with user:edit:any privileges';
@@ -131,15 +126,13 @@ class UserController extends Controller
      * Remove the specified resource from storage
      * Before deleting the user, detach all users from the user to prevent a foreign key error
      *
-     * @scope user:delete
-     *
      * @return \Illuminate\Http\Response
      */
     public function destroy(User $user)
     {
         $this->authorize('delete', [User::class]);
         // Cannot delete the user with user:edit:any scope
-        if ($user->is_last_powerful_user()) {
+        if ($user->isLastPowerfulUser()) {
             Log::notice('User deleted failed, tried removing the last user with user:edit:any scope', ['user_id' => $user->id]);
 
             return back()->withErrors(['user:editdelete' => 'Cannot delete the last user with user:edit:any scope.']);
