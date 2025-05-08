@@ -2,63 +2,32 @@
 
 namespace App\Policies;
 
-use App\Models\user;
+use App\Models\User;
 
 class UserPolicy
 {
-    /**
-     * Determine whether the user can view any models.
-     */
-    public function index(user $user): bool
+    public function view(User $user, User $target): bool
     {
-        return $user->has_any_scope([
-            'user:index',
-            'user:view:any',
-            'user:edit:any',
-            'user:delete:any'
-        ]);
+        return $user->id === $target->id
+            || $user->hasScope('user:view:*')
+            || $user->hasScope("user:view:{$target->id}");
     }
 
-    /**
-     * Determine whether the user can view any models.
-     */
-    public function view(user $user): bool
+    public function viewAny(User $user): bool
     {
-        return $user->has_any_scope([
-            'user:index',
-            'user:view:any',
-            'user:edit:any',
-            'user:delete:any'
-        ]);
+        return $user->hasScope('user:view:*')
+        || $user->hasScope('user:manage:*');
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
-    public function create(user $user): bool
+    public function manage(User $user, User $target): bool
     {
-        return $user->has_scope('user:create');
+        return $user->id === $target->id
+            || $user->hasScope('user:manage:*')
+            || $user->hasScope("user:manage:{$target->id}");
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
-    public function update(user $user): bool
+    public function manageAny(User $user): bool
     {
-        return $user->has_any_scope([
-            'user:edit:any',
-            'user:delete:any'
-        ]);
-    }
-
-    /**
-     * Determine whether the user can delete the model.
-     */
-    public function delete(user $user): bool
-    {
-        return $user->has_any_scope([
-            'user:edit:any',
-            'user:delete:any'
-        ]);
+        return $user->hasScope('user:manage:*');
     }
 }

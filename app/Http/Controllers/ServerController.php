@@ -26,11 +26,14 @@ class ServerController extends Controller
      *
      * This function will show a list of all servers.
      *
+     * @todo authorize the user to view the server
+     *
      * @return \Illuminate\Http\Response
      */
     public function monitorPage()
     {
-        $this->authorize('monitor', [Server::class]);
+        // Requires: server:view:{server}
+        $this->authorize('viewAny', Server::class);
         $user = Auth::user();
         $servers = $user->servers;
         foreach ($servers as $server) {
@@ -100,7 +103,7 @@ class ServerController extends Controller
      */
     public function index()
     {
-        $this->authorize('index', [Server::class]);
+        $this->authorize('viewAny', Server::class);
         $servers = Server::all();
         foreach ($servers as $server) {
             $server->statusCss = 'danger';
@@ -132,7 +135,7 @@ class ServerController extends Controller
      */
     public function create()
     {
-        $this->authorize('create');
+        $this->authorize('manageAny', Server::class);
 
         // Return the server create page with a list of users with id and name
         return view('server.create');
@@ -146,7 +149,7 @@ class ServerController extends Controller
      */
     public function store(ServerUpdateRequest $request)
     {
-        $this->authorize('create', [Server::class]);
+        $this->authorize('manageAny', Server::class);
         try {
             // Create the server
             $server = Server::create($request->validated());
@@ -170,7 +173,7 @@ class ServerController extends Controller
      */
     public function edit(Server $server)
     {
-        $this->authorize('update', $server);
+        $this->authorize('manage', $server);
 
         // Return the server edit page with the server and list of users with id and name
         return view('server.edit', [
@@ -189,7 +192,7 @@ class ServerController extends Controller
      */
     public function update(ServerUpdateRequest $request, $id)
     {
-        $this->authorize('update', Server::findOrFail($id));
+        $this->authorize('manage', Server::findOrFail($id));
         // Find the server
         $server = Server::findOrFail($id);
 
@@ -264,7 +267,7 @@ class ServerController extends Controller
      */
     public function runBatch($servers = [])
     {
-        $this->authorize('checkAny', [Server::class]);
+        $this->authorize('checkAny', Server::class);
         if (empty($servers)) {
             $servers = Auth::user()->servers;
         }
@@ -290,7 +293,7 @@ class ServerController extends Controller
      */
     public function destroy(Server $server)
     {
-        $this->authorize('delete', $server);
+        $this->authorize('manage', $server);
         // Detach all users from the server
         $server->users()->detach();
         // Delete the server

@@ -28,7 +28,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        $this->authorize('index', [User::class]);
+        $this->authorize('viewAny', User::class);
 
         return view('user.index', ['users' => User::all()]);
     }
@@ -40,7 +40,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        $this->authorize('view', [User::class]);
+        $this->authorize('view', $user);
 
         return view('user.show', [
             'user' => User::find($user->id),
@@ -54,7 +54,7 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        $this->authorize('update', [User::class]);
+        $this->authorize('manage', $user);
 
         // Return the edit page with the user and servers
         return view('user.edit', [
@@ -72,7 +72,7 @@ class UserController extends Controller
      */
     public function update(UserUpdateRequest $request, User $user)
     {
-        $this->authorize('update', [User::class]);
+        $this->authorize('manage', $user);
         try {
             /**
              * Sync the servers with the user
@@ -130,7 +130,7 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        $this->authorize('delete', [User::class]);
+        $this->authorize('manage', $user);
         // Cannot delete the user with user:edit:any scope
         if ($user->isLastPowerfulUser()) {
             Log::notice('User deleted failed, tried removing the last user with user:edit:any scope', ['user_id' => $user->id]);

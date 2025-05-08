@@ -34,7 +34,7 @@
         @empty
             <p class="text-center">{{ __('No servers defined.') }}</p>
             <div class="w-100"></div>
-            @can('create', App\Models\Server::class)
+            @can('manageAny', App\Models\Server::class)
                 <button class="btn btn-primary" onclick="window.location.href='{{ route('server.create') }}'">{{ __('Add server') }}</button>
             @endcan
         @endforelse
