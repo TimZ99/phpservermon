@@ -30,7 +30,6 @@ class ServerController extends Controller
      */
     public function monitorPage()
     {
-        $this->authorize('viewAny', Server::class);
         $user = Auth::user();
         $servers = $user->servers;
         foreach ($servers as $server) {
