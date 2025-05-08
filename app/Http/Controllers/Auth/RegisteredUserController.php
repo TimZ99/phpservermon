@@ -26,6 +26,9 @@ class RegisteredUserController extends Controller
     /**
      * Handle an incoming registration request.
      *
+     * @var Request
+     * @var User
+     *
      * @throws \Illuminate\Validation\ValidationException
      */
     public function store(Request $request): RedirectResponse
@@ -36,7 +39,6 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'phone' => ['string', 'max:15', 'nullable'],
             'suspended' => ['boolean'],
-            'admin' => ['boolean'],
         ]);
 
         $user = User::create([
@@ -47,11 +49,11 @@ class RegisteredUserController extends Controller
 
         Log::info('New user registered with id:'.$user->id);
 
-        /* check if there is an admin, if not, make user admin */
-        if (User::where(['admin' => true])->count() === 0) {
-            $user->admin = true;
+        /* check if there is a user that has every scope enabled */
+        if (User::count() === 1) {
+            $user->setScope($user->validScopes());
             $user->save();
-            Log::info('No admin found, making user '.$user->id.' administrator.');
+            Log::info('No user found, making user '.$user->id.' very powerful.');
         }
 
         event(new Registered($user));

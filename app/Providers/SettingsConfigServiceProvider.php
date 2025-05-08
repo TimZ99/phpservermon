@@ -2,35 +2,38 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\ServiceProvider;
 
 class SettingsConfigServiceProvider extends ServiceProvider
 {
-
     protected function canConnectToDatabase(): bool
-{
-    try {
-        DB::connection()->getPdo();
-        return true;
-    } catch (\Throwable $e) {
-        logger()->info('Database not ready: ' . $e->getMessage());
-        return false;
+    {
+        try {
+            DB::connection()->getPdo();
+
+            return true;
+        } catch (\Throwable $e) {
+            logger()->info('Database not ready: '.$e->getMessage());
+
+            return false;
+        }
     }
-}
 
     public function boot()
     {
         // check database connection, return if not.
         if (! $this->canConnectToDatabase()) {
             logger()->info('SettingsConfigServiceProvider: Database not ready, skipping config override. This could be expected behavior. For example: running an artisan command without the need for settings, like make.');
+
             return;
         }
 
         // check if settings table exists, return if not.
-        if (!Schema::hasTable('settings')) {
+        if (! Schema::hasTable('settings')) {
             logger()->warning('SettingsConfigServiceProvider: Settings table doesn\'t exist. Run migrations.');
+
             return;
         }
 
@@ -50,7 +53,7 @@ class SettingsConfigServiceProvider extends ServiceProvider
             ]);
         } catch (\Throwable $e) {
             // Fallback bij boot-time errors, zoals connection issues
-            logger()->warning('Settings config override failed: ' . $e->getMessage());
+            logger()->warning('Settings config override failed: '.$e->getMessage());
         }
     }
 }

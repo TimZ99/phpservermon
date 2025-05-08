@@ -2,11 +2,13 @@
 
 use App\Models\User;
 
-test('admin can create server ', function () {
+test('user with server:create scope can create server ', function () {
     $this->markTestIncomplete('Create and store controller is not implemented yet.');
 
     $user = User::factory()->create();
-    $admin = User::factory()->create(['admin' => true]);
+    $userWithScope = User::factory()->create();
+    $userWithScope->setScope(['server:manage:*']);
+    $userWithScope->save();
 
     // Test unauthenticated user
     $this->assertGuest();
@@ -28,9 +30,9 @@ test('admin can create server ', function () {
         'ip' => '10.0.0.1',
     ]);
 
-    // Test admin user
-    $this->actingAs($admin)->get('/server/create')->assertOk();
-    $this->actingAs($admin)->post('/server', ['name' => 'New Server', 'ip' => '192.168.1.1'])
+    // Test user with scope
+    $this->actingAs($userWithScope)->get('/server/create')->assertOk();
+    $this->actingAs($userWithScope)->post('/server', ['name' => 'New Server', 'ip' => '192.168.1.1'])
         ->assertSessionHasNoErrors()
         ->assertRedirect('/servers');
 

@@ -7,17 +7,21 @@
             Server details
         </div>
         <div class="card-body">
+            @can('manage', $server)
             <a href="{{route('server.edit', $server->id)}}">
                 <button class="btn btn-secondary mb-4">
                     {{ __('Edit server') }}
                 </button>
             </a>
+            @endcan
+            @can('check', $server)
             <a href="{{route('server.runChecks', $server->id)}}">
                 <button class="btn btn-secondary mb-4">
                     {{ __('Run tests') }}
                 </button>
             </a>
             <br>
+            @endcan
             <b>Server id</b> {{ $server->id }}<br>
             <b>Name</b> {{ $server->name }}<br>
             <b>IP</b> {{ $server->ip }}<br>

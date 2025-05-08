@@ -7,7 +7,6 @@ use App\Settings\EmailSettings;
 use App\Settings\GeneralSettings;
 use App\Settings\NotificationSettings;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -23,14 +22,12 @@ class ConfigController extends Controller
 {
     /**
      * Show the form for editing the specified resource.
-     * Admin-only function
      *
      * @return \Illuminate\Http\Response
      */
     public function edit()
     {
-        // Check if the user is an admin
-        Gate::authorize('admin-only');
+        $this->authorize('config:manage');
 
         // Return the config edit page
         return view('config.edit', [
@@ -44,7 +41,6 @@ class ConfigController extends Controller
 
     /**
      * Update the specified resource in storage.
-     * Admin-only function
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
@@ -55,9 +51,7 @@ class ConfigController extends Controller
         EmailSettings $emailSettings,
         NotificationSettings $notificationSettings)
     {
-        // Check if the user is an admin
-        Gate::authorize('admin-only');
-
+        $this->authorize('config:manage');
         $request->validated();
 
         // Update the config

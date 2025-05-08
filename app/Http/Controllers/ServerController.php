@@ -9,7 +9,6 @@ use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Gate;
 
 /**
  * Routing:
@@ -100,9 +99,7 @@ class ServerController extends Controller
      */
     public function index()
     {
-        // Check if the user is an admin
-        Gate::authorize('admin-only');
-
+        $this->authorize('viewAny', Server::class);
         $servers = Server::all();
         foreach ($servers as $server) {
             $server->statusCss = 'danger';
@@ -115,15 +112,11 @@ class ServerController extends Controller
     /**
      * Display the specified resource.
      *
-     * Allow users that are attached to the servers
-     * Allow admins
-     *
      * @return \Illuminate\Http\Response
      */
     public function show(Server $server)
     {
-        // Check if the user is an admin or attached to the server
-        Gate::any(['admin-only', 'user-connected-to-server'], [$server]);
+        $this->authorize('view', $server);
 
         // Return the server page with the server and users
         return view('server.show', [
@@ -133,14 +126,12 @@ class ServerController extends Controller
 
     /**
      * Show the form for creating a new resource.
-     * Admin-only function
      *
      * @return \Illuminate\Http\Response
      */
     public function create()
     {
-        // Check if the user is an admin
-        Gate::authorize('admin-only');
+        $this->authorize('manageAny', Server::class);
 
         // Return the server create page with a list of users with id and name
         return view('server.create');
@@ -148,19 +139,15 @@ class ServerController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     * Admin-only function
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function store(ServerUpdateRequest $request)
     {
-        // Check if the user is an admin
-        Gate::authorize('admin-only');
-
+        $this->authorize('manageAny', Server::class);
         try {
             // Create the server
-
             $server = Server::create($request->validated());
             // Sync the users with the server
             $server->users()->sync($request->input('users'));
@@ -177,14 +164,12 @@ class ServerController extends Controller
 
     /**
      * Show the form for editing the specified resource.
-     * Admin-only function
      *
      * @return \Illuminate\Http\Response
      */
     public function edit(Server $server)
     {
-        // Check if the user is an admin
-        Gate::authorize('admin-only');
+        $this->authorize('manage', $server);
 
         // Return the server edit page with the server and list of users with id and name
         return view('server.edit', [
@@ -196,7 +181,6 @@ class ServerController extends Controller
 
     /**
      * Update the specified resource in storage.
-     * Admin-only function
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\Server  $server
@@ -204,9 +188,7 @@ class ServerController extends Controller
      */
     public function update(ServerUpdateRequest $request, $id)
     {
-        // Check if the user is an admin
-        Gate::authorize('admin-only');
-
+        $this->authorize('manage', Server::findOrFail($id));
         // Find the server
         $server = Server::findOrFail($id);
 
@@ -262,12 +244,13 @@ class ServerController extends Controller
 
     /**
      * Run the job for the specified server
-     * Admin-only function
      *
      * @return \Illuminate\Http\Response
      */
     public function runJob(Server $server)
     {
+        $this->authorize('check', $server);
+
         return $this->runBatch([$server]);
     }
 
@@ -280,9 +263,7 @@ class ServerController extends Controller
      */
     public function runBatch($servers = [])
     {
-        // Check if the user is an admin
-        Gate::authorize('admin-only');
-
+        $this->authorize('checkAny', Server::class);
         if (empty($servers)) {
             $servers = Auth::user()->servers;
         }
@@ -303,14 +284,12 @@ class ServerController extends Controller
     /**
      * Remove the specified resource from storage
      * Before deleting the server, detach all users from the server to prevent a foreign key error
-     * Admin-only function
      *
      * @return \Illuminate\Http\Response
      */
     public function destroy(Server $server)
     {
-        // Check if the user is an admin
-        Gate::authorize('admin-only');
+        $this->authorize('manage', $server);
         // Detach all users from the server
         $server->users()->detach();
         // Delete the server

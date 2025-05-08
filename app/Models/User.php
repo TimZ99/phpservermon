@@ -25,13 +25,15 @@ use Illuminate\Notifications\Notifiable;
  * - $casts: Defines the data type casting for specific attributes.
  *
  * Methods:
- * - isAdmin(): Checks if the user has admin privileges.
  * - isSuspended(): Checks if the user is suspended.
  * - servers(): Defines a many-to-many relationship with the Server model.
- * - isLastAdmin(): Checks if the user is the last admin in the system.
+ * - isLastPowerfulUser(): Checks if the user is the last with user:manage:* scope.
  * - routeNotificationForTelegram(): Routes notifications to the user's Telegram account.
+ * - hasScope(): Checks if the user has a specific scope.
+ * - setScope(): Sets the scopes for the user.
+ * - validScopes(): Returns a list of valid scopes.
+ * - expand_scopes(): Expands the scopes based on implied relationships.
  *
- * @var admin boolean
  * @var suspended boolean
  */
 class User extends Authenticatable
@@ -45,13 +47,8 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
-        'email',
-        'phone',
-        'password',
-        'admin',
-        'suspended',
-        'telegram_user_id',
+        'name', 'email', 'phone', 'password', 'suspended',
+        'telegram_user_id', 'scopes',
     ];
 
     /**
@@ -60,8 +57,7 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $hidden = [
-        'password',
-        'remember_token',
+        'password', 'remember_token',
     ];
 
     /**
@@ -74,18 +70,10 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'admin' => 'boolean',
             'suspended' => 'boolean',
             'telegram_user_id' => 'integer',
+            'scopes' => 'json',
         ];
-    }
-
-    /**
-     * Check if the user is an admin.
-     */
-    public function isAdmin(): bool
-    {
-        return $this->admin === null ? false : $this->admin;
     }
 
     /**
@@ -107,11 +95,16 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if the user is the last admin.
+     * Check if the user is the last powerful user.
      */
-    public function isLastAdmin(): bool
+    public function isLastPowerfulUser(): bool
     {
-        return User::where('admin', true)->count() <= 1 && $this->admin;
+        // check how many users have user:manage:* in there scopes
+        $users_with_scope = User::all()->filter(function ($user) {
+            return $user->hasScope('user:manage:*');
+        })->count();
+
+        return $users_with_scope <= 1 && $this->hasScope('user:manage:*');
     }
 
     /**
@@ -120,5 +113,128 @@ class User extends Authenticatable
     public function routeNotificationForTelegram(): int
     {
         return $this->telegram_user_id;
+    }
+
+    /**
+     * Expand the scopes based on implied relationships.
+     *
+     * @param  string|array<string>  $scopes
+     */
+    public function hasScope(string|array $scope): bool
+    {
+        $scopes = $this->scopes ?? [];
+
+        if (is_string($scopes)) {
+            $scopes = json_decode($scopes, true) ?? [];
+        }
+
+        $scopes = is_array($scopes) ? $scopes : [];
+
+        foreach ((array) $scope as $check) {
+            if (in_array($check, $scopes, true)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Overrides the scopes that the user has.
+     *
+     * You need to run ->save() afterwards
+     *
+     * @var array<string>
+     */
+    public function setScope(array $scopes): void
+    {
+        $filtered = array_values(array_unique(array_filter(
+            $scopes,
+            fn ($scope) => self::isValidScope($scope)
+        )));
+
+        $this->scopes = $filtered;
+    }
+
+    /**
+     * Add one scope to the user.
+     *
+     * You need to run ->save() afterwards
+     *
+     * @var string|array<string>
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function addScope(string|array $scopes): void
+    {
+        foreach ((array) $scopes as $scope) {
+            if (! $this->isValidScope($scope)) {
+                throw new \InvalidArgumentException("Invalid scope: {$scope}");
+            }
+
+            if (! $this->hasScope($scope)) {
+                $this->scopes[] = $scope;
+            }
+        }
+
+        $this->scopes = array_values(array_unique($this->scopes));
+    }
+
+    /**
+     * Remove one scope to the user.
+     *
+     * You need to run ->save() afterwards
+     *
+     * @var string|array<string>
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function removeScope(string|array $scopes): void
+    {
+        foreach ((array) $scopes as $scope) {
+            if (! $this->isValidScope($scope)) {
+                throw new \InvalidArgumentException("Invalid scope: {$scope}");
+            }
+
+            if ($this->hasScope($scope)) {
+                $this->scopes = array_filter($this->scopes, fn ($val) => $val !== $scope);
+            }
+        }
+
+        $this->scopes = array_values(array_unique($this->scopes));
+    }
+
+    /**
+     * List of valid scopes.
+     *
+     * @var list<string>
+     */
+    public static function validScopes(): array
+    {
+        return [
+            'server:view:*',
+            'server:manage:*',
+            'server:check:*',
+            'user:view:*',
+            'user:manage:*',
+            'config:manage',
+        ];
+    }
+
+    public static function isValidScope(string $scope): bool
+    {
+        if (in_array($scope, self::validScopes(), true)) {
+            return true;
+        }
+
+        [$model, $action, $target] = explode(':', $scope) + [null, null, null];
+
+        return match (true) {
+            // server:action:uuid
+            $model === 'server' && in_array($action, ['view', 'manage', 'check']) => preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i', $target),
+            // user:action:id
+            $model === 'user' && in_array($action, ['view', 'manage']) => ctype_digit($target),
+            default => false,
+        };
     }
 }

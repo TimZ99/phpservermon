@@ -8,16 +8,22 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             @auth
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    @can('admin-only')
+                    @can('viewAny', App\Models\Server::class)
                     <x-nav-link :href="route('server.monitor')" :active="request()->routeIs('server.monitor')">
                         {{ __('Monitor') }}
                     </x-nav-link>
+                    @endcan
+                    @can('viewAny', App\Models\Server::class)
                     <x-nav-link :href="route('server.index')" :active="request()->routeIs('server.index')">
                         {{ __('Servers') }}
                     </x-nav-link>
+                    @endcan
+                    @can('viewAny', App\Models\User::class)
                     <x-nav-link :href="route('user.index')" :active="request()->routeIs('user.index')">
                         {{ __('Users') }}
                     </x-nav-link>
+                    @endcan
+                    @can('config:manage')
                     <x-nav-link :href="route('config.edit')" :active="request()->routeIs('config.edit')">
                         {{ __('Config') }}
                     </x-nav-link>

@@ -19,26 +19,26 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create a test admin user with 5 associated servers
+        // Create a powerful test user with 5 associated servers
+        $admin = User::factory()->hasServers(5)
+            ->create([
+                'name' => 'Admin User',
+                'email' => 'adminuser@example.com',
+            ]);
+        $admin->setScope($admin->validScopes());
+        $admin->save();
+        // Create a regular user with 5 associated servers
         User::factory()->hasServers(5)
             ->create([
-                'name' => 'Test User',
-                'email' => 'test@example.com',
-                'admin' => true,
+                'name' => 'Regular User',
+                'email' => 'regularuser@example.com',
             ]);
 
         // Create a regular user with 5 associated servers
         User::factory()->hasServers(5)
             ->create([
-                'name' => 'Non-admin',
-                'email' => 'regular@example.com',
-            ]);
-
-        // Create a regular user with 5 associated servers
-        User::factory()->hasServers(5)
-            ->create([
-                'name' => 'suspended',
-                'email' => 'suspended@example.com',
+                'name' => 'Suspended User',
+                'email' => 'suspendeduser@example.com',
                 'suspended' => true,
             ]);
     }

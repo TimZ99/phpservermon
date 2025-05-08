@@ -22,32 +22,27 @@ test('all routes are covered by authorization', function () {
     $this->actingAs($user)->get('/user/'.$user->id.'/edit')->assertForbidden();
     $this->actingAs($user)->patch('/user/'.$user->id)->assertForbidden();
     $this->actingAs($user)->delete('/user/'.$user->id)->assertForbidden();
-
-    // admin
-    $admin = User::factory()->create(['admin' => true]);
-    $this->actingAs($admin)->get('/users')->assertOk();
-    $this->actingAs($admin)->get('/user')->assertNotFound();
-    $this->actingAs($admin)->get('/user/'.$user->id)->assertOk();
-    $this->actingAs($admin)->get('/user/'.$user->id.'/edit')->assertOk();
-    $this->actingAs($admin)->patch('/user/'.$user->id)->assertRedirectToRoute('user.show', ['user' => $user->id]);
-    $this->actingAs($admin)->delete('/user/'.$user->id)->assertRedirectToRoute('user.index');
 });
 
 test('users index can be displayed', function () {
-    $admin = User::factory()->create(['admin' => true]);
+    $userWithScope = User::factory()->create();
+    $userWithScope->setScope(['user:view:*']);
+    $userWithScope->save();
     $user = User::factory()->create();
 
-    $this->actingAs($admin)
+    $this->actingAs($userWithScope)
         ->get('/users')
         ->assertOk()
         ->assertSee($user->name);
 });
 
 test('user show can be displayed', function () {
-    $admin = User::factory()->create(['admin' => true]);
+    $userWithScope = User::factory()->create();
+    $userWithScope->setScope(['user:view:*']);
+    $userWithScope->save();
     $user = User::factory()->create();
 
-    $this->actingAs($admin)
+    $this->actingAs($userWithScope)
         ->get('/user/'.$user->id)
         ->assertOk()
         ->assertSee($user->name)
