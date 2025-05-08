@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->json('scopes')->nullable();
+            $table->dropColumn('admin');
         });
     }
 
@@ -23,6 +24,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('scopes');
+            $table->boolean('admin')->default(false);
         });
     }
 };
