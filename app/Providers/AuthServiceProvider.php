@@ -8,22 +8,14 @@ use Illuminate\Support\ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
 {
-    protected $policies = [
-        \App\Models\Server::class => \App\Policies\ServerPolicy::class,
-        \App\Models\User::class => \App\Policies\UserPolicy::class,
-    ];
-    /**
-     * Register services.
-     */
-    public function register(): void
-    {
-    }
-
     /**
      * Register the application's gate definitions.
      */
     public static function boot(): void
     {
+        Gate::policy(\App\Models\Server::class, \App\Policies\ServerPolicy::class);
+        Gate::policy(\App\Models\User::class, \App\Policies\UserPolicy::class);
+
         Gate::define('config:manage', function (\App\Models\User $user): Response {
             return $user->hasScope('config:manage')
                 ? Response::allow()
