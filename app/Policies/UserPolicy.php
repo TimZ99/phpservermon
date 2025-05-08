@@ -8,8 +8,7 @@ class UserPolicy
 {
     public function view(User $user, User $target): bool
     {
-        return $user->id === $target->id
-            || $user->hasScope('user:view:*')
+        return $user->hasScope('user:view:*')
             || $user->hasScope("user:view:{$target->id}");
     }
 
@@ -21,8 +20,7 @@ class UserPolicy
 
     public function manage(User $user, User $target): bool
     {
-        return $user->id === $target->id
-            || $user->hasScope('user:manage:*')
+        return $user->hasScope('user:manage:*')
             || $user->hasScope("user:manage:{$target->id}");
     }
 

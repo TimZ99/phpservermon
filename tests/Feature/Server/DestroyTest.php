@@ -13,13 +13,15 @@ test('guest cannot delete a server', function () {
     $this->assertDatabaseCount('servers', 1);
 });
 
-test('only user with server:delete scope can delete a server', function () {
+test('only user with server:manage: scope can delete a server', function () {
     $user = User::factory()->create();
     $userWithScope = User::factory()->create();
-    $userWithScope->setScope(['server:delete']);
+    $userWithScope->setScope(['server:manage:*']);
+    $userWithScope->save();
+    
     $server = Server::factory(3)->create()->last();
 
-    // check if user with server:delete scope can delete a server
+    // check if user with server:manage scope can delete a server
     $this->actingAs($userWithScope)->delete('/server/'.$server->id)
         ->assertRedirectToRoute('server.index')
         ->assertSessionHasNoErrors();

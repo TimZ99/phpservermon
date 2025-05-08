@@ -27,7 +27,7 @@ use Illuminate\Notifications\Notifiable;
  * Methods:
  * - isSuspended(): Checks if the user is suspended.
  * - servers(): Defines a many-to-many relationship with the Server model.
- * - isLastPowerfulUser(): Checks if the user is the last with user:edit:any scope.
+ * - isLastPowerfulUser(): Checks if the user is the last with user:manage:* scope.
  * - routeNotificationForTelegram(): Routes notifications to the user's Telegram account.
  * - hasScope(): Checks if the user has a specific scope.
  * - setScope(): Sets the scopes for the user.
@@ -99,12 +99,12 @@ class User extends Authenticatable
      */
     public function isLastPowerfulUser(): bool
     {
-        // check how many users have user:edit:any in there scopes
-        $users_with_edit_user_scope = User::all()->filter(function ($user) {
-            return $user->hasScope('user:edit:any');
+        // check how many users have user:manage:* in there scopes
+        $users_with_scope = User::all()->filter(function ($user) {
+            return $user->hasScope('user:manage:*');
         })->count();
 
-        return $users_with_edit_user_scope <= 1 && $this->hasScope('user:edit:any');
+        return $users_with_scope <= 1 && $this->hasScope('user:manage:*');
     }
 
     /**

@@ -26,13 +26,10 @@ class ServerController extends Controller
      *
      * This function will show a list of all servers.
      *
-     * @todo authorize the user to view the server
-     *
      * @return \Illuminate\Http\Response
      */
     public function monitorPage()
     {
-        // Requires: server:view:{server}
         $this->authorize('viewAny', Server::class);
         $user = Auth::user();
         $servers = $user->servers;

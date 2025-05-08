@@ -2,7 +2,7 @@
 
 use App\Models\User;
 
-test('cannot edit other users without user:edit:any scope', function () {
+test('cannot edit other users without user:manage:* scope', function () {
     $user1 = User::factory()->create();
     $user2 = User::factory()->create();
 
@@ -13,9 +13,9 @@ test('cannot edit other users without user:edit:any scope', function () {
     $this->assertNotEquals('New Name', $user2->fresh()->name);
 });
 
-test('user can edit other users with the user:edit:any scope', function () {
+test('user can edit other users with the user:manage:* scope', function () {
     $userWithScope = User::factory()->create();
-    $userWithScope->setScope(['user:edit:any']);
+    $userWithScope->setScope(['user:manage:*']);
     $user = User::factory()->create();
 
     $this->actingAs($userWithScope)

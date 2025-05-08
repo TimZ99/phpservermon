@@ -7,7 +7,8 @@ test('user with server:create scope can create server ', function () {
 
     $user = User::factory()->create();
     $userWithScope = User::factory()->create();
-    $userWithScope->setScope(['server:create']);
+    $userWithScope->setScope(['server:manage:*']);
+    $userWithScope->save();
 
     // Test unauthenticated user
     $this->assertGuest();

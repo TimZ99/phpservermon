@@ -12,13 +12,15 @@ it('can check if a user is suspended', function () {
 });
 
 // isLastPowerfulUser function
-it('can check if a user is the last with user:edit:any scope', function () {
+it('can check if a user is the last with user:manage:* scope', function () {
     $user = User::factory()->create();
-    $user->setScope(['user:edit:any']);
+    $user->setScope(['user:manage:*']);
+    $user->save();
     expect($user->isLastPowerfulUser())->toBeTrue();
 
     $user1 = User::factory()->create();
-    $user1->setScope(['user:edit:any']);
+    $user1->setScope(['user:manage:*']);
+    $user1->save();
     expect($user1->isLastPowerfulUser())->toBeFalse();
 });
 
@@ -32,10 +34,11 @@ it('can route notifications for Telegram', function () {
 it('can set and check scopes for a user', function () {
     $user = User::factory()->create();
 
-    expect($user->hasScope('server:edit'))->toBeFalse();
+    expect($user->hasScope('config:manage'))->toBeFalse();
 
-    $user->setScope(['server:edit', 'invalid:server']);
+    $user->setScope(['config:manage', 'invalid:server']);
+    $user->save();
 
-    expect($user->hasScope('server:edit'))->toBeTrue();
+    expect($user->hasScope('config:manage'))->toBeTrue();
     expect($user->hasScope('invalid:scope'))->toBeFalse();
 });

@@ -7,7 +7,8 @@ test('user with user:create scope can create user ', function () {
 
     $user = User::factory()->create();
     $userWithScope = User::factory()->create();
-    $userWithScope->setScope(['user:create']);
+    $userWithScope->setScope(['user:manage:*']);
+    $userWithScope->save();
 
     $this->get('/user/create')->assertRedirectToRoute('login');
     $this->actingAs($user)->get('/user/create')->assertForbidden();

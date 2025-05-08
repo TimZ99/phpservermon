@@ -92,13 +92,13 @@ class UserController extends Controller
             }
 
             /**
-             * Check if the user is last user with user:edit:any scope
+             * Check if the user is last user with user:manage:* scope
              * If the user is the one, don't allow the update
              */
             if ($user->isLastPowerfulUser() &&
-                ! (is_array($request->input('scopes')) && in_array('user:edit:any', $request->input('scopes')))
+                ! (is_array($request->input('scopes')) && in_array('user:manage:*', $request->input('scopes')))
             ) {
-                $error_message = 'User update failed, tried removing the last user with user:edit:any privileges';
+                $error_message = 'User update failed, tried removing the last user with user:manage:* privileges';
                 Log::notice($error_message, ['user_id' => $user->id]);
 
                 return back()->withInput()->withErrors(['lastuser:editscope' => $error_message]);
@@ -131,11 +131,11 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         $this->authorize('manage', $user);
-        // Cannot delete the user with user:edit:any scope
+        // Cannot delete the user with user:manage:* scope
         if ($user->isLastPowerfulUser()) {
-            Log::notice('User deleted failed, tried removing the last user with user:edit:any scope', ['user_id' => $user->id]);
+            Log::notice('User deleted failed, tried removing the last user with user:manage:* scope', ['user_id' => $user->id]);
 
-            return back()->withErrors(['user:editdelete' => 'Cannot delete the last user with user:edit:any scope.']);
+            return back()->withErrors(['user:editdelete' => 'Cannot delete the last user with user:manage:* scope.']);
         }
 
         $user->servers()->detach();
