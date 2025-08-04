@@ -14,6 +14,14 @@
         <input id="email" name="email" class="form-control mb-2" type="email" class="mt-1" value="{{old('email', $user->email)}}" required autocomplete="off" />
         <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
+        <label for="phone">{{ __('Phone') }}</label>
+        <input id="phone" name="phone" class="form-control mb-2" type="tel" class="mt-1" value="{{old('phone', $user->phone)}}" autocomplete="off" />
+        <x-input-error class="mt-2" :messages="$errors->get('phone')" />
+
+        <label for="telegram_user_id">{{ __('Telegram user id') }}</label>
+        <input id="telegram_user_id" name="telegram_user_id" class="form-control mb-2" type="number" class="mt-1" value="{{old('telegram_user_id', $user->telegram_user_id)}}" autocomplete="off" />
+        <x-input-error class="mt-2" :messages="$errors->get('telegram_user_id')" />
+
         <input id="suspended" name="suspended" class="form-check-input mb-2" type="checkbox" class="mt-1" value="1" autocomplete="off" @if (old('suspended', $user->suspended)) checked @endif/>
         <label for="suspended" class="form-check-label">{{ __('Suspended') }}</label>
         <x-input-error class="mt-2" :messages="$errors->get('suspended')" />

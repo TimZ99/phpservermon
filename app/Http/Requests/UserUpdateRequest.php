@@ -52,6 +52,11 @@ class UserUpdateRequest extends FormRequest
                 'string', // The field must be a string
                 'max:20', // The field must not be longer than 20 characters
             ],
+            'telegram_user_id' => [
+                'sometimes', // Only validate if the field is present
+                'nullable', // The field is not required
+                'integer', // The field must be an integer
+            ],
             'suspended' => [
                 'required', // The field is required
                 'boolean', // The field must be a boolean
