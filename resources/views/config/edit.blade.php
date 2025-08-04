@@ -2,15 +2,14 @@
     <x-slot name="header">
         {{ __('Configuration') }}
     </x-slot>
-
-    <div class="card">
-        <div class="card-header">
-            Config page
-        </div>
-        <div class="card-body">
-            <form method="post" action="{{ route('config.update') }}" class="mt-6">
-                @csrf
-                @method('patch')
+    <form method="post" action="{{ route('config.update') }}" class="mt-6">
+        @csrf
+        @method('patch')
+        <div class="card">
+            <div class="card-header">
+                Config page
+            </div>
+            <div class="card-body">
 
                 <label for="locale">{{ __('Locale') }}</label>
                 <input id="locale" name="locale" class="form-control mt-1 mb-2" type="text" value="{{ old('locale', $locale) }}" required autofocus autocomplete="off" />
@@ -77,27 +76,76 @@
                 </select>
                 <x-input-error class="mt-2" :messages="$errors->get('timezone')" />
 
-                <label for="from_name">{{ __('Email name') }}</label>
-                <input id="from_name" name="from_name" class="form-control mb-2" type="text" class="mt-1" value="{{old('from_name', $from_name)}}" autocomplete="off" />
-                <x-input-error class="mt-2" :messages="$errors->get('from_name')" />
-
-                <label for="from_address">{{ __('Email address') }}</label>
-                <input id="from_address" name="from_address" class="form-control mb-2" type="text" class="mt-1" value="{{ old('from_address', $from_address) }}" autocomplete="off" />
-                <x-input-error class="mt-2" :messages="$errors->get('from_address')" />
-
-                <label for="telegram_bot_token">{{ __('Telegram Bot Token') }}</label>
-                <input id="telegram_bot_token" name="telegram_bot_token" class="form-control mb-2" type="text" class="mt-1" value="{{ old('telegram_bot_token', $telegram_bot_token) }}" autocomplete="off" />
-                <x-input-error class="mt-2" :messages="$errors->get('telegram_bot_token')" />
-
                 <div class="flex items-center gap-4">
                     <x-primary-button>{{ __('Save') }}</x-primary-button>
                     @if(session('success'))
-                        <p class="pt-4" x-data="{ show: true }" x-show="show">
-                            {{ __('Config updated successfully.') }}
-                        </p>
+                    <p class="pt-4" x-data="{ show: true }" x-show="show">
+                        {{ __('Config updated successfully.') }}
+                    </p>
                     @endif
                 </div>
-            </form>
+            </div>
         </div>
-    </div>
+        <div class="row mt-4">
+            <div class="col-6">
+                <div class="card">
+                    <div class="card-header">
+                        Email
+                    </div>
+                    <div class="card-body">
+                        <div class="form-check">
+                            <input class="form-check-input mt-1 mb-2" type="checkbox" value="1" @checked(old('email_notifications_enabled', $email_notifications_enabled)) id="email_notifications_enabled" name="email_notifications_enabled">
+                            <label for="email_notifications_enabled">Globally enable email notifications</label>
+                            <x-input-error class="mt-2" :messages="$errors->get('email_notifications_enabled')" />
+                        </div>
+
+                        <label for="from_name">{{ __('Email name') }}</label>
+                        <input id="from_name" name="from_name" class="form-control mt-1 mb-2" type="text" value="{{old('from_name', $from_name)}}" autocomplete="off" />
+                        <x-input-error class="mt-2" :messages="$errors->get('from_name')" />
+
+                        <label for="from_address">{{ __('Email address') }}</label>
+                        <input id="from_address" name="from_address" class="form-control mt-1 mb-2" type="text" value="{{ old('from_address', $from_address) }}" autocomplete="off" />
+                        <x-input-error class="mt-2" :messages="$errors->get('from_address')" />
+
+                        <div class="flex items-center gap-4">
+                            <x-primary-button>{{ __('Save') }}</x-primary-button>
+                            @if(session('success'))
+                            <p class="pt-4" x-data="{ show: true }" x-show="show">
+                                {{ __('Config updated successfully.') }}
+                            </p>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="card">
+                    <div class="card-header">
+                        Telegram
+                    </div>
+                    <div class="card-body">
+
+                        <div class="form-check">
+                            <input class="form-check-input mt-1 mb-2" type="checkbox" value="1" @checked(old('telegram_notifications_enabled', $telegram_notifications_enabled)) id="telegram_notifications_enabled" name="telegram_notifications_enabled">
+                            <label for="telegram_notifications_enabled">Globally enable Telegram notifications</label>
+                            <x-input-error class="mt-2" :messages="$errors->get('telegram_notifications_enabled')" />
+                        </div>
+
+                        <label for="telegram_bot_token">{{ __('Telegram Bot Token') }}</label>
+                        <input id="telegram_bot_token" name="telegram_bot_token" class="form-control mt-1 mb-2" type="text" value="{{ old('telegram_bot_token', $telegram_bot_token) }}" autocomplete="off" />
+                        <x-input-error class="mt-2" :messages="$errors->get('telegram_bot_token')" />
+
+                        <div class="flex items-center gap-4">
+                            <x-primary-button>{{ __('Save') }}</x-primary-button>
+                            @if(session('success'))
+                            <p class="pt-4" x-data="{ show: true }" x-show="show">
+                                {{ __('Config updated successfully.') }}
+                            </p>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
 </x-app-layout>

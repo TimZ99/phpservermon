@@ -29,11 +29,17 @@ class ConfigController extends Controller
         $this->authorize('config:manage');
 
         // Return the config edit page
+        $emailSettings = app(\App\Settings\EmailSettings::class);
+        $notificationSettings = app(\App\Settings\NotificationSettings::class);
+
+        // Some values also have a value in Config::get of the .ENV file.
         return view('config.edit', [
             'locale' => Config::get('app.locale'),
             'timezone' => Config::get('app.timezone'),
+            'email_notifications_enabled' => $emailSettings->email_notifications_enabled,
             'from_name' => Config::get('email.from.name'),
             'from_address' => Config::get('email.from.address'),
+            'telegram_notifications_enabled' => $notificationSettings->telegram_notifications_enabled,
             'telegram_bot_token' => Config::get('notification.telegram_bot_token'),
         ]);
     }
@@ -58,10 +64,12 @@ class ConfigController extends Controller
         $generalSettings->timezone = $request->timezone;
         $generalSettings->save();
 
+        $emailSettings->email_notifications_enabled = $request->boolean('email_notifications_enabled');
         $emailSettings->from_name = $request->from_name ?? null;
         $emailSettings->from_address = $request->from_address ?? null;
         $emailSettings->save();
 
+        $notificationSettings->telegram_notifications_enabled = $request->boolean('telegram_notifications_enabled');
         $notificationSettings->telegram_bot_token = $request->telegram_bot_token ?? null;
         $notificationSettings->save();
 
