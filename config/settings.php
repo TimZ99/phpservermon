@@ -8,7 +8,6 @@ return [
      */
     'settings' => [
         App\Settings\GeneralSettings::class,
-        App\Settings\EmailSettings::class,
         App\Settings\NotificationSettings::class,
     ],
 

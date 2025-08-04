@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Settings\EmailSettings;
 use App\Settings\GeneralSettings;
 use App\Settings\NotificationSettings;
 use Illuminate\Database\Seeder;
@@ -18,11 +17,9 @@ class SettingsSeeder extends Seeder
             'locale' => 'en',
             'timezone' => 'Europe/Amsterdam',
         ]);
-        EmailSettings::fake([
+        NotificationSettings::fake([
             'from_name' => 'PSM4',
             'from_address' => 'noreply@example.com',
-        ]);
-        NotificationSettings::fake([
             'telegram_bot_token' => env('TELEGRAM_BOT_TOKEN'),
         ]);
     }

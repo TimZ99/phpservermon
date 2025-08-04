@@ -17,10 +17,10 @@ class ConfigUpdateRequest extends FormRequest
         return [
             'locale' => ['required', 'string', 'min:2', 'max:30'],
             'timezone' => ['required', 'timezone:all', 'max:255'],
-            'email_notifications_enabled' => ['boolean'],
-            'from_name' => ['nullable', 'string', 'max:255'],
-            'from_address' => ['nullable', 'email:rfc,filter_unicode', 'max:255'],
-            'telegram_notifications_enabled' => ['boolean'],
+            'email_global_enabled' => ['boolean'],
+            'email_from_name' => ['nullable', 'string', 'max:255'],
+            'email_from_address' => ['nullable', 'email:rfc,filter_unicode', 'max:255'],
+            'telegram_global_enabled' => ['boolean'],
             'telegram_bot_token' => ['nullable', 'string', 'min:20', 'max:50'],
         ];
     }

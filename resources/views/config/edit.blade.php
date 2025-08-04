@@ -94,18 +94,18 @@
                     </div>
                     <div class="card-body">
                         <div class="form-check">
-                            <input class="form-check-input mt-1 mb-2" type="checkbox" value="1" @checked(old('email_notifications_enabled', $email_notifications_enabled)) id="email_notifications_enabled" name="email_notifications_enabled">
-                            <label for="email_notifications_enabled">Globally enable email notifications</label>
-                            <x-input-error class="mt-2" :messages="$errors->get('email_notifications_enabled')" />
+                            <input class="form-check-input mt-1 mb-2" type="checkbox" value="1" @checked(old('email_global_enabled', $email_global_enabled)) id="email_global_enabled" name="email_global_enabled">
+                            <label for="email_global_enabled">Globally enable email notifications</label>
+                            <x-input-error class="mt-2" :messages="$errors->get('email_global_enabled')" />
                         </div>
 
-                        <label for="from_name">{{ __('Email name') }}</label>
-                        <input id="from_name" name="from_name" class="form-control mt-1 mb-2" type="text" value="{{old('from_name', $from_name)}}" autocomplete="off" />
-                        <x-input-error class="mt-2" :messages="$errors->get('from_name')" />
+                        <label for="email_from_name">{{ __('Email name') }}</label>
+                        <input id="email_from_name" name="email_from_name" class="form-control mt-1 mb-2" type="text" value="{{old('email_from_name', $email_from_name)}}" autocomplete="off" />
+                        <x-input-error class="mt-2" :messages="$errors->get('email_from_name')" />
 
-                        <label for="from_address">{{ __('Email address') }}</label>
-                        <input id="from_address" name="from_address" class="form-control mt-1 mb-2" type="text" value="{{ old('from_address', $from_address) }}" autocomplete="off" />
-                        <x-input-error class="mt-2" :messages="$errors->get('from_address')" />
+                        <label for="email_from_address">{{ __('Email address') }}</label>
+                        <input id="email_from_address" name="email_from_address" class="form-control mt-1 mb-2" type="text" value="{{ old('email_from_address', $email_from_address) }}" autocomplete="off" />
+                        <x-input-error class="mt-2" :messages="$errors->get('email_from_address')" />
 
                         <div class="flex items-center gap-4">
                             <x-primary-button>{{ __('Save') }}</x-primary-button>
@@ -126,9 +126,9 @@
                     <div class="card-body">
 
                         <div class="form-check">
-                            <input class="form-check-input mt-1 mb-2" type="checkbox" value="1" @checked(old('telegram_notifications_enabled', $telegram_notifications_enabled)) id="telegram_notifications_enabled" name="telegram_notifications_enabled">
-                            <label for="telegram_notifications_enabled">Globally enable Telegram notifications</label>
-                            <x-input-error class="mt-2" :messages="$errors->get('telegram_notifications_enabled')" />
+                            <input class="form-check-input mt-1 mb-2" type="checkbox" value="1" @checked(old('telegram_global_enabled', $telegram_global_enabled)) id="telegram_global_enabled" name="telegram_global_enabled">
+                            <label for="telegram_global_enabled">Globally enable Telegram notifications</label>
+                            <x-input-error class="mt-2" :messages="$errors->get('telegram_global_enabled')" />
                         </div>
 
                         <label for="telegram_bot_token">{{ __('Telegram Bot Token') }}</label>

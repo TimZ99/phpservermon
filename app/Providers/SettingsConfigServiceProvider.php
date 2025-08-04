@@ -39,7 +39,6 @@ class SettingsConfigServiceProvider extends ServiceProvider
 
         try {
             // get settings
-            $emailSettings = app(\App\Settings\EmailSettings::class);
             $generalSettings = app(\App\Settings\GeneralSettings::class);
             $notificationSettings = app(\App\Settings\NotificationSettings::class);
 
@@ -47,8 +46,8 @@ class SettingsConfigServiceProvider extends ServiceProvider
             config([
                 'app.locale' => $generalSettings->default_locale ?? config('app.locale'),
                 'app.timezone' => $generalSettings->timezone ?? config('app.timezone'),
-                'email.from.name' => $emailSettings->from_name ?? config('email.from.name'),
-                'email.from.address' => $emailSettings->from_address ?? config('email.from.address'),
+                'email.from.name' => $notificationSettings->email_from_name ?? config('email.from.name'),
+                'email.from.address' => $notificationSettings->email_from_address ?? config('email.from.address'),
                 'notification.telegram_bot_token' => $notificationSettings->telegram_bot_token ?? config('notification.telegram_bot_token'),
             ]);
         } catch (\Throwable $e) {
