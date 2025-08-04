@@ -16,11 +16,11 @@ $ports = [
         @method('patch')
 
         <label for="name">{{ __('Name') }}</label>
-        <input id="name" name="name" class="form-control mb-2" type="text" class="mt-1" value="{{old('name', $server->name)}}" required autofocus autocomplete="off" />
+        <input id="name" name="name" class="form-control mt-1 mb-2" type="text" value="{{old('name', $server->name)}}" required autofocus autocomplete="off" />
         <x-input-error class="mt-2" :messages="$errors->get('name')" />
 
         <label for="ip">{{ __('IP') }}</label>
-        <input id="ip" name="ip" class="form-control mb-2" type="text" class="mt-1" value="{{ old('ip', $server->ip) }}" required autocomplete="off" />
+        <input id="ip" name="ip" class="form-control mt-1 mb-2" type="text" value="{{ old('ip', $server->ip) }}" required autocomplete="off" />
         <x-input-error class="mt-2" :messages="$errors->get('ip')" />
 
         <label for="popular_ports">{{ __('Port') }}</label>

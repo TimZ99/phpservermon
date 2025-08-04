@@ -13,65 +13,65 @@
                 @method('patch')
 
                 <label for="locale">{{ __('Locale') }}</label>
-                <input id="locale" name="locale" class="form-control mb-2" type="text" class="mt-1" value="{{ old('locale', $locale) }}" required autofocus autocomplete="off" />
+                <input id="locale" name="locale" class="form-control mt-1 mb-2" type="text" value="{{ old('locale', $locale) }}" required autofocus autocomplete="off" />
                 <x-input-error class="mt-2" :messages="$errors->get('locale')" />
-                
+
                 <label for="timezone">{{ __('Timezone') }}</label>
                 <select id="timezone" name="timezone" class="form-select mb-2" required>
                     <option @empty(old('timezone', $timezone)) selected @endempty disabled>{{ __('Select a timezone') }}</option>
                     <optgroup label="{{ __('UTC') }}">
                         @foreach (DateTimeZone::listIdentifiers(DateTimeZone::UTC) as $tz)
-                            <option @if (old('timezone', $timezone) == $tz) selected @endif value="{{ $tz }}">{{ $tz }}</option>
+                        <option @if (old('timezone', $timezone)==$tz) selected @endif value="{{ $tz }}">{{ $tz }}</option>
                         @endforeach
                     </optgroup>
                     <optgroup label="{{ __('Africa') }}">
                         @foreach (DateTimeZone::listIdentifiers(DateTimeZone::AFRICA) as $tz)
-                            <option @if (old('timezone', $timezone) == $tz) selected @endif value="{{ $tz }}">{{ $tz }}</option>
+                        <option @if (old('timezone', $timezone)==$tz) selected @endif value="{{ $tz }}">{{ $tz }}</option>
                         @endforeach
                     </optgroup>
                     <optgroup label="{{ __('America') }}">
                         @foreach (DateTimeZone::listIdentifiers(DateTimeZone::AMERICA) as $tz)
-                            <option @if (old('timezone', $timezone) == $tz) selected @endif value="{{ $tz }}">{{ $tz }}</option>
+                        <option @if (old('timezone', $timezone)==$tz) selected @endif value="{{ $tz }}">{{ $tz }}</option>
                         @endforeach
                     </optgroup>
                     <optgroup label="{{ __('Antarctica') }}">
                         @foreach (DateTimeZone::listIdentifiers(DateTimeZone::ANTARCTICA) as $tz)
-                            <option @if (old('timezone', $timezone) == $tz) selected @endif value="{{ $tz }}">{{ $tz }}</option>
+                        <option @if (old('timezone', $timezone)==$tz) selected @endif value="{{ $tz }}">{{ $tz }}</option>
                         @endforeach
                     </optgroup>
                     <optgroup label="{{ __('Arctic') }}">
                         @foreach (DateTimeZone::listIdentifiers(DateTimeZone::ARCTIC) as $tz)
-                            <option @if (old('timezone', $timezone) == $tz) selected @endif value="{{ $tz }}">{{ $tz }}</option>
+                        <option @if (old('timezone', $timezone)==$tz) selected @endif value="{{ $tz }}">{{ $tz }}</option>
                         @endforeach
                     </optgroup>
                     <optgroup label="{{ __('Asia') }}">
                         @foreach (DateTimeZone::listIdentifiers(DateTimeZone::ASIA) as $tz)
-                            <option @if (old('timezone', $timezone) == $tz) selected @endif value="{{ $tz }}">{{ $tz }}</option>
+                        <option @if (old('timezone', $timezone)==$tz) selected @endif value="{{ $tz }}">{{ $tz }}</option>
                         @endforeach
                     </optgroup>
                     <optgroup label="{{ __('Atlantic') }}">
                         @foreach (DateTimeZone::listIdentifiers(DateTimeZone::ATLANTIC) as $tz)
-                            <option @if (old('timezone', $timezone) == $tz) selected @endif value="{{ $tz }}">{{ $tz }}</option>
+                        <option @if (old('timezone', $timezone)==$tz) selected @endif value="{{ $tz }}">{{ $tz }}</option>
                         @endforeach
                     </optgroup>
                     <optgroup label="{{ __('Australia') }}">
                         @foreach (DateTimeZone::listIdentifiers(DateTimeZone::AUSTRALIA) as $tz)
-                            <option @if (old('timezone', $timezone) == $tz) selected @endif value="{{ $tz }}">{{ $tz }}</option>
+                        <option @if (old('timezone', $timezone)==$tz) selected @endif value="{{ $tz }}">{{ $tz }}</option>
                         @endforeach
                     </optgroup>
                     <optgroup label="{{ __('Europe') }}">
                         @foreach (DateTimeZone::listIdentifiers(DateTimeZone::EUROPE) as $tz)
-                            <option @if (old('timezone', $timezone) == $tz) selected @endif value="{{ $tz }}">{{ $tz }}</option>
+                        <option @if (old('timezone', $timezone)==$tz) selected @endif value="{{ $tz }}">{{ $tz }}</option>
                         @endforeach
                     </optgroup>
                     <optgroup label="{{ __('Indian') }}">
                         @foreach (DateTimeZone::listIdentifiers(DateTimeZone::INDIAN) as $tz)
-                            <option @if (old('timezone', $timezone) == $tz) selected @endif value="{{ $tz }}">{{ $tz }}</option>
+                        <option @if (old('timezone', $timezone)==$tz) selected @endif value="{{ $tz }}">{{ $tz }}</option>
                         @endforeach
                     </optgroup>
                     <optgroup label="{{ __('Pacific') }}">
                         @foreach (DateTimeZone::listIdentifiers(DateTimeZone::PACIFIC) as $tz)
-                            <option @if (old('timezone', $timezone) == $tz) selected @endif value="{{ $tz }}">{{ $tz }}</option>
+                        <option @if (old('timezone', $timezone)==$tz) selected @endif value="{{ $tz }}">{{ $tz }}</option>
                         @endforeach
                     </optgroup>
                 </select>
