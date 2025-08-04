@@ -18,7 +18,7 @@ test('only user with server:manage: scope can delete a server', function () {
     $userWithScope = User::factory()->create();
     $userWithScope->setScope(['server:manage:*']);
     $userWithScope->save();
-    
+
     $server = Server::factory(3)->create()->last();
 
     // check if user with server:manage scope can delete a server

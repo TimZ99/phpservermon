@@ -4,7 +4,6 @@ namespace App\Http\Requests;
 
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class UserUpdateRequest extends FormRequest
@@ -30,6 +29,11 @@ class UserUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
+        // Determine the user ID to ignore for unique email validation
+        $ignoreId = $this->route('user')
+                    ? $this->route('user')->id
+                    : $this->user()->id;
+
         return [
             'name' => [
                 'sometimes', // Only validate if the field is present
@@ -44,7 +48,7 @@ class UserUpdateRequest extends FormRequest
                 'lowercase', // The field must be lowercase
                 'email', // The field must be a valid email
                 'max:255', // The field must not be longer than 255 characters
-                Rule::unique(User::class)->ignore($this->user), // The field must be unique
+                Rule::unique(User::class)->ignore($ignoreId), // The email must be unique, ignoring the current user's ID
             ],
             'phone' => [
                 'sometimes', // Only validate if the field is present
