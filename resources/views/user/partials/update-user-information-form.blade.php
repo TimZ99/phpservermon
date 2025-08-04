@@ -7,7 +7,7 @@
         @method('patch')
 
         <label for="name">{{ __('Name') }}</label>
-        <input id="name" name="name" class="form-control mb-2" type="text" class="mt-1" value="{{old('name', $user->name)}}" required autofocus autocomplete="off" />
+        <input id="name" name="name" class="form-control mt-1 mb-2" type="text" value="{{old('name', $user->name)}}" required autofocus autocomplete="off" />
         <x-input-error class="mt-2" :messages="$errors->get('name')" />
 
         <label for="email">{{ __('Email') }}</label>

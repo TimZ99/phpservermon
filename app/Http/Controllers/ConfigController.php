@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ConfigUpdateRequest;
-use App\Settings\EmailSettings;
 use App\Settings\GeneralSettings;
 use App\Settings\NotificationSettings;
 use Illuminate\Support\Facades\Config;
@@ -29,11 +28,16 @@ class ConfigController extends Controller
         $this->authorize('config:manage');
 
         // Return the config edit page
+        $notificationSettings = app(\App\Settings\NotificationSettings::class);
+
+        // Some values also have a value in Config::get of the .ENV file.
         return view('config.edit', [
             'locale' => Config::get('app.locale'),
             'timezone' => Config::get('app.timezone'),
-            'from_name' => Config::get('email.from.name'),
-            'from_address' => Config::get('email.from.address'),
+            'email_global_enabled' => $notificationSettings->email_global_enabled,
+            'email_from_name' => Config::get('email.from.name'),
+            'email_from_address' => Config::get('email.from.address'),
+            'telegram_global_enabled' => $notificationSettings->telegram_global_enabled,
             'telegram_bot_token' => Config::get('notification.telegram_bot_token'),
         ]);
     }
@@ -47,7 +51,6 @@ class ConfigController extends Controller
     public function update(
         ConfigUpdateRequest $request,
         GeneralSettings $generalSettings,
-        EmailSettings $emailSettings,
         NotificationSettings $notificationSettings
     ) {
         $this->authorize('config:manage');
@@ -58,10 +61,10 @@ class ConfigController extends Controller
         $generalSettings->timezone = $request->timezone;
         $generalSettings->save();
 
-        $emailSettings->from_name = $request->from_name ?? null;
-        $emailSettings->from_address = $request->from_address ?? null;
-        $emailSettings->save();
-
+        $notificationSettings->email_global_enabled = $request->boolean('email_global_enabled');
+        $notificationSettings->email_from_name = $request->email_from_name ?? null;
+        $notificationSettings->email_from_address = $request->email_from_address ?? null;
+        $notificationSettings->telegram_global_enabled = $request->boolean('telegram_global_enabled');
         $notificationSettings->telegram_bot_token = $request->telegram_bot_token ?? null;
         $notificationSettings->save();
 
