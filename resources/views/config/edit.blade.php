@@ -91,10 +91,9 @@
 
                 <div class="flex items-center gap-4">
                     <x-primary-button>{{ __('Save') }}</x-primary-button>
-
-                    @if (session('status') === 'server-updated')
-                        <p x-data="{ show: true }" x-show="show">
-                            {{ __('Server updated successfully.') }}
+                    @if(session('success'))
+                        <p class="pt-4" x-data="{ show: true }" x-show="show">
+                            {{ __('Config updated successfully.') }}
                         </p>
                     @endif
                 </div>
