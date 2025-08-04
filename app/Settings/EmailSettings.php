@@ -12,6 +12,6 @@ class EmailSettings extends Settings
 
     public static function group(): string
     {
-        return 'email';
+        return 'mail';
     }
 }

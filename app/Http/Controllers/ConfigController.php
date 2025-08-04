@@ -7,7 +7,6 @@ use App\Settings\EmailSettings;
 use App\Settings\GeneralSettings;
 use App\Settings\NotificationSettings;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Routing:
@@ -49,8 +48,8 @@ class ConfigController extends Controller
         ConfigUpdateRequest $request,
         GeneralSettings $generalSettings,
         EmailSettings $emailSettings,
-        NotificationSettings $notificationSettings)
-    {
+        NotificationSettings $notificationSettings
+    ) {
         $this->authorize('config:manage');
         $request->validated();
 
@@ -59,21 +58,12 @@ class ConfigController extends Controller
         $generalSettings->timezone = $request->timezone;
         $generalSettings->save();
 
-        $emailSettings->from_name = $request->from_name;
-        $emailSettings->from_address = $request->from_address;
+        $emailSettings->from_name = $request->from_name ?? null;
+        $emailSettings->from_address = $request->from_address ?? null;
         $emailSettings->save();
 
-        $notificationSettings->telegram_bot_token = $request->telegram_bot_token;
+        $notificationSettings->telegram_bot_token = $request->telegram_bot_token ?? null;
         $notificationSettings->save();
-
-        // Log the config update
-        Log::info('Configuration updated', [
-            'locale' => $request->locale,
-            'timezone' => $request->timezone,
-            'from_name' => $request->from_name,
-            'from_address' => $request->from_address,
-            'telegram_bot_token' => $request->telegram_bot_token,
-        ]);
 
         // Return the config edit page with a success message
         return to_route('config.edit')->with('success', 'Configuration updated successfully.');
