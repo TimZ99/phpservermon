@@ -98,7 +98,7 @@ class RunCurl implements ShouldQueue
                         continue;
                     }
                     Notification::route('telegram', $user->telegram_user_id)
-                        ->notify(new \App\Notifications\ServerUpdate(
+                        ->notify(new \App\Notification\Messages\ServerUpdate(
                             $context['run_curl_batch_id'],
                             $batch->id,
                             $context['server']

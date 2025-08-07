@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Notifications;
+namespace App\Notification\Messages;
 
 use App\Models\CheckHistory;
 use App\Models\Server;
