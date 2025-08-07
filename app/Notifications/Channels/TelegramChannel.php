@@ -7,7 +7,11 @@ use NotificationChannels\Telegram\TelegramMessage;
 
 class TelegramChannel
 {
-    // format the message for Telegram
+    /**
+     * Format the message for Telegram
+     *
+     * @param  Notification  $notification  The notification instance.
+     */
     protected function createMessage(Notification $notification): string
     {
         return $notification->data['text'];
