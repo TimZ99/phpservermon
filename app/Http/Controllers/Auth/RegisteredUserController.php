@@ -9,7 +9,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
@@ -47,13 +46,13 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        Log::info('New user registered with id:'.$user->id);
+        logger()->info('New user registered with id:'.$user->id);
 
         /* check if there is a user that has every scope enabled */
         if (User::count() === 1) {
             $user->setScope($user->validScopes());
             $user->save();
-            Log::info('No user found, making user '.$user->id.' very powerful.');
+            logger()->info('No user found, making user '.$user->id.' very powerful.');
         }
 
         event(new Registered($user));

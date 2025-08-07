@@ -7,7 +7,6 @@ use App\Models\Server;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Log;
 use NotificationChannels\Telegram\TelegramMessage;
 
 class ServerUpdate extends Notification implements ShouldQueue
@@ -41,7 +40,7 @@ class ServerUpdate extends Notification implements ShouldQueue
         ? $notifiable->routeNotificationFor('telegram')
         : $notifiable->telegram_user_id;
 
-        Log::info('Sending Telegram notification.', [$notifiable]);
+        logger()->info('Sending Telegram notification.', [$notifiable]);
 
         // Get previous run_curl_batch_id
         $previousRunCurlBatchId = CheckHistory::where('server_id', $this->server->id)
@@ -52,7 +51,7 @@ class ServerUpdate extends Notification implements ShouldQueue
 
         if (! isset($previousRunCurlBatchId[0])) {
             $previousRunCurlBatchId[0] = '';
-            Log::debug('No previous run_curl_batch_id found, setting to empty string.');
+            logger()->debug('No previous run_curl_batch_id found, setting to empty string.');
         }
 
         $server_checks_old = CheckHistory::where('run_curl_batch_id', $previousRunCurlBatchId[0])
@@ -63,7 +62,7 @@ class ServerUpdate extends Notification implements ShouldQueue
             ->where('server_id', $this->server->id)
             ->orderBy('created_at', 'desc')->get()->toArray();
 
-        Log::debug('Fetching server checks', [
+        logger()->debug('Fetching server checks', [
             'previousRunCurlBatchId' => $previousRunCurlBatchId[0],
             'server_checks_old' => $server_checks_old,
             'server_checks_new' => $server_checks_new,
@@ -95,7 +94,7 @@ class ServerUpdate extends Notification implements ShouldQueue
             ->line($this->server_checks_batch_id)
             ->escapedLine($content)
             ->onError(function ($data) {
-                Log::error('Failed to send Telegram notification', [
+                logger()->error('Failed to send Telegram notification', [
                     'chat_id' => $data['to'],
                     'error' => isset($data['exception']) ? $data['exception']->getMessage() : 'Unknown error',
                 ]);

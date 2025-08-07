@@ -59,7 +59,7 @@ return [
         'sql_queries' => env('SENTRY_BREADCRUMBS_SQL_QUERIES_ENABLED', true),
 
         // Capture SQL query bindings (parameters) in SQL query breadcrumbs
-        'sql_bindings' => env('SENTRY_BREADCRUMBS_SQL_BINDINGS_ENABLED', false),
+        'sql_bindings' => env('SENTRY_BREADCRUMBS_SQL_BINDINGS_ENABLED', true),
 
         // Capture queue job information as breadcrumbs
         'queue_info' => env('SENTRY_BREADCRUMBS_QUEUE_INFO_ENABLED', true),
@@ -86,7 +86,7 @@ return [
         'sql_queries' => env('SENTRY_TRACE_SQL_QUERIES_ENABLED', true),
 
         // Capture SQL query bindings (parameters) in SQL query spans
-        'sql_bindings' => env('SENTRY_TRACE_SQL_BINDINGS_ENABLED', false),
+        'sql_bindings' => env('SENTRY_TRACE_SQL_BINDINGS_ENABLED', true),
 
         // Capture where the SQL query originated from on the SQL query spans
         'sql_origin' => env('SENTRY_TRACE_SQL_ORIGIN_ENABLED', true),
@@ -116,7 +116,7 @@ return [
         'notifications' => env('SENTRY_TRACE_NOTIFICATIONS_ENABLED', true),
 
         // Enable tracing for requests without a matching route (404's)
-        'missing_routes' => env('SENTRY_TRACE_MISSING_ROUTES_ENABLED', false),
+        'missing_routes' => env('SENTRY_TRACE_MISSING_ROUTES_ENABLED', true),
 
         // Configures if the performance trace should continue after the response has been sent to the user until the application terminates
         // This is required to capture any spans that are created after the response has been sent like queue jobs dispatched using `dispatch(...)->afterResponse()` for example
