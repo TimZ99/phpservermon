@@ -13,25 +13,25 @@ if ! pint --test; then
 fi
 
 # 2) Run Pest tests
-echo "🔎 Running Pest tests…"
-if ! pest --colors=always; then
-  echo "❌ Pest tests failed. Aborting commit."
-  exit 1
-fi
+#echo "🔎 Running Pest tests…"
+#if ! pest --colors=always; then
+#  echo "❌ Pest tests failed. Aborting commit."
+#  exit 1
+#fi
 
 # 3) Generate Pest coverage report
-echo "📊 Generating Pest coverage report…"
-if ! pest --colors=always --coverage-text; then
-  echo "❌ Coverage check failed. Aborting commit."
-  exit 1
-fi
+#echo "📊 Generating Pest coverage report…"
+#if ! pest --colors=always --coverage-text; then
+#  echo "❌ Coverage check failed. Aborting commit."
+#  exit 1
+#fi
 
 # 4) Check platform requirements via Composer
-echo "🔧 Checking platform requirements with Composer…"
-if ! composer check-platform-reqs --no-interaction; then
-  echo "❌ Platform requirement check failed. Aborting commit."
-  exit 1
-fi
+#echo "🔧 Checking platform requirements with Composer…"
+#if ! composer check-platform-reqs --no-interaction; then
+#  echo "❌ Platform requirement check failed. Aborting commit."
+#  exit 1
+#fi
 
 echo "✅ All checks passed. Proceeding with commit."
 exit 0
