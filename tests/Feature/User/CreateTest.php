@@ -2,6 +2,17 @@
 
 use App\Models\User;
 
+beforeEach(function () {
+    $this->user = User::factory()->create();
+});
+
+it('can check if a user is allowed to enter the page', function () {
+    $this->actingAs($this->user)->get(route('user.create'))->assertForbidden();
+
+    $this->user->addScope('user:manage:*');
+    $this->actingAs($this->user)->get(route('user.create'))->assertStatus(418);
+});
+
 test('user with user:create scope can create user ', function () {
     $this->markTestIncomplete('Create and store controller is not implemented yet.');
 

@@ -26,7 +26,7 @@ Route::middleware(['auth', 'can:not-suspended'])->group(function () {
     Route::get('/servers/run', [ServerController::class, 'runBatch'])->name('server.runBatch');
 
     /* User */
-    Route::resource('user', UserController::class)->except(['index', 'create', 'store']);
+    Route::resource('user', UserController::class)->except(['index', 'store']);
     Route::get('/users', [UserController::class, 'index'])->name('user.index');
 
     /* Config */
