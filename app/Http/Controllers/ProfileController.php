@@ -62,7 +62,15 @@ class ProfileController extends Controller
 
     public function test_telegram()
     {
-        Notification::send(Auth::user(), new DynamicNotification('test_message', ['text' => 'Test message for Telegram notification']));
+        try {
+            Notification::send(Auth::user(), new DynamicNotification('test_message', ['text' => 'Test message for Telegram notification']));
+        } catch (\Exception $e) {
+            \Sentry\captureException($e);
+            $message = 'Failed to send Telegram notification: '.$e->getMessage();
+            logger()->error($message);
+
+            return $message;
+        }
 
         return 'Notification sent to user';
     }
