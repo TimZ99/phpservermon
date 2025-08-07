@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UserUpdateRequest;
+use App\Notifications\DynamicNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -61,9 +62,7 @@ class ProfileController extends Controller
 
     public function test_telegram()
     {
-        $user = \Illuminate\Support\Facades\Auth::user();
-
-        Notification::route('telegram', $user->telegram_user_id)->notify(new \App\Notifications\TestMessage);
+        Notification::send(Auth::user(), new DynamicNotification('test_message', ['text' => 'Test message for Telegram notification']));
 
         return 'Notification sent to user';
     }
