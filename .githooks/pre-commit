@@ -1,0 +1,37 @@
+#!/usr/bin/env sh
+#
+# Pre-commit hook: Pest tests, coverage report, Pint & platform check
+
+# 0) Ensure vendor binaries are in PATH (for CLI and Tower)
+export PATH="$(pwd)/vendor/bin:$PATH"
+
+# 1) Run Laravel Pint (code style)
+echo "🛠 Running Laravel Pint…"
+if ! pint --test; then
+  echo "❌ Code style issues detected by Pint. Aborting commit."
+  exit 1
+fi
+
+# 2) Run Pest tests
+echo "🔎 Running Pest tests…"
+if ! pest --colors=always; then
+  echo "❌ Pest tests failed. Aborting commit."
+  exit 1
+fi
+
+# 3) Generate Pest coverage report
+echo "📊 Generating Pest coverage report…"
+if ! pest --colors=always --coverage-text; then
+  echo "❌ Coverage check failed. Aborting commit."
+  exit 1
+fi
+
+# 4) Check platform requirements via Composer
+echo "🔧 Checking platform requirements with Composer…"
+if ! composer check-platform-reqs --no-interaction; then
+  echo "❌ Platform requirement check failed. Aborting commit."
+  exit 1
+fi
+
+echo "✅ All checks passed. Proceeding with commit."
+exit 0
