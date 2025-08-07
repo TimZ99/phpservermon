@@ -15,10 +15,13 @@ class DynamicNotification extends Notification
 
     public array $data;  // data payload (like monitor info, etc.)
 
+    public array $channels;  // channels to send this notification through
+
     public function __construct(string $notification_event, array $data = [], array $channels = [])
     {
         $this->notification_event = $notification_event;
         $this->data = $data;
+        $this->channels = $channels;
     }
 
     /**
@@ -26,40 +29,40 @@ class DynamicNotification extends Notification
      */
     public function via(object $notifiable): array
     {
+        return $this->getChannels($notifiable);
+    }
+
+    protected function getChannels(object $notifiable): array
+    {
+        // If channels are specified, use them
+        if (! empty($this->channels)) {
+            return array_unique($this->channels);
+        }
         $channels = [];
 
-        // 1. Load global settings for channels
         $settings = app(\App\Settings\NotificationSettings::class);
 
-        if ($this->event = 'test_message') {
-            $user_preferences = [new \App\Models\NotificationPreference([
-                'user_id' => $notifiable->id,
-                'channel' => 'telegram',
-                'event' => 'test_message',
-                'enabled' => true,
-            ])];
-        } else {
-            $user_preferences = \App\Models\NotificationPreference::query()
-                ->where('user_id', $notifiable->id)
-                ->where('event', $this->event)
-                ->get()
-                ->keyBy('channel');
-        }
-        // 3. Determine for each channel if we should notify
+        $user_preferences = \App\Models\NotificationPreference::query()
+            ->where('user_id', $notifiable->id)
+            ->where('event', $this->notification_event)
+            ->get()
+            ->keyBy('channel');
         if (
             $settings->email_global_enabled
             && ! empty($notifiable->email)
+            && $user_preferences->has('mail')
         ) {
             $channels[] = 'mail';  // use Laravel's mail channel
         }
         if (
             $settings->telegram_global_enabled
             && ! empty($notifiable->telegram_user_id)
+            && $user_preferences->has('telegram')
         ) {
             $channels[] = \App\Notifications\Channels\TelegramChannel::class;
         }
 
-        return $channels;
+        return array_unique($channels);
     }
 
     // Channel-specific message builders:
