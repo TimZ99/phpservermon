@@ -3,13 +3,12 @@
 namespace App\Notifications\Channels;
 
 use Illuminate\Notifications\Notification;
-use NotificationChannels\Telegram\Telegram;
 use NotificationChannels\Telegram\TelegramMessage;
 
 class TelegramChannel
 {
     // format the message for Telegram
-    protected function toTelegram(Notification $notification): string
+    protected function createMessage(Notification $notification): string
     {
         return $notification->data['text'];
     }
@@ -29,8 +28,20 @@ class TelegramChannel
 
         $settings = app(\App\Settings\NotificationSettings::class);
 
-        TelegramMessage::create($this->toTelegram($notification))
+        TelegramMessage::create($this->createMessage($notification))
+            ->token($settings->telegram_bot_token)
             ->to($chatId)
-            ->send(new Telegram($settings->telegram_bot_token));
+            ->send();
+    }
+}
+
+class TelegramChannelUser extends \App\Models\User
+{
+    /**
+     * Route notifications for the Telegram channel.
+     */
+    public function routeNotificationForTelegram(): int
+    {
+        return $this->telegram_user_id;
     }
 }

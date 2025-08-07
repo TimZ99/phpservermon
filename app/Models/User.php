@@ -108,14 +108,6 @@ class User extends Authenticatable
     }
 
     /**
-     * Route notifications for the telegram channel.
-     */
-    public function routeNotificationForTelegram(): int
-    {
-        return $this->telegram_user_id;
-    }
-
-    /**
      * Expand the scopes based on implied relationships.
      *
      * @param  string|array<string>  $scopes
