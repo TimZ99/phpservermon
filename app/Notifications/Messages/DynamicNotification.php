@@ -11,13 +11,13 @@ class DynamicNotification extends Notification
     // (Optionally implement ShouldQueue if you want to queue notifications)
     use Queueable;
 
-    public string $event;
+    public string $notification_event;
 
     public array $data;  // data payload (like monitor info, etc.)
 
-    public function __construct(string $event, array $data = [])
+    public function __construct(string $notification_event, array $data = [], array $channels = [])
     {
-        $this->event = $event;
+        $this->notification_event = $notification_event;
         $this->data = $data;
     }
 
@@ -67,8 +67,8 @@ class DynamicNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         // Use localization keys for subject/content:
-        $subject = __('notifications.'.$this->event.'.subject', $this->data);
-        $line1 = __('notifications.'.$this->event.'.message', $this->data);
+        $subject = __('notifications.'.$this->notification_event.'.subject', $this->data);
+        $line1 = __('notifications.'.$this->notification_event.'.message', $this->data);
 
         return (new MailMessage)
             ->subject($subject)
@@ -79,7 +79,7 @@ class DynamicNotification extends Notification
     {
         // Return plain text for SMS (could also return a custom SmsMessage object)
         return __(
-            'notifications.'.$this->event.'.sms_text',
+            'notifications.'.$this->notification_event.'.sms_text',
             $this->data
         );
     }
