@@ -156,7 +156,7 @@ class ServerController extends Controller
         try {
             // Create the server
             $server = Server::create($request->validated());
-            $server->update(['check_settings' => $this->defaultCheckSettings()]);
+            $server->update(['check_settings' => $this->buildCheckSettingsFromRequest($request, $server)]);
             // Sync the users with the server
             $server->users()->sync($request->input('users'));
 
@@ -181,10 +181,14 @@ class ServerController extends Controller
         $this->authorize('manage', $server);
 
         // Return the server edit page with the server and list of users with id and name
+        $server = Server::with('users')->find($server->id);
+
         return view('server.edit', [
-            'server' => Server::find($server->id),
+            'server' => $server,
             // Get id and name for all users that are not suspended
             'users' => User::where('suspended', false)->select('id', 'name')->get(),
+            'defaultCheckSettings' => $this->defaultCheckSettings(),
+            'checkDefinitions' => config('server-checks'),
         ]);
     }
 
@@ -221,8 +225,9 @@ class ServerController extends Controller
          * Update the server
          * Fill the server with the validated data
          */
-        $server->fill($request->validated())->save();
-        $server->fill(['check_settings' => $this->defaultCheckSettings()])->save();
+        $server->fill($request->validated());
+        $server->check_settings = $this->buildCheckSettingsFromRequest($request, $server);
+        $server->save();
 
         // Return the server page with the updated server
         return to_route('server.show', $server->id);
@@ -277,6 +282,105 @@ class ServerController extends Controller
 
         // Return to the server index page
         return to_route('server.index');
+    }
+
+    protected function buildCheckSettingsFromRequest(ServerUpdateRequest $request, ?Server $server = null): array
+    {
+        $defaults = $this->defaultCheckSettings();
+        $existing = $server?->check_settings ?? [];
+        $base = array_replace_recursive($defaults, $existing);
+        $input = $request->input('check_settings', []);
+
+        if (! is_array($input) || empty($input)) {
+            return $base;
+        }
+
+        $settings = [];
+
+        foreach ($defaults as $name => $config) {
+            $current = $base[$name] ?? $config;
+            $enabled = data_get($input, "{$name}.enabled");
+            if ($enabled === null) {
+                $enabled = data_get($current, 'enabled', false);
+            }
+
+            $current['enabled'] = filter_var($enabled, FILTER_VALIDATE_BOOLEAN);
+
+            switch ($name) {
+                case 'SSL_expiration':
+                    $days = data_get($input, "{$name}.days");
+                    if ($days === null) {
+                        $days = data_get($current, 'input.days', 5);
+                    }
+                    $current['input']['days'] = max(1, (int) $days);
+                    break;
+                case 'ContentRegex':
+                    $pattern = data_get($input, "{$name}.pattern");
+                    if ($pattern === null) {
+                        $pattern = data_get($current, 'input.pattern', '');
+                    }
+                    $current['input']['pattern'] = trim((string) $pattern);
+                    break;
+                case 'Latency':
+                    $warning = data_get($input, "{$name}.warning_ms");
+                    if ($warning === null) {
+                        $warning = data_get($current, 'input.warning_ms', 600);
+                    }
+                    $fail = data_get($input, "{$name}.fail_ms");
+                    if ($fail === null) {
+                        $fail = data_get($current, 'input.fail_ms', 1500);
+                    }
+
+                    $warning = max(1, (int) $warning);
+                    $fail = max($warning, (int) $fail);
+
+                    $current['input']['warning_ms'] = $warning;
+                    $current['input']['fail_ms'] = $fail;
+                    break;
+                case 'Headers':
+                    $raw = data_get($input, "{$name}.required", null);
+                    if ($raw === null) {
+                        $requirements = data_get($current, 'input.required', []);
+                    } else {
+                        $requirements = $this->parseHeaderRequirements($raw);
+                    }
+                    $current['input']['required'] = $requirements;
+                    break;
+            }
+
+            $settings[$name] = $current;
+        }
+
+        return $settings;
+    }
+
+    /**
+     * @return array<string, string|null>
+     */
+    protected function parseHeaderRequirements(?string $raw): array
+    {
+        if ($raw === null) {
+            return [];
+        }
+
+        $lines = preg_split("/\r?\n/", trim($raw)) ?: [];
+        $requirements = [];
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if ($line === '') {
+                continue;
+            }
+
+            if (str_contains($line, ':')) {
+                [$name, $value] = explode(':', $line, 2);
+                $requirements[trim($name)] = trim($value) === '' ? null : trim($value);
+            } else {
+                $requirements[$line] = null;
+            }
+        }
+
+        return $requirements;
     }
 
     /**
