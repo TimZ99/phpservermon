@@ -25,3 +25,4 @@ yarn-error.log
 .DS_Store
 /.deepsource.toml
 /build
+/.github/copilot-instructions.md

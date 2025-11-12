@@ -42,24 +42,13 @@ class DynamicNotification extends Notification
 
         $settings = app(\App\Settings\NotificationSettings::class);
 
-        $user_preferences = \App\Models\NotificationPreference::query()
-            ->where('user_id', $notifiable->id)
-            ->where('event', $this->notification_event)
-            ->get()
-            ->keyBy('channel');
-        if (
-            $settings->email_global_enabled
-            && ! empty($notifiable->email)
-            && $user_preferences->has('mail')
-        ) {
-            $channels[] = 'mail';  // use Laravel's mail channel
+        // Channel resolution is based on global settings and available user contact info
+        if ($settings->email_global_enabled && ! empty($notifiable->email)) {
+            $channels[] = 'mail'; // Laravel's built-in mail channel
         }
-        if (
-            $settings->telegram_global_enabled
-            && ! empty($notifiable->telegram_user_id)
-            && $user_preferences->has('telegram')
-        ) {
-            $channels[] = \App\Notifications\Channels\TelegramChannel::class;
+
+        if ($settings->telegram_global_enabled && ! empty($notifiable->telegram_user_id)) {
+            $channels[] = \App\Notifications\Channels\Telegram\TelegramChannel::class;
         }
 
         return array_unique($channels);

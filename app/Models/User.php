@@ -227,4 +227,18 @@ class User extends Authenticatable
             default => false,
         };
     }
+
+    /**
+     * Route notifications for the Telegram channel.
+     *
+     * Returns the Telegram chat/user ID if available.
+     */
+    public function routeNotificationForTelegram(): ?int
+    {
+        if (empty($this->telegram_user_id)) {
+            return null;
+        }
+
+        return (int) $this->telegram_user_id;
+    }
 }
