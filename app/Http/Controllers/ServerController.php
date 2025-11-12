@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ServerUpdateRequest;
 use App\Models\Server;
 use App\Models\User;
-use App\Services\ServerChecks\ServerCheckOrchestrator;
+use App\Services\ServerChecks\RunServerCheckService;
 use App\Services\ServerChecks\ServerCheckRegistry;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -257,15 +257,11 @@ class ServerController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function runJob(Server $server, ServerCheckOrchestrator $orchestrator)
+    public function runJob(Server $server, RunServerCheckService $runServerCheck)
     {
         $this->authorize('check', $server);
 
-        $runIds = $orchestrator->dispatch([$server]);
-        $runId = $runIds[$server->id] ?? null;
-        if ($runId) {
-            session(["server_run.{$server->id}" => $runId]);
-        }
+        $runServerCheck->handle([$server]);
 
         return to_route('server.show', $server->id)->with('check_dispatched', true);
     }
@@ -277,14 +273,14 @@ class ServerController extends Controller
      *                          Each element should be an instance of \App\Models\Server.
      * @return void
      */
-    public function runBatch(ServerCheckOrchestrator $orchestrator, $servers = [])
+    public function runBatch(RunServerCheckService $runServerCheck, $servers = [])
     {
         $this->authorize('checkAny', Server::class);
         if (empty($servers)) {
             $servers = Auth::user()->servers;
         }
 
-        $orchestrator->dispatch($servers);
+        $runServerCheck->handle($servers);
 
         return 'Jobs dispatched and the queue is being processed.';
     }
