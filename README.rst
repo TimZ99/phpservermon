@@ -30,6 +30,19 @@ Docker:
 etc.
 ```
 
+When you run Sail we now boot three containers: the main `PSM-test` web app, `queue-worker` (runs `php artisan queue:work --queue=curl,default`) and `scheduler` (runs `php artisan schedule:work`). Keeping all three services up is optional but recommended because background checks, heartbeats, and pruning tasks stay off the request cycle, improving the overall experience.
+
+Background workers
+-------------------
+
+Regardless of deployment method you must keep both the scheduler and queue worker alive:
+
+* **Docker/Sail:** the `queue-worker` and `scheduler` services start automatically once you execute `./vendor/bin/sail up`.
+* **Process supervisor:** on bare metal you can use Supervisor/systemd/etc. to run `php artisan queue:work --queue=curl,default --tries=1` and `php artisan schedule:work` as persistent services.
+* **Cron:** if you prefer cron for scheduling, add `* * * * * php /path/to/artisan schedule:run` to cron and still keep a supervised queue worker online.
+
+Without both processes, the heartbeat falls back to `sync` execution and checks will run inline.
+
 Telescope
 --------
 
