@@ -21,12 +21,7 @@
         {{ __('Server details') }}
     </x-slot>
 
-    @if ($runCompleted)
-    <div class="alert alert-success d-flex align-items-center" role="alert">
-        <div class="spinner-border spinner-border-sm text-success me-2" role="status"></div>
-        <div>{{ __('Latest checks finished. Refresh to view updated results.') }}</div>
-    </div>
-    @elseif (! empty($activeRunId))
+    @if (! empty($activeRunId))
     <div class="alert alert-info d-flex align-items-center justify-content-between" role="alert">
         <div class="d-flex align-items-center">
             <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>

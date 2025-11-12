@@ -282,7 +282,7 @@ class ServerController extends Controller
 
         $runServerCheck->handle($servers);
 
-        return 'Jobs dispatched and the queue is being processed.';
+        return to_route('server.monitor')->with('check_dispatched', true);
     }
 
     /**

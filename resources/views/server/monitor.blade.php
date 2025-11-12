@@ -1,4 +1,10 @@
 <x-app-layout>
+    @if(session('check_dispatched'))
+    <div class="alert alert-info" role="alert">
+        {{ __('Checks have been queued. This view will update as results arrive.') }}
+    </div>
+    @endif
+
     <div class="row d-flex">
     @can('checkAny', App\Models\Server::class)
         <a href="{{route('server.runBatch')}}">
@@ -40,4 +46,3 @@
         @endforelse
     </div>
 </x-app-layout>
-
