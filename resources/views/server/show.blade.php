@@ -50,7 +50,7 @@
             <br>
             <b>Created at</b> {{ $server->created_at }}<br>
             <b>Updated at</b> {{ $server->updated_at }}<br>
-            <b>Check settings</b>{{ $server->check_settings }}<br>
+            <b>Check settings</b>{{ json_encode($server->check_settings) }}<br>
         </div>
     </div>
 </x-app-layout>

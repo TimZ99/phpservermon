@@ -10,6 +10,8 @@ class GeneralSettings extends Settings
 
     public ?string $timezone = null;
 
+    public int $check_history_retention_days = 7;
+
     public static function group(): string
     {
         return 'general';

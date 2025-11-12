@@ -76,6 +76,10 @@
                 </select>
                 <x-input-error class="mt-2" :messages="$errors->get('timezone')" />
 
+                <label for="check_history_retention_days" class="mt-3">{{ __('Check history retention (days)') }}</label>
+                <input id="check_history_retention_days" name="check_history_retention_days" class="form-control mt-1 mb-2" type="number" min="1" max="365" value="{{ old('check_history_retention_days', $check_history_retention_days) }}" required />
+                <x-input-error class="mt-2" :messages="$errors->get('check_history_retention_days')" />
+
                 <div class="flex items-center gap-4">
                     <x-primary-button>{{ __('Save') }}</x-primary-button>
                     @if(session('success'))

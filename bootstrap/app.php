@@ -1,5 +1,9 @@
 <?php
 
+use App\Enums\QueueName;
+use App\Jobs\Heartbeat\CurlWorkerHeartbeat;
+use App\Jobs\Maintenance\PruneCheckHistory;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -14,6 +18,17 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         //
+    })
+    ->withSchedule(function (Schedule $schedule) {
+        $schedule->job(new CurlWorkerHeartbeat, QueueName::CURL->value)
+            ->name('curl-heartbeat')
+            ->description('Confirms the curl queue is being processed')
+            ->everyMinute();
+
+        $schedule->job(new PruneCheckHistory, QueueName::MAINTENANCE->value)
+            ->name('prune-check-history')
+            ->description('Prunes old check history records')
+            ->dailyAt('00:30');
     })
     ->withExceptions(function (Exceptions $exceptions) {
         Integration::handles($exceptions);

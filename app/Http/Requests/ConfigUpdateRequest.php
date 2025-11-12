@@ -17,6 +17,7 @@ class ConfigUpdateRequest extends FormRequest
         return [
             'locale' => ['required', 'string', 'min:2', 'max:30'],
             'timezone' => ['required', 'timezone:all', 'max:255'],
+            'check_history_retention_days' => ['required', 'integer', 'min:1', 'max:365'],
             'email_global_enabled' => ['boolean'],
             'email_from_name' => ['nullable', 'string', 'max:255'],
             'email_from_address' => ['nullable', 'email:rfc,filter_unicode', 'max:255'],

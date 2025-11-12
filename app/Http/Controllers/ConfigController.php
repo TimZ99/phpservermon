@@ -28,12 +28,14 @@ class ConfigController extends Controller
         $this->authorize('config:manage');
 
         // Return the config edit page
+        $generalSettings = app(GeneralSettings::class);
         $notificationSettings = app(\App\Settings\NotificationSettings::class);
 
         // Some values also have a value in Config::get of the .ENV file.
         return view('config.edit', [
             'locale' => Config::get('app.locale'),
             'timezone' => Config::get('app.timezone'),
+            'check_history_retention_days' => $generalSettings->check_history_retention_days,
             'email_global_enabled' => $notificationSettings->email_global_enabled,
             'email_from_name' => Config::get('email.from.name'),
             'email_from_address' => Config::get('email.from.address'),
@@ -59,6 +61,7 @@ class ConfigController extends Controller
         // Update the config
         $generalSettings->default_locale = $request->locale;
         $generalSettings->timezone = $request->timezone;
+        $generalSettings->check_history_retention_days = $request->integer('check_history_retention_days', 7);
         $generalSettings->save();
 
         $notificationSettings->email_global_enabled = $request->boolean('email_global_enabled');

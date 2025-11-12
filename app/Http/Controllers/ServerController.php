@@ -3,12 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ServerUpdateRequest;
-use App\Jobs\RunCurl;
 use App\Models\Server;
 use App\Models\User;
+use App\Services\ServerChecks\ServerCheckOrchestrator;
 use Exception;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Bus;
 
 /**
  * Routing:
@@ -34,7 +33,7 @@ class ServerController extends Controller
         $servers = $user->servers;
         foreach ($servers as $server) {
             $show_status = [];
-            $checkSettings = json_decode($server->check_settings, true);
+            $checkSettings = $server->check_settings ?? [];
 
             foreach ($checkSettings as $checkName => $check) {
                 if (! isset($check['enabled']) || ! $check['enabled']) {
@@ -102,8 +101,16 @@ class ServerController extends Controller
         $this->authorize('viewAny', Server::class);
         $servers = Server::all();
         foreach ($servers as $server) {
-            $server->statusCss = 'danger';
-            $server->statusCssColor = '#dc3545';
+            $server->statusCss = match ($server->overall_status) {
+                'success' => 'success',
+                'warning' => 'warning',
+                default => 'danger',
+            };
+            $server->statusCssColor = match ($server->statusCss) {
+                'success' => '#28a745',
+                'warning' => '#ffc107',
+                default => '#dc3545',
+            };
         }
 
         return view('server.index', ['servers' => $servers]);
@@ -149,6 +156,7 @@ class ServerController extends Controller
         try {
             // Create the server
             $server = Server::create($request->validated());
+            $server->update(['check_settings' => $this->defaultCheckSettings()]);
             // Sync the users with the server
             $server->users()->sync($request->input('users'));
 
@@ -214,30 +222,7 @@ class ServerController extends Controller
          * Fill the server with the validated data
          */
         $server->fill($request->validated())->save();
-
-        $json = json_encode([
-            'SSL' => [
-                'enabled' => true,
-                'nested' => true,
-                'SSL_expiration' => [
-                    'enabled' => true,
-                    'type' => 'warning',
-                    'input' => ['days' => 5],
-                ],
-                'SSL_certificate_valid' => [
-                    'enabled' => true,
-                    'type' => 'error',
-                    'input' => [],
-                ],
-            ],
-            'StatusCode' => [
-                'enabled' => true,
-                'type' => 'error',
-                'input' => [],
-            ],
-        ]);
-
-        $server->fill(['check_settings' => $json])->save();
+        $server->fill(['check_settings' => $this->defaultCheckSettings()])->save();
 
         // Return the server page with the updated server
         return to_route('server.show', $server->id);
@@ -248,11 +233,13 @@ class ServerController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function runJob(Server $server)
+    public function runJob(Server $server, ServerCheckOrchestrator $orchestrator)
     {
         $this->authorize('check', $server);
 
-        return $this->runBatch([$server]);
+        $orchestrator->dispatch([$server]);
+
+        return 'Server checks queued.';
     }
 
     /**
@@ -262,22 +249,14 @@ class ServerController extends Controller
      *                          Each element should be an instance of \App\Models\Server.
      * @return void
      */
-    public function runBatch($servers = [])
+    public function runBatch(ServerCheckOrchestrator $orchestrator, $servers = [])
     {
         $this->authorize('checkAny', Server::class);
         if (empty($servers)) {
             $servers = Auth::user()->servers;
         }
 
-        // Dispatch the RunCurl job for each server
-        $jobs = [];
-        foreach ($servers as $server) {
-            $jobs[] = new RunCurl($server);
-        }
-
-        Bus::batch($jobs)->name('CURL multiple servers')
-            ->onQueue('curl')
-            ->dispatch();
+        $orchestrator->dispatch($servers);
 
         return 'Jobs dispatched and the queue is being processed.';
     }
@@ -298,5 +277,36 @@ class ServerController extends Controller
 
         // Return to the server index page
         return to_route('server.index');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function defaultCheckSettings(): array
+    {
+        return [
+            'StatusCode' => ['enabled' => true],
+            'SSL_active' => ['enabled' => true],
+            'SSL_certificate_valid' => ['enabled' => true],
+            'SSL_expiration' => [
+                'enabled' => true,
+                'input' => ['days' => 5],
+            ],
+            'ContentRegex' => [
+                'enabled' => false,
+                'input' => ['pattern' => '/.+/'],
+            ],
+            'Latency' => [
+                'enabled' => true,
+                'input' => [
+                    'warning_ms' => 600,
+                    'fail_ms' => 1500,
+                ],
+            ],
+            'Headers' => [
+                'enabled' => false,
+                'input' => ['required' => []],
+            ],
+        ];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\EncryptedCheckSettings;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -55,6 +56,9 @@ class Server extends Model
      */
     protected $casts = [
         'port' => 'integer',
+        'check_settings' => EncryptedCheckSettings::class,
+        'overall_status_changed_at' => 'datetime',
+        'last_checked_at' => 'datetime',
     ];
 
     /**

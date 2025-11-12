@@ -2,108 +2,114 @@
 
 namespace App\Jobs;
 
+use App\Enums\QueueName;
 use App\Models\Server;
-use Illuminate\Bus\Batchable;
+use App\Services\ServerChecks\ServerCheckRunStore;
+use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Notification;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 
 class RunCurl implements ShouldQueue
 {
-    use Batchable, Queueable;
+    use Dispatchable, InteractsWithQueue, Queueable;
 
     /**
-     * Create a new job instance.
-     *
-     * @param  Server  $server  The server instance to be tested.
-     * @param  array  $checks  An array of checks to be performed on the server.
-     * @return void
+     * @param  array<string>  $checks
      */
-    public function __construct(protected Server $server, protected array $checks = [])
+    public function __construct(
+        protected string $serverId,
+        protected string $runId,
+        protected array $checks = []
+    ) {
+        $this->onQueue(QueueName::CURL->value);
+    }
+
+    public function handle(ServerCheckRunStore $store): void
     {
-        $this->onQueue('curl');
-        $this->server = $server;
-        $this->checks = $checks;
+        $server = Server::findOrFail($this->serverId);
+        $this->prepareServerForCurl($server);
+
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($curl, CURLOPT_ENCODING, '');
+        curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 10);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($curl, CURLOPT_CERTINFO, 1);
+        curl_setopt($curl, CURLOPT_HEADER, true);
+        curl_setopt($curl, CURLOPT_URL, $server->ip);
+
+        if (! empty($server->port)) {
+            curl_setopt($curl, CURLOPT_PORT, $server->port);
+        }
+
+        $startedAt = now();
+        $rawResponse = curl_exec($curl);
+        $info = curl_getinfo($curl) ?: [];
+        $error = curl_error($curl) ?: null;
+        curl_close($curl);
+
+        $headerSize = (int) Arr::get($info, 'header_size', 0);
+        $rawHeaders = $headerSize > 0 && is_string($rawResponse)
+            ? substr($rawResponse, 0, $headerSize)
+            : '';
+
+        $body = is_string($rawResponse) ? substr($rawResponse, $headerSize) : null;
+
+        $headers = $this->parseHeaders($rawHeaders);
+        $payload = [
+            'server' => [
+                'id' => $server->id,
+                'name' => $server->name,
+                'ip' => $server->ip,
+                'port' => $server->port,
+            ],
+            'checks' => $this->checks,
+            'check_settings' => $server->check_settings ?? [],
+            'curl' => [
+                'info' => $info,
+                'body' => $body,
+                'headers' => $headers,
+                'raw_headers' => $rawHeaders,
+                'error' => $error,
+                'latency_ms' => isset($info['total_time']) ? (int) round($info['total_time'] * 1000) : null,
+            ],
+            'started_at' => $startedAt->toIso8601String(),
+        ];
+
+        $store->put($this->runId, $payload);
+        Log::debug('Stored curl payload for server checks', ['run_id' => $this->runId, 'server_id' => $server->id]);
+    }
+
+    protected function prepareServerForCurl(Server $server): void
+    {
+        $server->ip = preg_replace('/^(.*)%cachebuster%/', '$0'.time(), $server->ip ?? '') ?? $server->ip;
     }
 
     /**
-     * Handle the job to run a cURL request and dispatch server checks.
+     * @return array<string, string>
      */
-    public function handle(): void
+    protected function parseHeaders(?string $raw): array
     {
-        // 1 Updates the server IP with a cache buster.
-        $this->server->ip = preg_replace('/^(.*)%cachebuster%/', '$0'.time(), $this->server->ip);
-
-        // 2 Initializes a cURL session and sets various options.
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_setopt($curl, CURLOPT_ENCODING, '');
-        curl_setopt($curl, CURLOPT_CERTINFO, 1);
-        curl_setopt($curl, CURLOPT_URL, $this->server->ip);
-
-        // 3 Executes the cURL request and retrieves the result and info.
-        $result = [
-            'exec' => curl_exec($curl),
-            'info' => curl_getinfo($curl),
-        ];
-
-        curl_close($curl);
-
-        // 4 Logs the start of tests for the server.
-        logger()->debug('Start tests for server. First curl website.', ['server' => $this->server, 'result' => $result, 'batch_id' => $this->batch()->id]);
-        $jobs = [];
-
-        // 5 Decodes and filters the server check settings if checks are not already set.
-        if (empty($this->checks)) {
-            $decodedSettings = json_decode($this->server->check_settings, true);
-            $this->checks = array_keys(array_filter($decodedSettings, fn ($settings) => $settings['enabled']));
+        if (empty($raw)) {
+            return [];
         }
 
-        // 6 Ensures the checks array contains unique values.
-        $this->checks = array_unique($this->checks);
+        $lines = preg_split("/(\r?\n)/", trim($raw)) ?: [];
+        $headers = [];
 
-        // 7 Iterates over the checks, creating job instances for each valid check class.
-        foreach ($this->checks as $check) {
-            $checkClass = 'App\Jobs\ServerChecks\\'.$check;
-            if (class_exists($checkClass)) {
-                // class need the following properties: server, curl_result, run_curl_batch_id
-                $jobs[] = new $checkClass($this->server, $result['info'], $this->batch()->id);
-            } else {
-                logger()->warning('Server check class does not exist', ['checkClass' => $checkClass]);
+        foreach ($lines as $line) {
+            if (str_contains($line, ':')) {
+                [$name, $value] = explode(':', $line, 2);
+                $headers[trim(strtolower($name))] = trim($value);
             }
         }
 
-        // 8 Logs a warning if no jobs were created and returns early.
-        if (empty($jobs)) {
-            logger()->warning('No server checks were dispatched because no jobs were created.');
-
-            return;
-        }
-
-        $context = ['server' => $this->server, 'run_curl_batch_id' => $this->batch()->id];
-        // 9 Dispatches a batch of server check jobs to the 'ServerTest' queue.
-        Bus::batch($jobs)
-            ->name('Tests for server '.$this->server->id)
-            ->onQueue('ServerTest')
-            ->finally(function ($batch) use ($context) {
-                logger()->debug('All server checks have been dispatched.', ['run_curl_batch_id' => $context['run_curl_batch_id'], 'server_checks_batch_id' => $batch->id]);
-                $server = Server::find($context['server']->id);
-                foreach ($server->users as $user) {
-                    if (empty($user->telegram_user_id)) {
-                        continue;
-                    }
-                    Notification::route('telegram', $user->telegram_user_id)
-                        ->notify(new \App\Notification\Messages\ServerUpdate(
-                            $context['run_curl_batch_id'],
-                            $batch->id,
-                            $context['server']
-                        ));
-                }
-            })
-            ->dispatch();
+        return $headers;
     }
 }
