@@ -14,26 +14,31 @@
         </a>
         @endcan
         @forelse ($servers as $server)
-            <div class="col-sm-4 col-md-3 col-xl-2">
+            <div class="col-sm-4 col-md-3 col-xl-3">
                 <div class="card text-bg-{{ $server->statusCss }} mb-4" @can('view', $server) onclick="window.location.href='{{ route('server.show', $server->id) }}'" @endcan>
                     <div class="card-header">
                         <a href="{{ route('server.show', $server->id) }}">{{ $server->name }}</a>
                     </div>
                     <div class="card-body">
-                        <p class="card-text">
-                            {{ __('Last online') }}: {{ $server->last_online_nice }}<br>
-                            {{ __('Last check') }}: {{ $server->last_checked_nice }}
-                            @if ($server->status === 'online')
-                                <br>
-                                {{ __('Last offline') }}: {{ $server->last_offline_nice }} {{ $server->last_offline_duration_nice }}<br>
-                                {{ __('Response time') }}: {{ (int) round($server->rtime * 1000) }} ms
-                            @endif
-                            <br>
-                            @foreach ($server->show_status as $check)
-                                <div style="width: 10px; height: 10px; background-color: {{ $check['color'] }}; display: inline-block;" title="{{ $check['name'] }}"></div>
-                            @endforeach
-
-                        </p>
+                        <div class="card-text my-0">
+                            {{ __('Last check') }}:
+                            @php
+                                $overallStatus = strtolower($server->overall_status ?? 'unknown');
+                                $badgeClass = match($overallStatus) {
+                                    'success' => 'bg-success',
+                                    'warning' => 'bg-warning text-dark',
+                                    'fail', 'danger', 'error' => 'bg-danger',
+                                    default => 'bg-secondary',
+                                };
+                            @endphp
+                            <span class="badge {{ $badgeClass }} my-1">{{ strtoupper($overallStatus) }}</span><br>
+                            {{ $server->last_checked_at->timezone(config('app.timezone'))->format('M j, Y H:i:s') ?? __('Never') }}<br>
+                            <div style="width:100%;">
+                                @foreach ($server->show_status as $check)
+                                    <div style="width: 10px; height: 10px; background-color: {{ $check['color'] }}; display: inline-block;" title="{{ $check['name'] }}"></div>
+                                @endforeach
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
