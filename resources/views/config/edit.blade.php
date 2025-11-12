@@ -6,8 +6,9 @@
         @csrf
         @method('patch')
         <div class="card">
-            <div class="card-header">
-                Config page
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>{{ __('Config page') }}</span>
+                <span id="heartbeat-indicator" class="badge bg-secondary">{{ __('Checking heartbeat...') }}</span>
             </div>
             <div class="card-body">
 
@@ -152,4 +153,35 @@
             </div>
         </div>
     </form>
-</x-app-layout>
+ </x-app-layout>
+ <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const indicator = document.getElementById('heartbeat-indicator');
+        if (! indicator) return;
+
+        const pollHeartbeat = () => fetch('{{ route('config.heartbeat') }}', {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        })
+            .then(response => response.json())
+            .then(data => {
+                indicator.classList.remove('bg-secondary', 'bg-success', 'bg-danger', 'bg-warning');
+                if (data.alive) {
+                    indicator.classList.add('bg-success');
+                    indicator.textContent = '{{ __('Heartbeat OK – using queue') }}';
+                } else {
+                    indicator.classList.add('bg-danger');
+                    indicator.textContent = '{{ __('No heartbeat found – using sync') }}';
+                }
+            })
+            .catch(() => {
+                indicator.classList.remove('bg-secondary');
+                indicator.classList.add('bg-warning');
+                indicator.textContent = '{{ __('Heartbeat status unknown') }}';
+            });
+
+        pollHeartbeat();
+        setInterval(pollHeartbeat, 30000);
+    });
+ </script>

@@ -32,6 +32,7 @@ Route::middleware(['auth', 'can:not-suspended'])->group(function () {
     /* Config */
     Route::get('/config', [ConfigController::class, 'edit'])->name('config.edit');
     Route::patch('/config', [ConfigController::class, 'update'])->name('config.update');
+    Route::get('/config/heartbeat', [ConfigController::class, 'heartbeat'])->name('config.heartbeat');
 });
 
 require __DIR__.'/auth.php';

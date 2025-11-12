@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\QueueName;
 use App\Http\Requests\ConfigUpdateRequest;
+use App\Services\Queue\QueueHeartbeatService;
 use App\Settings\GeneralSettings;
 use App\Settings\NotificationSettings;
 use Illuminate\Support\Facades\Config;
@@ -73,5 +75,18 @@ class ConfigController extends Controller
 
         // Return the config edit page with a success message
         return to_route('config.edit')->with('success', 'Configuration updated successfully.');
+    }
+
+    public function heartbeat(QueueHeartbeatService $service)
+    {
+        $this->authorize('config:manage');
+
+        $alive = $service->isAlive(QueueName::CURL);
+        $last = $service->lastBeat(QueueName::CURL);
+
+        return response()->json([
+            'alive' => $alive,
+            'last_beat' => $last?->toIso8601String(),
+        ]);
     }
 }
