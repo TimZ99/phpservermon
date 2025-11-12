@@ -1,56 +1,176 @@
+@php
+    $statusMap = [
+        'success' => ['label' => __('Success'), 'class' => 'badge bg-success'],
+        'warning' => ['label' => __('Warning'), 'class' => 'badge bg-warning text-dark'],
+        'fail' => ['label' => __('Fail'), 'class' => 'badge bg-danger'],
+        'danger' => ['label' => __('Fail'), 'class' => 'badge bg-danger'],
+        'error' => ['label' => __('Fail'), 'class' => 'badge bg-danger'],
+        'unknown' => ['label' => __('Unknown'), 'class' => 'badge bg-secondary'],
+    ];
+    $overall = strtolower($server->overall_status ?? 'unknown');
+    $overallMeta = $statusMap[$overall] ?? $statusMap['unknown'];
+    $timezone = config('app.timezone', 'UTC');
+    $lastCheckedAt = $server->last_checked_at
+        ? $server->last_checked_at->timezone($timezone)->format('M j, Y H:i:s')
+        : __('Never');
+    $checkSettings = $checkSettings ?? [];
+@endphp
+
 <x-app-layout>
     <x-slot name="header">
-        Server details
+        {{ __('Server details') }}
     </x-slot>
-    <div class="card">
-        <div class="card-header">
-            Server details
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>{{ __('Server details') }}</span>
+            <div>
+                @can('manage', $server)
+                <a href="{{ route('server.edit', $server->id) }}" class="btn btn-sm btn-outline-primary me-2">
+                    {{ __('Edit server') }}
+                </a>
+                @endcan
+                @can('check', $server)
+                <a href="{{ route('server.runChecks', $server->id) }}" class="btn btn-sm btn-outline-secondary">
+                    {{ __('Run tests') }}
+                </a>
+                @endcan
+            </div>
         </div>
         <div class="card-body">
-            @can('manage', $server)
-            <a href="{{route('server.edit', $server->id)}}">
-                <button class="btn btn-secondary mb-4">
-                    {{ __('Edit server') }}
-                </button>
-            </a>
-            @endcan
-            @can('check', $server)
-            <a href="{{route('server.runChecks', $server->id)}}">
-                <button class="btn btn-secondary mb-4">
-                    {{ __('Run tests') }}
-                </button>
-            </a>
-            <br>
-            @endcan
-            <b>Server id</b> {{ $server->id }}<br>
-            <b>Name</b> {{ $server->name }}<br>
-            <b>IP</b> {{ $server->ip }}<br>
-            <b>Port</b> {{ $server->port }}<br>
-            @isset($server->users) 
-                <b>Users</b> 
-                @foreach($server->users as $user) 
-                    {{ $user->name }}, 
-                @endforeach 
-                <br>
-            @endisset
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">{{ __('Server ID') }}</dt>
+                        <dd class="col-sm-8">{{ $server->id }}</dd>
 
-            <b>Ran checks</b><br> 
-            @php
-                $previousBatchId = null;
-            @endphp
-            @foreach($server->check_histories->sortBy(['server_checks_batch_id', 'created_at']) as $check)
-                @if($previousBatchId !== null && $previousBatchId !== $check->server_checks_batch_id)
-                    <br>
-                @endif
-                {{ $check->name }} - {{ $check->message }}<br>
-                @php
-                    $previousBatchId = $check->server_checks_batch_id;
-                @endphp
-            @endforeach
-            <br>
-            <b>Created at</b> {{ $server->created_at }}<br>
-            <b>Updated at</b> {{ $server->updated_at }}<br>
-            <b>Check settings</b>{{ json_encode($server->check_settings) }}<br>
+                        <dt class="col-sm-4">{{ __('Name') }}</dt>
+                        <dd class="col-sm-8">{{ $server->name }}</dd>
+
+                        <dt class="col-sm-4">{{ __('IP / Host') }}</dt>
+                        <dd class="col-sm-8">{{ $server->ip }}</dd>
+
+                        <dt class="col-sm-4">{{ __('Port') }}</dt>
+                        <dd class="col-sm-8">{{ $server->port ?? __('Default') }}</dd>
+
+                        <dt class="col-sm-4">{{ __('Users') }}</dt>
+                        <dd class="col-sm-8">
+                            @forelse($server->users as $user)
+                                <span class="badge bg-light text-dark me-1 mb-1">{{ $user->name }}</span>
+                            @empty
+                                <span class="text-muted">{{ __('No users attached') }}</span>
+                            @endforelse
+                        </dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 bg-light rounded h-100">
+                        <p class="mb-2 text-muted text-uppercase fw-bold">{{ __('Overall status') }}</p>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="{{ $overallMeta['class'] }} me-3">{{ $overallMeta['label'] }}</span>
+                            <div>
+                                <div class="small text-muted">{{ __('Last check') }}</div>
+                                <div class="fw-semibold">{{ $lastCheckedAt }}</div>
+                            </div>
+                        </div>
+                        <div class="small text-muted">
+                            {{ __('Created at') }}: {{ $server->created_at->timezone($timezone)->format('M j, Y H:i') }}<br>
+                            {{ __('Updated at') }}: {{ $server->updated_at->timezone($timezone)->format('M j, Y H:i') }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            {{ __('Check settings') }}
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped mb-0">
+                    <thead>
+                        <tr>
+                            <th>{{ __('Check') }}</th>
+                            <th>{{ __('Status') }}</th>
+                            <th>{{ __('Description') }}</th>
+                            <th>{{ __('Inputs / Thresholds') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($checkSettings as $name => $settings)
+                        @php
+                            $enabled = data_get($settings, 'enabled', false);
+                            $description = data_get($checkDefinitions, "{$name}.description");
+                            $inputs = data_get($settings, 'input', []);
+                        @endphp
+                        <tr>
+                            <td class="fw-semibold">{{ \Illuminate\Support\Str::headline($name) }}</td>
+                            <td>
+                                <span class="badge {{ $enabled ? 'bg-success' : 'bg-secondary' }}">
+                                    {{ $enabled ? __('Enabled') : __('Disabled') }}
+                                </span>
+                            </td>
+                            <td class="text-muted small">{{ $description ?? __('No description available.') }}</td>
+                            <td>
+                                @if(empty($inputs))
+                                    <span class="text-muted small">{{ __('No additional inputs') }}</span>
+                                @else
+                                    <ul class="list-unstyled mb-0 small">
+                                        @foreach($inputs as $key => $value)
+                                            @if(is_array($value))
+                                                <li><strong>{{ \Illuminate\Support\Str::headline($key) }}:</strong> {{ json_encode($value) }}</li>
+                                            @else
+                                                <li><strong>{{ \Illuminate\Support\Str::headline($key) }}:</strong> {{ $value === null || $value === '' ? __('Required only') : $value }}</li>
+                                            @endif
+                                        @endforeach
+                                    </ul>
+                                @endif
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">{{ __('No check settings defined.') }}</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer">
+            <details>
+                <summary class="text-muted small cursor-pointer">{{ __('Show raw JSON') }}</summary>
+                <pre class="bg-dark text-white p-3 rounded mt-3 small">{{ json_encode($server->check_settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>
+            </details>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            {{ __('Recent check history') }}
+        </div>
+        <div class="card-body">
+            @if($server->check_histories->isEmpty())
+                <p class="text-muted mb-0">{{ __('No checks have been recorded yet.') }}</p>
+            @else
+                <div class="list-group">
+                    @foreach($server->check_histories as $history)
+                        @php
+                            $status = strtolower($history->status ?? 'unknown');
+                            $badge = $statusMap[$status] ?? $statusMap['unknown'];
+                        @endphp
+                        <div class="list-group-item d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="fw-semibold">{{ $history->name }}</div>
+                                <div class="text-muted small">{{ $history->message }}</div>
+                                <div class="text-muted small">{{ $history->created_at->timezone($timezone)->format('M j, Y H:i:s') }}</div>
+                            </div>
+                            <span class="{{ $badge['class'] }}">{{ $badge['label'] }}</span>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
         </div>
     </div>
 </x-app-layout>

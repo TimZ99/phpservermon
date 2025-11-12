@@ -125,9 +125,15 @@ class ServerController extends Controller
     {
         $this->authorize('view', $server);
 
-        // Return the server page with the server and users
+        $server = Server::with([
+            'users:id,name',
+            'check_histories' => fn ($query) => $query->latest('created_at')->take(50),
+        ])->findOrFail($server->id);
+
         return view('server.show', [
-            'server' => Server::find($server->id),
+            'server' => $server,
+            'checkSettings' => $server->check_settings ?? [],
+            'checkDefinitions' => config('server-checks'),
         ]);
     }
 
