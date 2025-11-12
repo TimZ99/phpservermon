@@ -43,6 +43,7 @@ class ConfigController extends Controller
             'email_from_address' => Config::get('email.from.address'),
             'telegram_global_enabled' => $notificationSettings->telegram_global_enabled,
             'telegram_bot_token' => Config::get('notification.telegram_bot_token'),
+            'queue_connection' => Config::get('queue.default'),
         ]);
     }
 

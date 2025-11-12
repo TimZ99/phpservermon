@@ -20,10 +20,12 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withSchedule(function (Schedule $schedule) {
-        $schedule->job(new CurlWorkerHeartbeat, QueueName::CURL->value)
-            ->name('curl-heartbeat')
-            ->description('Confirms the curl queue is being processed')
-            ->everyMinute();
+        if (config('queue.default') === 'database') {
+            $schedule->job(new CurlWorkerHeartbeat, QueueName::CURL->value)
+                ->name('curl-heartbeat')
+                ->description('Confirms the curl queue is being processed')
+                ->everyFiveMinutes();
+        }
 
         $schedule->job(new PruneCheckHistory, QueueName::MAINTENANCE->value)
             ->name('prune-check-history')

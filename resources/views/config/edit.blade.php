@@ -8,7 +8,13 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span>{{ __('Config page') }}</span>
-                <span id="heartbeat-indicator" class="badge bg-secondary">{{ __('Checking heartbeat...') }}</span>
+                <span id="heartbeat-indicator" class="badge bg-secondary">
+                    @if ($queue_connection !== 'database')
+                        {{ __('Queue driver: :driver', ['driver' => $queue_connection]) }}
+                    @else
+                        {{ __('Checking heartbeat...') }}
+                    @endif
+                </span>
             </div>
             <div class="card-body">
 
@@ -159,6 +165,14 @@
         const indicator = document.getElementById('heartbeat-indicator');
         if (! indicator) return;
 
+        const queueDriver = '{{ $queue_connection }}';
+        if (queueDriver !== 'database') {
+            indicator.classList.remove('bg-secondary');
+            indicator.classList.add('bg-primary');
+            indicator.textContent = `{{ __('Queue driver: :driver') }}`.replace(':driver', queueDriver);
+            return;
+        }
+
         const pollHeartbeat = () => fetch('{{ route('config.heartbeat') }}', {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
@@ -166,13 +180,14 @@
         })
             .then(response => response.json())
             .then(data => {
-                indicator.classList.remove('bg-secondary', 'bg-success', 'bg-danger', 'bg-warning');
+                indicator.classList.remove('bg-secondary', 'bg-success', 'bg-danger', 'bg-warning', 'bg-primary');
+
                 if (data.alive) {
                     indicator.classList.add('bg-success');
-                    indicator.textContent = '{{ __('Heartbeat OK – using queue') }}';
+                    indicator.textContent = '{{ __('Heartbeat alive – queue driver: database') }}';
                 } else {
-                    indicator.classList.add('bg-danger');
-                    indicator.textContent = '{{ __('No heartbeat found – using sync') }}';
+                    indicator.classList.add('bg-warning');
+                    indicator.textContent = '{{ __('Heartbeat not found – using queue driver sync instead') }}';
                 }
             })
             .catch(() => {
@@ -182,6 +197,6 @@
             });
 
         pollHeartbeat();
-        setInterval(pollHeartbeat, 30000);
+        setInterval(pollHeartbeat, 300000);
     });
  </script>

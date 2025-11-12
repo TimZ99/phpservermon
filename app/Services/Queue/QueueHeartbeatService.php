@@ -27,7 +27,7 @@ class QueueHeartbeatService
         return now()->setTimestamp((int) $timestamp);
     }
 
-    public function isAlive(QueueName|string $queue, int $thresholdSeconds = 90): bool
+    public function isAlive(QueueName|string $queue, int $thresholdSeconds = 630): bool
     {
         $lastBeat = $this->lastBeat($queue);
 
