@@ -74,28 +74,32 @@ class NotificationPreferenceService
 
     protected function resolvePreference(User $user, Server $server, string $checkName, string $channel): ?NotificationPreference
     {
-        /** @var NotificationPreference|null $preference */
-        $preference = NotificationPreference::query()
+        return NotificationPreference::query()
             ->where('user_id', $user->id)
             ->where('channel', $channel)
-            ->where(function (Builder $query) use ($server, $checkName) {
-                $query->where(function (Builder $q) {
-                    $q->whereNull('server_id')
-                        ->whereNull('check_name');
-                })->orWhere(function (Builder $q) use ($server) {
-                    $q->where('server_id', $server->id)
-                        ->whereNull('check_name');
-                })->orWhere(function (Builder $q) use ($checkName) {
-                    $q->whereNull('server_id')
-                        ->where('check_name', $checkName);
-                })->orWhere(function (Builder $q) use ($server, $checkName) {
-                    $q->where('server_id', $server->id)
-                        ->where('check_name', $checkName);
-                });
+            ->where(function (Builder $query) use ($server) {
+                $query->whereNull('server_id')
+                    ->orWhere('server_id', $server->id);
             })
-            ->orderByRaw('case when server_id is not null and check_name is not null then 1 when server_id is not null then 2 when check_name is not null then 3 else 4 end')
+            ->where(function (Builder $query) use ($checkName) {
+                $query->whereNull('check_name')
+                    ->orWhere('check_name', $checkName);
+            })
+            ->get()
+            ->sortBy(fn (NotificationPreference $pref) => $this->preferencePriority($pref, $server, $checkName))
             ->first();
+    }
 
-        return $preference;
+    protected function preferencePriority(NotificationPreference $preference, Server $server, string $checkName): int
+    {
+        $serverSpecific = (string) $preference->server_id === (string) $server->id;
+        $checkSpecific = $preference->check_name === $checkName;
+
+        return match (true) {
+            $serverSpecific && $checkSpecific => 0,
+            $serverSpecific && ! $checkSpecific => 1,
+            ! $serverSpecific && $checkSpecific => 2,
+            default => 3,
+        };
     }
 }

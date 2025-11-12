@@ -66,3 +66,45 @@ it('treats muted-until preferences as disabled until expiration', function () {
 
     expect($channels)->not->toContain('mail');
 });
+
+it('prefers most specific preference ordering', function () {
+    $user = User::factory()->create(['email' => 'demo@example.com']);
+    $server = Server::factory()->create();
+    $check = '__OVERALLSTATUS__';
+
+    NotificationPreference::create([
+        'user_id' => $user->id,
+        'server_id' => null,
+        'check_name' => null,
+        'channel' => 'mail',
+        'enabled' => false,
+    ]);
+
+    NotificationPreference::create([
+        'user_id' => $user->id,
+        'server_id' => null,
+        'check_name' => $check,
+        'channel' => 'mail',
+        'enabled' => true,
+    ]);
+
+    NotificationPreference::create([
+        'user_id' => $user->id,
+        'server_id' => $server->id,
+        'check_name' => null,
+        'channel' => 'mail',
+        'enabled' => false,
+    ]);
+
+    NotificationPreference::create([
+        'user_id' => $user->id,
+        'server_id' => $server->id,
+        'check_name' => $check,
+        'channel' => 'mail',
+        'enabled' => true,
+    ]);
+
+    $channels = preferenceService()->channelsFor($user, $server, $check);
+
+    expect($channels)->toContain('mail');
+});
