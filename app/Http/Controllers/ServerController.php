@@ -129,11 +129,20 @@ class ServerController extends Controller
             'users:id,name',
             'check_histories' => fn ($query) => $query->latest('created_at')->take(50),
         ])->findOrFail($server->id);
+        $activeRunId = session("server_run.{$server->id}");
+        $runCompleted = false;
+        if ($activeRunId && $server->last_check_run_id === $activeRunId) {
+            $runCompleted = true;
+            session()->forget("server_run.{$server->id}");
+            $activeRunId = null;
+        }
 
         return view('server.show', [
             'server' => $server,
             'checkSettings' => $server->check_settings ?? [],
             'checkDefinitions' => config('server-checks'),
+            'activeRunId' => $activeRunId,
+            'runCompleted' => $runCompleted,
         ]);
     }
 
@@ -248,9 +257,13 @@ class ServerController extends Controller
     {
         $this->authorize('check', $server);
 
-        $orchestrator->dispatch([$server]);
+        $runIds = $orchestrator->dispatch([$server]);
+        $runId = $runIds[$server->id] ?? null;
+        if ($runId) {
+            session(["server_run.{$server->id}" => $runId]);
+        }
 
-        return 'Server checks queued.';
+        return to_route('server.show', $server->id)->with('check_dispatched', true);
     }
 
     /**

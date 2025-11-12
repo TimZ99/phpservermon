@@ -18,11 +18,13 @@ class ServerCheckOrchestrator
     /**
      * @param  iterable<Server>  $servers
      * @param  array<string>  $limitToChecks
+     * @return array<string, string> Server ID => run ID
      */
-    public function dispatch(iterable $servers, array $limitToChecks = []): void
+    public function dispatch(iterable $servers, array $limitToChecks = []): array
     {
         $queueAlive = $this->heartbeat->isAlive(QueueName::CURL);
         $connection = $queueAlive ? null : 'sync';
+        $runIds = [];
 
         foreach ($servers as $server) {
             $runId = (string) Str::uuid();
@@ -35,6 +37,9 @@ class ServerCheckOrchestrator
             }
 
             $pending->dispatch();
+            $runIds[$server->id] = $runId;
         }
+
+        return $runIds;
     }
 }

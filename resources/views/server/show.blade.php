@@ -21,6 +21,27 @@
         {{ __('Server details') }}
     </x-slot>
 
+    @if ($runCompleted)
+    <div class="alert alert-success d-flex align-items-center" role="alert">
+        <div class="spinner-border spinner-border-sm text-success me-2" role="status"></div>
+        <div>{{ __('Latest checks finished. Refresh to view updated results.') }}</div>
+    </div>
+    @elseif (! empty($activeRunId))
+    <div class="alert alert-info d-flex align-items-center justify-content-between" role="alert">
+        <div class="d-flex align-items-center">
+            <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+            <div>
+                <div class="fw-semibold">{{ __('Checks running...') }}</div>
+                <div class="small mb-0">{{ __('Monitoring run ID: :id. This page refreshes automatically.', ['id' => $activeRunId]) }}</div>
+            </div>
+        </div>
+        <button class="btn btn-sm btn-outline-light" onclick="window.location.reload()">{{ __('Refresh now') }}</button>
+    </div>
+    <script>
+        setTimeout(() => window.location.reload(), 5000);
+    </script>
+    @endif
+
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
             <span>{{ __('Server details') }}</span>
@@ -151,25 +172,44 @@
             {{ __('Recent check history') }}
         </div>
         <div class="card-body">
-            @if($server->check_histories->isEmpty())
+            @php
+                $groups = $server->check_histories->groupBy(function ($history) use ($timezone) {
+                    return $history->created_at->timezone($timezone)->format('M j, Y H:i:s');
+                });
+            @endphp
+            @if($groups->isEmpty())
                 <p class="text-muted mb-0">{{ __('No checks have been recorded yet.') }}</p>
             @else
-                <div class="list-group">
-                    @foreach($server->check_histories as $history)
-                        @php
-                            $status = strtolower($history->status ?? 'unknown');
-                            $badge = $statusMap[$status] ?? $statusMap['unknown'];
-                        @endphp
-                        <div class="list-group-item d-flex justify-content-between align-items-start">
-                            <div>
-                                <div class="fw-semibold">{{ $history->name }}</div>
-                                <div class="text-muted small">{{ $history->message }}</div>
-                                <div class="text-muted small">{{ $history->created_at->timezone($timezone)->format('M j, Y H:i:s') }}</div>
-                            </div>
-                            <span class="{{ $badge['class'] }}">{{ $badge['label'] }}</span>
+                @foreach($groups as $timestamp => $entries)
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="fw-semibold">{{ $timestamp }}</span>
+                            @php
+                                $overallStatus = strtolower(optional($entries->first(fn($item) => $item->name === \App\Jobs\FinalizeServerCheckRun::OVERALL_STATUS))->status ?? 'unknown');
+                                $overallBadge = $statusMap[$overallStatus] ?? $statusMap['unknown'];
+                            @endphp
+                            @if($overallStatus !== 'unknown')
+                                <span class="{{ $overallBadge['class'] }} ms-3">{{ $overallBadge['label'] }}</span>
+                            @endif
                         </div>
-                    @endforeach
-                </div>
+                        <div class="list-group">
+                            @foreach($entries->sortBy('name') as $history)
+                                @continue($history->name === \App\Jobs\FinalizeServerCheckRun::OVERALL_STATUS)
+                                @php
+                                    $status = strtolower($history->status ?? 'unknown');
+                                    $badge = $statusMap[$status] ?? $statusMap['unknown'];
+                                @endphp
+                                <div class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <div class="fw-semibold">{{ $history->name }}</div>
+                                        <div class="text-muted small">{{ $history->message }}</div>
+                                    </div>
+                                    <span class="{{ $badge['class'] }}">{{ $badge['label'] }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endforeach
             @endif
         </div>
     </div>
