@@ -9,6 +9,14 @@ class ContentRegex extends BaseServerCheckJob
         return 'ContentRegex';
     }
 
+    public static function defaults(): array
+    {
+        return [
+            'enabled' => false,
+            'input' => ['pattern' => '/.+/'],
+        ];
+    }
+
     protected function perform(array $payload, array $settings): void
     {
         $pattern = $settings['input']['pattern'] ?? null;

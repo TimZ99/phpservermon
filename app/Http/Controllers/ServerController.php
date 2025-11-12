@@ -6,6 +6,7 @@ use App\Http\Requests\ServerUpdateRequest;
 use App\Models\Server;
 use App\Models\User;
 use App\Services\ServerChecks\ServerCheckOrchestrator;
+use App\Services\ServerChecks\ServerCheckRegistry;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 
@@ -137,10 +138,12 @@ class ServerController extends Controller
             $activeRunId = null;
         }
 
+        $registry = app(ServerCheckRegistry::class);
+
         return view('server.show', [
             'server' => $server,
             'checkSettings' => $server->check_settings ?? [],
-            'checkDefinitions' => config('server-checks'),
+            'checkDefinitions' => $registry->all(),
             'activeRunId' => $activeRunId,
             'runCompleted' => $runCompleted,
         ]);
@@ -197,13 +200,14 @@ class ServerController extends Controller
 
         // Return the server edit page with the server and list of users with id and name
         $server = Server::with('users')->find($server->id);
+        $registry = app(ServerCheckRegistry::class);
 
         return view('server.edit', [
             'server' => $server,
             // Get id and name for all users that are not suspended
             'users' => User::where('suspended', false)->select('id', 'name')->get(),
-            'defaultCheckSettings' => $this->defaultCheckSettings(),
-            'checkDefinitions' => config('server-checks'),
+            'defaultCheckSettings' => $registry->defaults(),
+            'checkDefinitions' => $registry->all(),
         ]);
     }
 
@@ -305,7 +309,7 @@ class ServerController extends Controller
 
     protected function buildCheckSettingsFromRequest(ServerUpdateRequest $request, ?Server $server = null): array
     {
-        $defaults = $this->defaultCheckSettings();
+        $defaults = app(ServerCheckRegistry::class)->defaults();
         $existing = $server?->check_settings ?? [];
         $base = array_replace_recursive($defaults, $existing);
         $input = $request->input('check_settings', []);
@@ -400,36 +404,5 @@ class ServerController extends Controller
         }
 
         return $requirements;
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    protected function defaultCheckSettings(): array
-    {
-        return [
-            'StatusCode' => ['enabled' => true],
-            'SSL_active' => ['enabled' => true],
-            'SSL_certificate_valid' => ['enabled' => true],
-            'SSL_expiration' => [
-                'enabled' => true,
-                'input' => ['days' => 5],
-            ],
-            'ContentRegex' => [
-                'enabled' => false,
-                'input' => ['pattern' => '/.+/'],
-            ],
-            'Latency' => [
-                'enabled' => true,
-                'input' => [
-                    'warning_ms' => 600,
-                    'fail_ms' => 1500,
-                ],
-            ],
-            'Headers' => [
-                'enabled' => false,
-                'input' => ['required' => []],
-            ],
-        ];
     }
 }

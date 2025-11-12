@@ -47,6 +47,11 @@ abstract class BaseServerCheckJob implements ShouldQueue
 
     abstract protected function checkName(): string;
 
+    public static function defaults(): array
+    {
+        return ['enabled' => false];
+    }
+
     /**
      * @param  array<string, mixed>|null  $settings
      */

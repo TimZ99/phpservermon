@@ -9,6 +9,11 @@ class SSLActive extends BaseServerCheckJob
         return 'SSL_active';
     }
 
+    public static function defaults(): array
+    {
+        return ['enabled' => true];
+    }
+
     protected function perform(array $payload, array $settings): void
     {
         $url = $payload['curl']['info']['url'] ?? $payload['server']['ip'] ?? '';

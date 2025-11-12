@@ -9,6 +9,14 @@ class Headers extends BaseServerCheckJob
         return 'Headers';
     }
 
+    public static function defaults(): array
+    {
+        return [
+            'enabled' => false,
+            'input' => ['required' => []],
+        ];
+    }
+
     protected function perform(array $payload, array $settings): void
     {
         $required = $settings['input']['required'] ?? [];

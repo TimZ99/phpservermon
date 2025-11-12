@@ -9,6 +9,17 @@ class Latency extends BaseServerCheckJob
         return 'Latency';
     }
 
+    public static function defaults(): array
+    {
+        return [
+            'enabled' => true,
+            'input' => [
+                'warning_ms' => 600,
+                'fail_ms' => 1500,
+            ],
+        ];
+    }
+
     protected function perform(array $payload, array $settings): void
     {
         $latency = $payload['curl']['latency_ms'] ?? null;

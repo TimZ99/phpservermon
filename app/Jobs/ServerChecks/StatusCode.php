@@ -9,6 +9,11 @@ class StatusCode extends BaseServerCheckJob
         return 'StatusCode';
     }
 
+    public static function defaults(): array
+    {
+        return ['enabled' => true];
+    }
+
     protected function perform(array $payload, array $settings): void
     {
         $info = $payload['curl']['info'] ?? [];

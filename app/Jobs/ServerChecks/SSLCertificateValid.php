@@ -13,6 +13,11 @@ class SSLCertificateValid extends BaseServerCheckJob
         return 'SSL_certificate_valid';
     }
 
+    public static function defaults(): array
+    {
+        return ['enabled' => true];
+    }
+
     protected function perform(array $payload, array $settings): void
     {
         $certificate = $this->extractCertificate($payload);

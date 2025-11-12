@@ -13,6 +13,14 @@ class SSLExpiration extends BaseServerCheckJob
         return 'SSL_expiration';
     }
 
+    public static function defaults(): array
+    {
+        return [
+            'enabled' => true,
+            'input' => ['days' => 5],
+        ];
+    }
+
     protected function perform(array $payload, array $settings): void
     {
         $certificate = $this->extractCertificate($payload);
