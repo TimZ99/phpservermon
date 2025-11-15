@@ -5,7 +5,7 @@
     </div>
     @endif
 
-    <div class="row d-flex">
+    <div class="row g-4">
     @can('checkAny', App\Models\Server::class)
         <a href="{{route('server.runBatch')}}">
             <button class="btn btn-secondary mb-4">
@@ -14,14 +14,21 @@
         </a>
         @endcan
         @forelse ($servers as $server)
-            <div class="col-sm-4 col-md-3 col-xl-3">
-                <div class="card text-bg-{{ $server->statusCss }} mb-4" @can('view', $server) onclick="window.location.href='{{ route('server.show', $server->id) }}'" @endcan>
-                    <div class="card-header">
-                        <a href="{{ route('server.show', $server->id) }}">{{ $server->name }}</a>
-                    </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="card text-bg-{{ $server->statusCss }} h-100" @can('view', $server) onclick="window.location.href='{{ route('server.show', $server->id) }}'" @endcan>
                     <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                            <div>
+                                <p class="text-uppercase text-white-50 small mb-1">{{ __('Server') }}</p>
+                                <h2 class="h5 mb-0">
+                                    <a class="text-white text-decoration-none" href="{{ route('server.show', $server->id) }}">{{ $server->name }}</a>
+                                </h2>
+                            </div>
+                            <span class="badge bg-white text-dark text-uppercase">{{ $server->statusCss }}</span>
+                        </div>
+
                         <div class="card-text my-0">
-                            {{ __('Last check') }}:
+                            <p class="text-uppercase small mb-1">{{ __('Last check') }}</p>
                             @php
                                 $overallStatus = strtolower($server->overall_status ?? 'unknown');
                                 $badgeClass = match($overallStatus) {
@@ -33,7 +40,7 @@
                             @endphp
                             <span class="badge {{ $badgeClass }} my-1">{{ strtoupper($overallStatus) }}</span><br>
                             {{ $server->last_checked_at->timezone(config('app.timezone'))->format('M j, Y H:i:s') ?? __('Never') }}<br>
-                            <div style="width:100%;">
+                            <div class="mt-2" style="width:100%;">
                                 @foreach ($server->show_status as $check)
                                     <div style="width: 10px; height: 10px; background-color: {{ $check['color'] }}; display: inline-block;" title="{{ $check['name'] }}"></div>
                                 @endforeach

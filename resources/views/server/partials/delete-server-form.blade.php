@@ -1,13 +1,14 @@
-<section>
-    <header class="mt-4">
-        <h2>{{ __('Delete server') }} </h2>
-        <p>{{ __('Once a server is deleted, all of its resources and data will be permanently deleted.') }}</p>
-    </header>
+<section class="card">
+    <div class="card-body">
+        <p class="text-uppercase text-danger small mb-1">{{ __('Danger zone') }}</p>
+        <h2 class="h4 text-danger mb-2">{{ __('Delete server') }}</h2>
+        <p class="text-muted mb-4">{{ __('Once a server is deleted, all of its resources and data will be permanently deleted.') }}</p>
 
-    <x-danger-button data-bs-toggle="modal" data-bs-target="#confirm-server-deletion">{{ __('Delete server') }}</x-danger-button>
+        <x-danger-button data-bs-toggle="modal" data-bs-target="#confirm-server-deletion">{{ __('Delete server') }}</x-danger-button>
+    </div>
 
     <x-modal id="confirm-server-deletion" ariaLabelledby="confirm-server-deletion-label" >
-        <form method="post" action="{{ route('server.destroy', $server->id) }}" class="p-6">
+        <form method="post" action="{{ route('server.destroy', $server->id) }}" class="p-4">
             @csrf
             @method('delete')
             <div class="modal-header">

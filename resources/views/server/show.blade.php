@@ -38,24 +38,29 @@
     @endif
 
     <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <span>{{ __('Server details') }}</span>
-            <div>
-                @can('manage', $server)
-                <a href="{{ route('server.edit', $server->id) }}" class="btn btn-sm btn-outline-primary me-2">
-                    {{ __('Edit server') }}
-                </a>
-                @endcan
-                @can('check', $server)
-                <a href="{{ route('server.runChecks', $server->id) }}" class="btn btn-sm btn-outline-secondary">
-                    {{ __('Run tests') }}
-                </a>
-                @endcan
-            </div>
-        </div>
         <div class="card-body">
-            <div class="row g-4">
-                <div class="col-md-6">
+            <div class="row g-4 align-items-center">
+                <div class="col-12 col-lg-6">
+                    <div>
+                        <p class="text-uppercase text-muted small mb-1">{{ __('Overview') }}</p>
+                        <h2 class="h4 mb-0">{{ __('Server details') }}</h2>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-6 d-flex justify-content-lg-end gap-2">
+                    @can('manage', $server)
+                    <a href="{{ route('server.edit', $server->id) }}" class="btn btn-sm btn-outline-primary">
+                        {{ __('Edit server') }}
+                    </a>
+                    @endcan
+                    @can('check', $server)
+                    <a href="{{ route('server.runChecks', $server->id) }}" class="btn btn-sm btn-outline-secondary">
+                        {{ __('Run tests') }}
+                    </a>
+                    @endcan
+                </div>
+            </div>
+            <div class="row g-4 mt-2">
+                <div class="col-md-8">
                     <dl class="row mb-0">
                         <dt class="col-sm-4">{{ __('Server ID') }}</dt>
                         <dd class="col-sm-8">{{ $server->id }}</dd>
@@ -79,17 +84,17 @@
                         </dd>
                     </dl>
                 </div>
-                <div class="col-md-6">
-                    <div class="p-3 bg-light rounded h-100">
-                        <p class="mb-2 text-muted text-uppercase fw-bold">{{ __('Overall status') }}</p>
+                <div class="col-md-4 mt-0 mb-auto">
+                    <div class="p-3 rounded border bg-secondary text-white w-100">
+                        <p class="mb-2 text-uppercase fw-bold">{{ __('Overall status') }}</p>
                         <div class="d-flex align-items-center mb-3">
                             <span class="{{ $overallMeta['class'] }} me-3">{{ $overallMeta['label'] }}</span>
                             <div>
-                                <div class="small text-muted">{{ __('Last check') }}</div>
+                                <div class="small">{{ __('Last check') }}</div>
                                 <div class="fw-semibold">{{ $lastCheckedAt }}</div>
                             </div>
                         </div>
-                        <div class="small text-muted">
+                        <div class="small">
                             {{ __('Created at') }}: {{ $server->created_at->timezone($timezone)->format('M j, Y H:i') }}<br>
                             {{ __('Updated at') }}: {{ $server->updated_at->timezone($timezone)->format('M j, Y H:i') }}
                         </div>
@@ -100,11 +105,12 @@
     </div>
 
     <div class="card mb-4">
-        <div class="card-header">
-            {{ __('Check settings') }}
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
+        <div class="card-body">
+            <div class="mb-4">
+                <p class="text-uppercase text-muted small mb-1">{{ __('Checks') }}</p>
+                <h2 class="h4 mb-0">{{ __('Check settings') }}</h2>
+            </div>
+            <div class="table-responsive rounded-4 border" style="border-color: var(--app-border-color) !important;">
                 <table class="table table-striped mb-0">
                     <thead>
                         <tr>
@@ -154,7 +160,7 @@
                 </table>
             </div>
         </div>
-        <div class="card-footer">
+        <div class="card-footer border-top">
             <details>
                 <summary class="text-muted small cursor-pointer">{{ __('Show raw JSON') }}</summary>
                 <pre class="bg-dark text-white p-3 rounded mt-3 small">{{ json_encode($server->check_settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>
@@ -163,10 +169,11 @@
     </div>
 
     <div class="card">
-        <div class="card-header">
-            {{ __('Recent check history') }}
-        </div>
         <div class="card-body">
+            <div class="mb-4">
+                <p class="text-uppercase text-muted small mb-1">{{ __('History') }}</p>
+                <h2 class="h4 mb-0">{{ __('Recent check history') }}</h2>
+            </div>
             @php
                 $groups = $server->check_histories->groupBy(function ($history) use ($timezone) {
                     return $history->created_at->timezone($timezone)->format('M j, Y H:i:s');
