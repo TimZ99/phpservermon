@@ -22,7 +22,7 @@
     $hasTelegramUser = $telegramReady && ! empty($user->telegram_user_id);
 @endphp
 
-<section class="card shadow-sm border-0">
+<section class="card">
     <div class="card-body">
         <div class="text-center">
             <div class="rounded-circle bg-primary bg-opacity-10 text-primary fw-semibold d-inline-flex align-items-center justify-content-center"

@@ -61,6 +61,12 @@ class UserUpdateRequest extends FormRequest
                 'nullable', // The field is not required
                 'integer', // The field must be an integer
             ],
+            'theme_mode' => [
+                'sometimes',
+                'required',
+                'string',
+                Rule::in(['auto', 'day', 'night']),
+            ],
             'suspended' => [
                 'required', // The field is required
                 'boolean', // The field must be a boolean

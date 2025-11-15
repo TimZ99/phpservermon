@@ -1,5 +1,10 @@
+@php
+    $themePreference = optional(auth()->user())->theme_mode ?? 'auto';
+    $initialTheme = $themePreference === 'night' ? 'dark' : 'light';
+    $initialThemeClass = $initialTheme === 'dark' ? 'theme-night' : 'theme-day';
+@endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme-preference="{{ $themePreference }}" data-bs-theme="{{ $initialTheme }}" class="{{ $initialThemeClass }}">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +12,7 @@
 
         <title>{{ config('app.name', 'PHPServerMonitor') }}</title>
 
-        <meta name="description" content="PHP Server Monitor">
+        <meta name="description" content="PHPServerMonitor">
         <meta name="robots" content="noindex" />
         <!--<link rel="manifest" href="./manifest.json">-->
         <meta name="mobile-web-app-capable" content="yes">
@@ -33,8 +38,8 @@
         @include('layouts.navigation')
         <!-- Page Heading -->
         @isset($header)
-            <header class="bg-dark text-white border-bottom">
-                <div class="container pt-0 pb-2 pb-lg-3">
+            <header class="bg-dark text-white border-bottom pb-3">
+                <div class="container page-header-inner">
                     {{ $header }}
                 </div>
             </header>
@@ -44,7 +49,7 @@
                 {{ $slot }}
             </div>
         </main>
-        <footer class="footer mt-auto py-3 bg-white border-top" role="contentinfo">
+        <footer class="footer mt-auto py-3" role="contentinfo">
             <div class="container text-center text-md-start">
                 <span class="text-body-secondary">
                     Powered by

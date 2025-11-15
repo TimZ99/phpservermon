@@ -1,4 +1,4 @@
-<section class="card shadow-sm border-0">
+<section class="card">
     <div class="card-body">
         <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
             <div>

@@ -1,4 +1,4 @@
-<section class="card shadow-sm border-0">
+<section class="card">
     <div class="card-body">
         <p class="text-uppercase text-danger small mb-1">{{ __('Danger zone') }}</p>
         <h2 class="h4 text-danger mb-2">{{ __('Delete Account') }}</h2>

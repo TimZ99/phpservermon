@@ -1,5 +1,10 @@
+@php
+    $themePreference = optional(auth()->user())->theme_mode ?? 'auto';
+    $initialTheme = $themePreference === 'night' ? 'dark' : 'light';
+    $initialThemeClass = $initialTheme === 'dark' ? 'theme-night' : 'theme-day';
+@endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme-preference="{{ $themePreference }}" data-bs-theme="{{ $initialTheme }}" class="{{ $initialThemeClass }}">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +12,7 @@
 
         <title>{{ config('app.name', 'PHPServerMonitor') }}</title>
 
-        <meta name="description" content="PHP Server Monitor">
+        <meta name="description" content="PHPServerMonitor">
         <meta name="robots" content="noindex" />
         <!--<link rel="manifest" href="./manifest.json">-->
         <meta name="mobile-web-app-capable" content="yes">
@@ -34,7 +39,7 @@
         <main> 
             {{ $slot }}
         </main>
-        <footer class="fixed-bottom" role="contentinfo">
+        <footer class="footer fixed-bottom py-3" role="contentinfo">
             <div class="container">
                 <span class="text-body-secondary">
                     Powered by

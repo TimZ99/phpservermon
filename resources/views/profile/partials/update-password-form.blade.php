@@ -1,4 +1,4 @@
-<section class="card shadow-sm border-0">
+<section class="card">
     <div class="card-body">
         <div class="mb-4">
             <p class="text-uppercase text-muted small mb-1">{{ __('Security') }}</p>
