@@ -22,7 +22,7 @@
     </x-slot>
 
     @if (! empty($activeRunId))
-    <div class="alert alert-info d-flex align-items-center justify-content-between" role="alert">
+    <div class="alert alert-info text-bg-info d-flex align-items-center justify-content-between" role="alert">
         <div class="d-flex align-items-center">
             <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
             <div>

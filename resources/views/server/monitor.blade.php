@@ -1,6 +1,6 @@
 <x-app-layout>
     @if(session('check_dispatched'))
-    <div class="alert alert-info" role="alert">
+    <div class="alert alert-info text-bg-info" role="alert">
         {{ __('Checks have been queued. This view will update as results arrive.') }}
     </div>
     @endif

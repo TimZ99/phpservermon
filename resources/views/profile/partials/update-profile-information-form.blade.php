@@ -28,7 +28,7 @@
                 <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
                 @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
-                    <div class="alert alert-warning d-flex justify-content-between align-items-center gap-3 mt-3 mb-0">
+                    <div class="alert alert-warning text-bg-warning d-flex justify-content-between align-items-center gap-3 mt-3 mb-0">
                         <div>
                             <p class="mb-1">{{ __('Your email address is unverified.') }}</p>
                             <p class="mb-0 small">{{ __('Click the link below and we will re-send the verification email.') }}</p>

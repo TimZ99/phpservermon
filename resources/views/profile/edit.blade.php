@@ -9,19 +9,19 @@
     <div class="row g-4">
         @if(session('status') === 'telegram-test-sent')
             <div class="col-12">
-                <div class="alert alert-success mb-0">{{ __('Telegram test message sent.') }}</div>
+                <div class="alert alert-success text-bg-success mb-0">{{ __('Telegram test message sent.') }}</div>
             </div>
         @elseif(session('status') === 'telegram-disabled')
             <div class="col-12">
-                <div class="alert alert-warning mb-0">{{ __('Telegram is disabled globally or bot token missing.') }}</div>
+                <div class="alert alert-warning text-bg-warning mb-0">{{ __('Telegram is disabled globally or bot token missing.') }}</div>
             </div>
         @elseif(session('status') && str_contains(session('status'), 'Failed to send Telegram'))
             <div class="col-12">
-                <div class="alert alert-danger mb-0">{{ session('status') }}</div>
+                <div class="alert alert-danger text-bg-danger mb-0">{{ session('status') }}</div>
             </div>
         @elseif(session('status') === 'profile-updated')
             <div class="col-12">
-                <div class="alert alert-success mb-0">{{ __('Your profile details have been updated.') }}</div>
+                <div class="alert alert-success text-bg-success mb-0">{{ __('Your profile details have been updated.') }}</div>
             </div>
         @endif
 
