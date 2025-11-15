@@ -23,7 +23,8 @@ services:
         networks:
             - sail
         depends_on:
-            - mariadb
+            mariadb:
+                condition: service_healthy
     queue-worker:
         build:
             context: ./vendor/laravel/sail/runtimes/8.4
