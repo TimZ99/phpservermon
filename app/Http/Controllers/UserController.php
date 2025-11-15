@@ -6,7 +6,6 @@ use App\Http\Requests\UserUpdateRequest;
 use App\Models\Server;
 use App\Models\User;
 use Exception;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Routing:
@@ -45,6 +44,18 @@ class UserController extends Controller
         return view('user.show', [
             'user' => User::find($user->id),
         ]);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        $this->authorize('manageAny', User::class);
+
+        return response('This function is not yet implemented.', 418);
     }
 
     /**
@@ -99,7 +110,7 @@ class UserController extends Controller
                 ! (is_array($request->input('scopes')) && in_array('user:manage:*', $request->input('scopes')))
             ) {
                 $error_message = 'User update failed, tried removing the last user with user:manage:* privileges';
-                Log::notice($error_message, ['user_id' => $user->id]);
+                logger()->notice($error_message, ['user_id' => $user->id]);
 
                 return back()->withInput()->withErrors(['lastuser:editscope' => $error_message]);
             }
@@ -112,10 +123,11 @@ class UserController extends Controller
             $user->fill($request->validated());
             $user->save();
 
-            Log::info('User updated successfully', ['user_id' => $user->id]);
+            logger()->info('User updated successfully', ['user_id' => $user->id]);
 
             return to_route('user.show', $user->id);
         } catch (Exception $e) {
+            \Sentry\captureException($e);
             report($e);
 
             return back()->withInput()->withErrors(['general' => 'A problem occurred while updating the user. Please try again later.']);
@@ -133,7 +145,7 @@ class UserController extends Controller
         $this->authorize('manage', $user);
         // Cannot delete the user with user:manage:* scope
         if ($user->isLastPowerfulUser()) {
-            Log::notice('User deleted failed, tried removing the last user with user:manage:* scope', ['user_id' => $user->id]);
+            logger()->notice('User deleted failed, tried removing the last user with user:manage:* scope', ['user_id' => $user->id]);
 
             return back()->withErrors(['user:editdelete' => 'Cannot delete the last user with user:manage:* scope.']);
         }
@@ -141,7 +153,7 @@ class UserController extends Controller
         $user->servers()->detach();
         $user->delete();
 
-        Log::info('User deleted successfully', ['user_id' => $user->id]);
+        logger()->info('User deleted successfully', ['user_id' => $user->id]);
 
         return to_route('user.index');
     }

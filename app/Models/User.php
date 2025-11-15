@@ -108,14 +108,6 @@ class User extends Authenticatable
     }
 
     /**
-     * Route notifications for the telegram channel.
-     */
-    public function routeNotificationForTelegram(): int
-    {
-        return $this->telegram_user_id;
-    }
-
-    /**
      * Expand the scopes based on implied relationships.
      *
      * @param  string|array<string>  $scopes
@@ -167,17 +159,15 @@ class User extends Authenticatable
      */
     public function addScope(string|array $scopes): void
     {
-        foreach ((array) $scopes as $scope) {
-            if (! $this->isValidScope($scope)) {
+        $new = array_filter((array) $scopes, function (string $scope) {
+            if (! self::isValidScope($scope)) {
                 throw new \InvalidArgumentException("Invalid scope: {$scope}");
             }
 
-            if (! $this->hasScope($scope)) {
-                $this->scopes[] = $scope;
-            }
-        }
+            return true;
+        });
 
-        $this->scopes = array_values(array_unique($this->scopes));
+        $this->scopes = array_values(array_unique(array_merge($this->scopes ?? [], $new)));
     }
 
     /**

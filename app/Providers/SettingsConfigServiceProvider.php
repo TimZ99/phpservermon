@@ -15,6 +15,7 @@ class SettingsConfigServiceProvider extends ServiceProvider
 
             return true;
         } catch (\Throwable $e) {
+            \Sentry\captureException($e);
             logger()->info('Database not ready: '.$e->getMessage());
 
             return false;
@@ -51,6 +52,7 @@ class SettingsConfigServiceProvider extends ServiceProvider
                 'notification.telegram_bot_token' => $notificationSettings->telegram_bot_token ?? config('notification.telegram_bot_token'),
             ]);
         } catch (\Throwable $e) {
+            \Sentry\captureException($e);
             // Fallback bij boot-time errors, zoals connection issues
             logger()->warning('Settings config override failed: '.$e->getMessage());
         }

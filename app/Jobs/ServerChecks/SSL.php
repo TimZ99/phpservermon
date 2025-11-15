@@ -6,7 +6,6 @@ use App\Models\CheckHistory;
 use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Support\Facades\Log;
 
 class SSL implements ShouldQueue
 {
@@ -40,7 +39,7 @@ class SSL implements ShouldQueue
         // 1. Checks if SSL checks are enabled in the settings.
         if (! $this->check_settings->SSL->enabled) {
             // 2. Logs a debug message if SSL checks are not enabled and exits.
-            Log::debug('SSL check is not enabled for server.');
+            logger()->debug('SSL check is not enabled for server.');
 
             return;
         }
@@ -68,7 +67,7 @@ class SSL implements ShouldQueue
                 'message' => 'Could not test because no SSL certificate found.',
                 'check_settings' => json_encode($this->check_settings->SSL->SSL_expiration),
             ]);
-            Log::warning('No SSL certificate found.', ['info' => $certinfo]);
+            logger()->warning('No SSL certificate found.', ['info' => $certinfo]);
 
             return;
         }
@@ -79,7 +78,7 @@ class SSL implements ShouldQueue
         $expiration_time = $this->curl_result['certinfo'][0]['Expire date'];
 
         // 6. Logs the parsed SSL certificate information for debugging purposes.
-        Log::debug('SSL Cert info', ['certinfo' => $certinfo]);
+        logger()->debug('SSL Cert info', ['certinfo' => $certinfo]);
 
         // 7. Checks the validity of the SSL certificate.
         $this->checkSSLCertificateValidity($cert_expiration_date, $expiration_time);
@@ -87,7 +86,7 @@ class SSL implements ShouldQueue
         $this->checkSSLExpiration($cert_expiration_date, $expiration_time);
 
         // 9. Logs a debug message indicating the completion of the SSL check.
-        Log::debug('Completed SSL check for server.');
+        logger()->debug('Completed SSL check for server.');
     }
 
     /**
@@ -102,12 +101,12 @@ class SSL implements ShouldQueue
     protected function checkSSLCertificateValidity($cert_expiration_date, $expiration_time): void
     {
         if ($this->check_settings->SSL->SSL_certificate_valid->enabled !== true) {
-            Log::debug('Checking for valid SSL certificate is not enabled.');
+            logger()->debug('Checking for valid SSL certificate is not enabled.');
 
             return;
         }
 
-        Log::debug('Validating SSL certificate.');
+        logger()->debug('Validating SSL certificate.');
         $status = $cert_expiration_date > time() ? 'success' : 'error';
         $message = $status === 'success' ? 'SSL certificate is valid' : 'SSL certificate is not valid';
 
@@ -121,7 +120,7 @@ class SSL implements ShouldQueue
             'check_settings' => json_encode($this->check_settings->SSL->SSL_certificate_valid),
         ]);
 
-        Log::log($status === 'success' ? 'info' : 'warning', $message, ['expiration_time' => $expiration_time]);
+        logger()->log($status === 'success' ? 'info' : 'warning', $message, ['expiration_time' => $expiration_time]);
     }
 
     /**
@@ -137,12 +136,12 @@ class SSL implements ShouldQueue
     protected function checkSSLExpiration($cert_expiration_date, $expiration_time): void
     {
         if ($this->check_settings->SSL->SSL_expiration->enabled !== true) {
-            Log::debug('Checking for SSL expiration is not enabled.');
+            logger()->debug('Checking for SSL expiration is not enabled.');
 
             return;
         }
 
-        Log::debug('Checking for SSL expiration.');
+        logger()->debug('Checking for SSL expiration.');
         $expiration_days = round(($cert_expiration_date - time()) / 86400);
 
         if ($expiration_days < 0) {
@@ -157,7 +156,7 @@ class SSL implements ShouldQueue
                 'message' => $message,
                 'check_settings' => json_encode($this->check_settings->SSL->SSL_expiration),
             ]);
-            Log::log('warning', $message, ['expiration_time' => $expiration_time]);
+            logger()->log('warning', $message, ['expiration_time' => $expiration_time]);
         }
 
         $days_to_expiration = $this->check_settings->SSL->SSL_expiration->input->days;
@@ -176,6 +175,6 @@ class SSL implements ShouldQueue
             'check_settings' => json_encode($this->check_settings->SSL->SSL_expiration),
         ]);
 
-        Log::log($status === 'warning' ? 'warning' : 'info', $message, ['expiration_time' => $expiration_time]);
+        logger()->log($status === 'warning' ? 'warning' : 'info', $message, ['expiration_time' => $expiration_time]);
     }
 }

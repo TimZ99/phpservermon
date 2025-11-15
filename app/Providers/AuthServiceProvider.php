@@ -5,7 +5,6 @@ namespace App\Providers;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -25,7 +24,7 @@ class AuthServiceProvider extends ServiceProvider
 
             if ($policy) {
                 if (! method_exists($policy, $ability)) {
-                    Log::warning("Missing policy method '{$ability}'", [
+                    logger()->warning("Missing policy method '{$ability}'", [
                         'user_id' => $user->id,
                         'policy' => get_class($policy),
                         'target' => is_object($target) ? get_class($target) : $target,
@@ -35,7 +34,7 @@ class AuthServiceProvider extends ServiceProvider
             } else {
                 // No policy — treat as a Gate
                 if (! Gate::has($ability)) {
-                    Log::warning("Gate '{$ability}' was called but not defined", [
+                    logger()->warning("Gate '{$ability}' was called but not defined", [
                         'user_id' => $user->id,
                         'route' => request()->fullUrl(),
                     ]);

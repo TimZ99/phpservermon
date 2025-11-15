@@ -6,7 +6,6 @@ use App\Models\CheckHistory;
 use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Support\Facades\Log;
 
 class Template implements ShouldQueue
 {
@@ -31,12 +30,12 @@ class Template implements ShouldQueue
     public function handle(): void
     {
         if (! isset($this->check_settings->Template) || ! $this->check_settings->Template->enabled) {
-            Log::debug('Template check is not enabled for server.');
+            logger()->debug('Template check is not enabled for server.');
 
             return;
         }
 
-        Log::error('Template check ran!');
+        logger()->error('Template check ran!');
         // success / warning / danger
         $status = 'danger';
         // string

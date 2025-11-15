@@ -155,6 +155,7 @@ class ServerController extends Controller
             // Return the server page with the created server
             return to_route('server.show', $server->id);
         } catch (Exception $e) {
+            \Sentry\captureException($e);
             report($e);
 
             // If an error occurs, return back to the server create page with the input and errors

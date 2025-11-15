@@ -7,7 +7,6 @@ use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 
 class RunCurl implements ShouldQueue
@@ -55,7 +54,7 @@ class RunCurl implements ShouldQueue
         curl_close($curl);
 
         // 4 Logs the start of tests for the server.
-        Log::debug('Start tests for server. First curl website.', ['server' => $this->server, 'result' => $result, 'batch_id' => $this->batch()->id]);
+        logger()->debug('Start tests for server. First curl website.', ['server' => $this->server, 'result' => $result, 'batch_id' => $this->batch()->id]);
         $jobs = [];
 
         // 5 Decodes and filters the server check settings if checks are not already set.
@@ -74,13 +73,13 @@ class RunCurl implements ShouldQueue
                 // class need the following properties: server, curl_result, run_curl_batch_id
                 $jobs[] = new $checkClass($this->server, $result['info'], $this->batch()->id);
             } else {
-                Log::warning('Server check class does not exist', ['checkClass' => $checkClass]);
+                logger()->warning('Server check class does not exist', ['checkClass' => $checkClass]);
             }
         }
 
         // 8 Logs a warning if no jobs were created and returns early.
         if (empty($jobs)) {
-            Log::warning('No server checks were dispatched because no jobs were created.');
+            logger()->warning('No server checks were dispatched because no jobs were created.');
 
             return;
         }
@@ -91,14 +90,14 @@ class RunCurl implements ShouldQueue
             ->name('Tests for server '.$this->server->id)
             ->onQueue('ServerTest')
             ->finally(function ($batch) use ($context) {
-                Log::debug('All server checks have been dispatched.', ['run_curl_batch_id' => $context['run_curl_batch_id'], 'server_checks_batch_id' => $batch->id]);
+                logger()->debug('All server checks have been dispatched.', ['run_curl_batch_id' => $context['run_curl_batch_id'], 'server_checks_batch_id' => $batch->id]);
                 $server = Server::find($context['server']->id);
                 foreach ($server->users as $user) {
                     if (empty($user->telegram_user_id)) {
                         continue;
                     }
                     Notification::route('telegram', $user->telegram_user_id)
-                        ->notify(new \App\Notifications\ServerUpdate(
+                        ->notify(new \App\Notification\Messages\ServerUpdate(
                             $context['run_curl_batch_id'],
                             $batch->id,
                             $context['server']

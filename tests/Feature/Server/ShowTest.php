@@ -3,7 +3,7 @@
 use App\Models\Server;
 use App\Models\User;
 
-test('onlyuser with server:view:* can view server list', function () {
+test('only user with server:view:* can view server list', function () {
     $user = User::factory()->create();
     $userWithScope = User::factory()->create();
     $userWithScope->setScope(['server:view:*']);

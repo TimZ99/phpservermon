@@ -43,8 +43,14 @@
         </div>
 
         <div>
+            <label for="phone">{{ __('Phone') }}</label>
+            <input id="phone" name="phone" class="form-control mb-2" type="tel" value="{{old('phone', $user->phone)}}" autocomplete="tel" />
+            <x-input-error class="mt-2" :messages="$errors->get('phone')" />
+        </div>
+
+        <div>
             <label for="telegram_user_id">{{ __('Telegram User ID') }}</label>
-            <input id="telegram_user_id" name="telegram_user_id" class="form-control mb-2" type="number" value="{{ old('telegram_user_id', $user->telegram_user_id) }}" required />
+            <input id="telegram_user_id" name="telegram_user_id" class="form-control mb-2" type="number" value="{{ old('telegram_user_id', $user->telegram_user_id) }}" />
             <x-input-error class="mt-2" :messages="$errors->get('telegram_user_id')" />
             <a href="{{ route('profile.test.telegram') }}">
                 <x-secondary-button type="button" class="mb-2">{{ __('Test Telegram') }}</x-secondary-button>

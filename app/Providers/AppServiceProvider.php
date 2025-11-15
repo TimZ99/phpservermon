@@ -29,5 +29,8 @@ class AppServiceProvider extends \Illuminate\Support\ServiceProvider
         // If the environment is local, prevent models from silently discarding
         // attributes that are not present in the database.
         Model::preventSilentlyDiscardingAttributes($this->app->environment('local'));
+        \Sentry\configureScope(function (\Sentry\State\Scope $scope): void {
+            $scope->setTag('page.locale', $this->app->getLocale());
+        });
     }
 }
