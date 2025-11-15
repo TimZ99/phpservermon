@@ -1,19 +1,40 @@
 <x-app-layout>
     <x-slot name="header">
-        {{ __('Profile') }}
+        <div class="d-flex flex-wrap align-items-baseline gap-3">
+            <h1 class="h5 mb-0 text-white">{{ __('Profile & Security') }}</h1>
+            <p class="text-white-50 mb-0 small">{{ __('Manage the details that keep your account personal and secure.') }}</p>
+        </div>
     </x-slot>
-    <div class="row">
+
+    <div class="row g-4">
         @if(session('status') === 'telegram-test-sent')
-            <div class="alert alert-success">{{ __('Telegram test message sent.') }}</div>
+            <div class="col-12">
+                <div class="alert alert-success mb-0">{{ __('Telegram test message sent.') }}</div>
+            </div>
         @elseif(session('status') === 'telegram-disabled')
-            <div class="alert alert-warning">{{ __('Telegram is disabled globally or bot token missing.') }}</div>
+            <div class="col-12">
+                <div class="alert alert-warning mb-0">{{ __('Telegram is disabled globally or bot token missing.') }}</div>
+            </div>
         @elseif(session('status') && str_contains(session('status'), 'Failed to send Telegram'))
-            <div class="alert alert-danger">{{ session('status') }}</div>
+            <div class="col-12">
+                <div class="alert alert-danger mb-0">{{ session('status') }}</div>
+            </div>
+        @elseif(session('status') === 'profile-updated')
+            <div class="col-12">
+                <div class="alert alert-success mb-0">{{ __('Your profile details have been updated.') }}</div>
+            </div>
         @endif
-        @include('profile.partials.update-profile-information-form')
-        <hr>
-        @include('profile.partials.update-password-form')
-        <hr>
-        @include('profile.partials.delete-user-form')
+
+        <div class="col-12 col-lg-8">
+            <div class="vstack gap-4">
+                @include('profile.partials.update-profile-information-form')
+                @include('profile.partials.update-password-form')
+                @include('profile.partials.delete-user-form')
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+            @include('profile.partials.profile-overview')
+        </div>
     </div>
 </x-app-layout>

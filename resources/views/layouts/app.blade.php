@@ -29,21 +29,23 @@
         <!-- Scripts -->
         @vite(['resources/css/app.scss', 'resources/js/app.js'])
     </head>
-    <body>
+    <body class="d-flex flex-column min-vh-100">
         @include('layouts.navigation')
         <!-- Page Heading -->
         @isset($header)
-            <header class="px-4 pb-3 text-bg-dark">
-                {{ $header }}
+            <header class="bg-dark text-white border-bottom">
+                <div class="container pt-0 pb-2 pb-lg-3">
+                    {{ $header }}
+                </div>
             </header>
         @endisset
-        <main role="main">
-            <div class="mt-4 container align-items-center justify-content-center">
+        <main role="main" class="flex-grow-1 py-4">
+            <div class="container align-items-center justify-content-center">
                 {{ $slot }}
             </div>
         </main>
-        <footer class="footer fixed-bottom" role="contentinfo">
-            <div class="container">
+        <footer class="footer mt-auto py-3 bg-white border-top" role="contentinfo">
+            <div class="container text-center text-md-start">
                 <span class="text-body-secondary">
                     Powered by
                     <a href="https://github.com/phpservermon/phpservermon/" target="_blank" rel="noopener">
