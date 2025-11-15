@@ -18,8 +18,12 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
+        $notificationSettings = app(\App\Settings\NotificationSettings::class);
+
         return view('profile.edit', [
             'user' => $request->user(),
+            'telegramGloballyEnabled' => $notificationSettings->telegram_global_enabled,
+            'telegramBotConfigured' => ! empty($notificationSettings->telegram_bot_token),
         ]);
     }
 
@@ -62,6 +66,12 @@ class ProfileController extends Controller
 
     public function test_telegram()
     {
+        $settings = app(\App\Settings\NotificationSettings::class);
+
+        if (! $settings->telegram_global_enabled || empty($settings->telegram_bot_token)) {
+            return Redirect::route('profile.edit')->with('status', 'telegram-disabled');
+        }
+
         try {
             Notification::send(Auth::user(), new DynamicNotification('test_message', ['text' => 'Test message for Telegram notification']));
         } catch (\Exception $e) {
@@ -69,9 +79,9 @@ class ProfileController extends Controller
             $message = 'Failed to send Telegram notification: '.$e->getMessage();
             logger()->error($message);
 
-            return $message;
+            return Redirect::route('profile.edit')->with('status', $message);
         }
 
-        return 'Notification sent to user';
+        return Redirect::route('profile.edit')->with('status', 'telegram-test-sent');
     }
 }

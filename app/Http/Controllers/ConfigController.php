@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\QueueName;
 use App\Http\Requests\ConfigUpdateRequest;
+use App\Services\Queue\QueueHeartbeatService;
 use App\Settings\GeneralSettings;
 use App\Settings\NotificationSettings;
 use Illuminate\Support\Facades\Config;
@@ -28,17 +30,20 @@ class ConfigController extends Controller
         $this->authorize('config:manage');
 
         // Return the config edit page
+        $generalSettings = app(GeneralSettings::class);
         $notificationSettings = app(\App\Settings\NotificationSettings::class);
 
         // Some values also have a value in Config::get of the .ENV file.
         return view('config.edit', [
             'locale' => Config::get('app.locale'),
             'timezone' => Config::get('app.timezone'),
+            'check_history_retention_days' => $generalSettings->check_history_retention_days,
             'email_global_enabled' => $notificationSettings->email_global_enabled,
             'email_from_name' => Config::get('email.from.name'),
             'email_from_address' => Config::get('email.from.address'),
             'telegram_global_enabled' => $notificationSettings->telegram_global_enabled,
             'telegram_bot_token' => Config::get('notification.telegram_bot_token'),
+            'queue_connection' => Config::get('queue.default'),
         ]);
     }
 
@@ -59,6 +64,7 @@ class ConfigController extends Controller
         // Update the config
         $generalSettings->default_locale = $request->locale;
         $generalSettings->timezone = $request->timezone;
+        $generalSettings->check_history_retention_days = $request->integer('check_history_retention_days', 7);
         $generalSettings->save();
 
         $notificationSettings->email_global_enabled = $request->boolean('email_global_enabled');
@@ -70,5 +76,18 @@ class ConfigController extends Controller
 
         // Return the config edit page with a success message
         return to_route('config.edit')->with('success', 'Configuration updated successfully.');
+    }
+
+    public function heartbeat(QueueHeartbeatService $service)
+    {
+        $this->authorize('config:manage');
+
+        $alive = $service->isAlive(QueueName::CURL);
+        $last = $service->lastBeat(QueueName::CURL);
+
+        return response()->json([
+            'alive' => $alive,
+            'last_beat' => $last?->toIso8601String(),
+        ]);
     }
 }

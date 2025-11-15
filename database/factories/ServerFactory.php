@@ -19,27 +19,38 @@ class ServerFactory extends Factory
         $statuses = [200, 401, 403, 404];
         $status = $statuses[array_rand($statuses)];
 
-        $json = json_encode([
-            'SSL' => [
-                'enabled' => true,
-                'nested' => true,
-                'SSL_expiration' => [
-                    'enabled' => true,
-                    'type' => 'warning',
-                    'input' => ['days' => 5],
-                ],
-                'SSL_certificate_valid' => [
-                    'enabled' => true,
-                    'type' => 'error',
-                    'input' => [],
-                ],
-            ],
+        $json = [
             'StatusCode' => [
                 'enabled' => true,
-                'type' => 'error',
-                'input' => [],
             ],
-        ]);
+            'SSL_active' => [
+                'enabled' => true,
+            ],
+            'SSL_certificate_valid' => [
+                'enabled' => true,
+            ],
+            'SSL_expiration' => [
+                'enabled' => true,
+                'input' => ['days' => 5],
+            ],
+            'ContentRegex' => [
+                'enabled' => false,
+                'input' => ['pattern' => '/.+/'],
+            ],
+            'Latency' => [
+                'enabled' => true,
+                'input' => [
+                    'warning_ms' => 600,
+                    'fail_ms' => 1500,
+                ],
+            ],
+            'Headers' => [
+                'enabled' => false,
+                'input' => [
+                    'required' => [],
+                ],
+            ],
+        ];
 
         return [
             'name' => $status.' '.fake()->word(),

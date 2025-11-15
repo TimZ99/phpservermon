@@ -6,8 +6,15 @@
         @csrf
         @method('patch')
         <div class="card">
-            <div class="card-header">
-                Config page
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>{{ __('Config page') }}</span>
+                <span id="heartbeat-indicator" class="badge bg-secondary">
+                    @if ($queue_connection !== 'database')
+                        {{ __('Queue driver: :driver', ['driver' => $queue_connection]) }}
+                    @else
+                        {{ __('Checking heartbeat...') }}
+                    @endif
+                </span>
             </div>
             <div class="card-body">
 
@@ -75,6 +82,10 @@
                     </optgroup>
                 </select>
                 <x-input-error class="mt-2" :messages="$errors->get('timezone')" />
+
+                <label for="check_history_retention_days" class="mt-3">{{ __('Check history retention (days)') }}</label>
+                <input id="check_history_retention_days" name="check_history_retention_days" class="form-control mt-1 mb-2" type="number" min="1" max="365" value="{{ old('check_history_retention_days', $check_history_retention_days) }}" required />
+                <x-input-error class="mt-2" :messages="$errors->get('check_history_retention_days')" />
 
                 <div class="flex items-center gap-4">
                     <x-primary-button>{{ __('Save') }}</x-primary-button>
@@ -148,4 +159,44 @@
             </div>
         </div>
     </form>
-</x-app-layout>
+ </x-app-layout>
+ <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const indicator = document.getElementById('heartbeat-indicator');
+        if (! indicator) return;
+
+        const queueDriver = '{{ $queue_connection }}';
+        if (queueDriver !== 'database') {
+            indicator.classList.remove('bg-secondary');
+            indicator.classList.add('bg-primary');
+            indicator.textContent = `{{ __('Queue driver: :driver') }}`.replace(':driver', queueDriver);
+            return;
+        }
+
+        const pollHeartbeat = () => fetch('{{ route('config.heartbeat') }}', {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        })
+            .then(response => response.json())
+            .then(data => {
+                indicator.classList.remove('bg-secondary', 'bg-success', 'bg-danger', 'bg-warning', 'bg-primary');
+
+                if (data.alive) {
+                    indicator.classList.add('bg-success');
+                    indicator.textContent = '{{ __('Heartbeat alive – queue driver: database') }}';
+                } else {
+                    indicator.classList.add('bg-warning');
+                    indicator.textContent = '{{ __('Heartbeat not found – using queue driver sync instead') }}';
+                }
+            })
+            .catch(() => {
+                indicator.classList.remove('bg-secondary');
+                indicator.classList.add('bg-warning');
+                indicator.textContent = '{{ __('Heartbeat status unknown') }}';
+            });
+
+        pollHeartbeat();
+        setInterval(pollHeartbeat, 300000);
+    });
+ </script>

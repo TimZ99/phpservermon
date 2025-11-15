@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ServerUpdateRequest;
-use App\Jobs\RunCurl;
 use App\Models\Server;
 use App\Models\User;
+use App\Services\ServerChecks\RunServerCheckService;
+use App\Services\ServerChecks\ServerCheckRegistry;
 use Exception;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Bus;
 
 /**
  * Routing:
@@ -34,7 +34,7 @@ class ServerController extends Controller
         $servers = $user->servers;
         foreach ($servers as $server) {
             $show_status = [];
-            $checkSettings = json_decode($server->check_settings, true);
+            $checkSettings = $server->check_settings ?? [];
 
             foreach ($checkSettings as $checkName => $check) {
                 if (! isset($check['enabled']) || ! $check['enabled']) {
@@ -102,8 +102,16 @@ class ServerController extends Controller
         $this->authorize('viewAny', Server::class);
         $servers = Server::all();
         foreach ($servers as $server) {
-            $server->statusCss = 'danger';
-            $server->statusCssColor = '#dc3545';
+            $server->statusCss = match ($server->overall_status) {
+                'success' => 'success',
+                'warning' => 'warning',
+                default => 'danger',
+            };
+            $server->statusCssColor = match ($server->statusCss) {
+                'success' => '#28a745',
+                'warning' => '#ffc107',
+                default => '#dc3545',
+            };
         }
 
         return view('server.index', ['servers' => $servers]);
@@ -118,9 +126,26 @@ class ServerController extends Controller
     {
         $this->authorize('view', $server);
 
-        // Return the server page with the server and users
+        $server = Server::with([
+            'users:id,name',
+            'check_histories' => fn ($query) => $query->latest('created_at')->take(50),
+        ])->findOrFail($server->id);
+        $activeRunId = session("server_run.{$server->id}");
+        $runCompleted = false;
+        if ($activeRunId && $server->last_check_run_id === $activeRunId) {
+            $runCompleted = true;
+            session()->forget("server_run.{$server->id}");
+            $activeRunId = null;
+        }
+
+        $registry = app(ServerCheckRegistry::class);
+
         return view('server.show', [
-            'server' => Server::find($server->id),
+            'server' => $server,
+            'checkSettings' => $server->check_settings ?? [],
+            'checkDefinitions' => $registry->all(),
+            'activeRunId' => $activeRunId,
+            'runCompleted' => $runCompleted,
         ]);
     }
 
@@ -149,6 +174,7 @@ class ServerController extends Controller
         try {
             // Create the server
             $server = Server::create($request->validated());
+            $server->update(['check_settings' => $this->buildCheckSettingsFromRequest($request, $server)]);
             // Sync the users with the server
             $server->users()->sync($request->input('users'));
 
@@ -173,10 +199,15 @@ class ServerController extends Controller
         $this->authorize('manage', $server);
 
         // Return the server edit page with the server and list of users with id and name
+        $server = Server::with('users')->find($server->id);
+        $registry = app(ServerCheckRegistry::class);
+
         return view('server.edit', [
-            'server' => Server::find($server->id),
+            'server' => $server,
             // Get id and name for all users that are not suspended
             'users' => User::where('suspended', false)->select('id', 'name')->get(),
+            'defaultCheckSettings' => $registry->defaults(),
+            'checkDefinitions' => $registry->all(),
         ]);
     }
 
@@ -213,31 +244,9 @@ class ServerController extends Controller
          * Update the server
          * Fill the server with the validated data
          */
-        $server->fill($request->validated())->save();
-
-        $json = json_encode([
-            'SSL' => [
-                'enabled' => true,
-                'nested' => true,
-                'SSL_expiration' => [
-                    'enabled' => true,
-                    'type' => 'warning',
-                    'input' => ['days' => 5],
-                ],
-                'SSL_certificate_valid' => [
-                    'enabled' => true,
-                    'type' => 'error',
-                    'input' => [],
-                ],
-            ],
-            'StatusCode' => [
-                'enabled' => true,
-                'type' => 'error',
-                'input' => [],
-            ],
-        ]);
-
-        $server->fill(['check_settings' => $json])->save();
+        $server->fill($request->validated());
+        $server->check_settings = $this->buildCheckSettingsFromRequest($request, $server);
+        $server->save();
 
         // Return the server page with the updated server
         return to_route('server.show', $server->id);
@@ -248,11 +257,13 @@ class ServerController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function runJob(Server $server)
+    public function runJob(Server $server, RunServerCheckService $runServerCheck)
     {
         $this->authorize('check', $server);
 
-        return $this->runBatch([$server]);
+        $runServerCheck->handle([$server]);
+
+        return to_route('server.show', $server->id)->with('check_dispatched', true);
     }
 
     /**
@@ -262,24 +273,16 @@ class ServerController extends Controller
      *                          Each element should be an instance of \App\Models\Server.
      * @return void
      */
-    public function runBatch($servers = [])
+    public function runBatch(RunServerCheckService $runServerCheck, $servers = [])
     {
         $this->authorize('checkAny', Server::class);
         if (empty($servers)) {
             $servers = Auth::user()->servers;
         }
 
-        // Dispatch the RunCurl job for each server
-        $jobs = [];
-        foreach ($servers as $server) {
-            $jobs[] = new RunCurl($server);
-        }
+        $runServerCheck->handle($servers);
 
-        Bus::batch($jobs)->name('CURL multiple servers')
-            ->onQueue('curl')
-            ->dispatch();
-
-        return 'Jobs dispatched and the queue is being processed.';
+        return to_route('server.monitor')->with('check_dispatched', true);
     }
 
     /**
@@ -298,5 +301,104 @@ class ServerController extends Controller
 
         // Return to the server index page
         return to_route('server.index');
+    }
+
+    protected function buildCheckSettingsFromRequest(ServerUpdateRequest $request, ?Server $server = null): array
+    {
+        $defaults = app(ServerCheckRegistry::class)->defaults();
+        $existing = $server?->check_settings ?? [];
+        $base = array_replace_recursive($defaults, $existing);
+        $input = $request->input('check_settings', []);
+
+        if (! is_array($input) || empty($input)) {
+            return $base;
+        }
+
+        $settings = [];
+
+        foreach ($defaults as $name => $config) {
+            $current = $base[$name] ?? $config;
+            $enabled = data_get($input, "{$name}.enabled");
+            if ($enabled === null) {
+                $enabled = data_get($current, 'enabled', false);
+            }
+
+            $current['enabled'] = filter_var($enabled, FILTER_VALIDATE_BOOLEAN);
+
+            switch ($name) {
+                case 'SSL_expiration':
+                    $days = data_get($input, "{$name}.days");
+                    if ($days === null) {
+                        $days = data_get($current, 'input.days', 5);
+                    }
+                    $current['input']['days'] = max(1, (int) $days);
+                    break;
+                case 'ContentRegex':
+                    $pattern = data_get($input, "{$name}.pattern");
+                    if ($pattern === null) {
+                        $pattern = data_get($current, 'input.pattern', '');
+                    }
+                    $current['input']['pattern'] = trim((string) $pattern);
+                    break;
+                case 'Latency':
+                    $warning = data_get($input, "{$name}.warning_ms");
+                    if ($warning === null) {
+                        $warning = data_get($current, 'input.warning_ms', 600);
+                    }
+                    $fail = data_get($input, "{$name}.fail_ms");
+                    if ($fail === null) {
+                        $fail = data_get($current, 'input.fail_ms', 1500);
+                    }
+
+                    $warning = max(1, (int) $warning);
+                    $fail = max($warning, (int) $fail);
+
+                    $current['input']['warning_ms'] = $warning;
+                    $current['input']['fail_ms'] = $fail;
+                    break;
+                case 'Headers':
+                    $raw = data_get($input, "{$name}.required", null);
+                    if ($raw === null) {
+                        $requirements = data_get($current, 'input.required', []);
+                    } else {
+                        $requirements = $this->parseHeaderRequirements($raw);
+                    }
+                    $current['input']['required'] = $requirements;
+                    break;
+            }
+
+            $settings[$name] = $current;
+        }
+
+        return $settings;
+    }
+
+    /**
+     * @return array<string, string|null>
+     */
+    protected function parseHeaderRequirements(?string $raw): array
+    {
+        if ($raw === null) {
+            return [];
+        }
+
+        $lines = preg_split("/\r?\n/", trim($raw)) ?: [];
+        $requirements = [];
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if ($line === '') {
+                continue;
+            }
+
+            if (str_contains($line, ':')) {
+                [$name, $value] = explode(':', $line, 2);
+                $requirements[trim($name)] = trim($value) === '' ? null : trim($value);
+            } else {
+                $requirements[$line] = null;
+            }
+        }
+
+        return $requirements;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Settings;
 
+use Spatie\LaravelSettings\Attributes\Encrypted;
 use Spatie\LaravelSettings\Settings;
 
 class NotificationSettings extends Settings
@@ -14,6 +15,7 @@ class NotificationSettings extends Settings
 
     public bool $telegram_global_enabled = false;
 
+    #[Encrypted]
     public ?string $telegram_bot_token = null;
 
     public static function group(): string

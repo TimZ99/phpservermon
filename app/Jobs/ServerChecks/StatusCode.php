@@ -2,79 +2,36 @@
 
 namespace App\Jobs\ServerChecks;
 
-use App\Models\CheckHistory;
-use Illuminate\Bus\Batchable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Queue\Queueable;
-
-class StatusCode implements ShouldQueue
+class StatusCode extends BaseServerCheckJob
 {
-    use Batchable, Queueable;
-
-    protected $check_settings;
-
-    /**
-     * Create a new job instance.
-     */
-    public function __construct(protected $server, protected $curl_result, protected $run_curl_batch_id)
+    protected function checkName(): string
     {
-        $this->onQueue('ServerTest');
-        $this->curl_result = $curl_result;
-        $this->check_settings = json_decode($this->server->check_settings);
-        $this->run_curl_batch_id = $run_curl_batch_id;
+        return 'StatusCode';
     }
 
-    /**
-     * Execute the job.
-     */
-    public function handle(): void
+    public static function defaults(): array
     {
-        if (! isset($this->check_settings->StatusCode) || ! $this->check_settings->StatusCode->enabled) {
-            logger()->debug('Status code check is not enabled for server.');
+        return ['enabled' => true];
+    }
 
-            return;
+    protected function perform(array $payload, array $settings): void
+    {
+        $info = $payload['curl']['info'] ?? [];
+        $code = (int) ($info['http_code'] ?? 0);
+        $message = 'Unhandled status code '.$code;
+        $status = 'fail';
+
+        if ($code === 0) {
+            $message = 'No response from server';
+        } elseif ($code >= 200 && $code <= 399) {
+            $status = 'success';
+            $message = 'Status code OK ('.$code.')';
+        } elseif ($code >= 400 && $code <= 499) {
+            $message = 'Client error ('.$code.')';
+        } elseif ($code >= 500 && $code <= 599) {
+            $message = 'Server error ('.$code.')';
         }
 
-        $code = $this->curl_result['http_code'] ?? null;
-        $status = 'error';
-
-        switch ($code) {
-            case 0:
-                logger()->warning('TIMEOUT ERROR: no response from server', [$this->curl_result]);
-                $message = 'TIMEOUT ERROR: no response from server';
-                break;
-            case 200:
-                logger()->info('Status code is OK', [$this->curl_result]);
-                $status = 'success';
-                $message = 'Status code is OK ('.$code.')';
-                break;
-            case 301:
-                logger()->info('Resource moved permanently', [$this->curl_result]);
-                $status = 'warning';
-                $message = 'Resource moved permanently ('.$code.')';
-                break;
-            case 404:
-                logger()->error('Resource not found', [$this->curl_result]);
-                $message = 'Resource not found ('.$code.')';
-                break;
-            case 500:
-                logger()->error('Internal server error', [$this->curl_result]);
-                $message = 'Internal server error ('.$code.')';
-                break;
-            default:
-                logger()->info('Unhandled status code: '.(string) $code, [$this->curl_result]);
-                $message = 'Unhandled status code: '.(string) $code;
-                break;
-        }
-
-        CheckHistory::create([
-            'server_id' => $this->server->id,
-            'run_curl_batch_id' => $this->run_curl_batch_id,
-            'server_checks_batch_id' => $this->batch()->id,
-            'name' => 'StatusCode',
-            'status' => $status,
-            'message' => $message,
-            'check_settings' => isset($this->check_settings->StatusCode) ? json_encode($this->check_settings->StatusCode) : null,
-        ]);
+        $this->record($this->checkName(), $status, $message, $settings);
     }
 }

@@ -52,6 +52,9 @@
             <label for="telegram_user_id">{{ __('Telegram User ID') }}</label>
             <input id="telegram_user_id" name="telegram_user_id" class="form-control mb-2" type="number" value="{{ old('telegram_user_id', $user->telegram_user_id) }}" />
             <x-input-error class="mt-2" :messages="$errors->get('telegram_user_id')" />
+            @if (! $telegramGloballyEnabled || ! $telegramBotConfigured)
+                <p class="text-warning small mb-2">{{ __('Telegram notifications are disabled globally or the bot token is not configured.') }}</p>
+            @endif
             <a href="{{ route('profile.test.telegram') }}">
                 <x-secondary-button type="button" class="mb-2">{{ __('Test Telegram') }}</x-secondary-button>
             </a>

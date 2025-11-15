@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Notifications\Notifiable;
@@ -92,6 +93,14 @@ class User extends Authenticatable
     public function servers(): BelongsToMany
     {
         return $this->belongsToMany(Server::class);
+    }
+
+    /**
+     * @return HasMany<\App\Models\NotificationPreference>
+     */
+    public function notificationPreferences(): HasMany
+    {
+        return $this->hasMany(NotificationPreference::class);
     }
 
     /**
@@ -226,5 +235,19 @@ class User extends Authenticatable
             $model === 'user' && in_array($action, ['view', 'manage']) => ctype_digit($target),
             default => false,
         };
+    }
+
+    /**
+     * Route notifications for the Telegram channel.
+     *
+     * Returns the Telegram chat/user ID if available.
+     */
+    public function routeNotificationForTelegram(): ?int
+    {
+        if (empty($this->telegram_user_id)) {
+            return null;
+        }
+
+        return (int) $this->telegram_user_id;
     }
 }
