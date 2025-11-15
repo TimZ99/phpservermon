@@ -38,9 +38,9 @@
                 <dt class="col-6 text-muted">{{ __('Email status') }}</dt>
                 <dd class="col-6 mb-2 text-end">
                     @if($emailNeedsVerification)
-                        <span class="badge bg-warning-subtle text-warning-emphasis">{{ __('Unverified') }}</span>
+                        <span class="badge text-bg-warning">{{ __('Unverified') }}</span>
                     @else
-                        <span class="badge bg-success-subtle text-success-emphasis">{{ __('Verified') }}</span>
+                        <span class="badge text-bg-success">{{ __('Verified') }}</span>
                     @endif
                 </dd>
 
@@ -52,11 +52,11 @@
                 <dt class="col-6 text-muted">{{ __('Telegram') }}</dt>
                 <dd class="col-6 mb-2 text-end">
                     @if(! $telegramReady)
-                        <span class="badge bg-secondary-subtle text-secondary-emphasis">{{ __('Disabled') }}</span>
+                        <span class="badge text-bg-secondary">{{ __('Disabled') }}</span>
                     @elseif($hasTelegramUser)
-                        <span class="badge bg-success-subtle text-success-emphasis">{{ __('Connected') }}</span>
+                        <span class="badge text-bg-success">{{ __('Connected') }}</span>
                     @else
-                        <span class="badge bg-warning-subtle text-warning-emphasis">{{ __('Not linked') }}</span>
+                        <span class="badge text-bg-warning">{{ __('Not linked') }}</span>
                     @endif
                 </dd>
 

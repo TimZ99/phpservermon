@@ -31,6 +31,19 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
+        <script>
+            (() => {
+                const root = document.documentElement;
+                const preference = root.dataset.themePreference || 'auto';
+                if (preference === 'auto' && window.matchMedia) {
+                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    root.dataset.bsTheme = prefersDark ? 'dark' : 'light';
+                    root.classList.remove('theme-day', 'theme-night');
+                    root.classList.add(prefersDark ? 'theme-night' : 'theme-day');
+                }
+            })();
+        </script>
+
         <!-- Scripts -->
         @vite(['resources/css/app.scss', 'resources/js/app.js'])
     </head>

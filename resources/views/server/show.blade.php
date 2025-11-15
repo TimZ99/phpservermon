@@ -1,11 +1,11 @@
 @php
     $statusMap = [
-        'success' => ['label' => __('Success'), 'class' => 'badge bg-success'],
-        'warning' => ['label' => __('Warning'), 'class' => 'badge bg-warning text-dark'],
-        'fail' => ['label' => __('Fail'), 'class' => 'badge bg-danger'],
-        'danger' => ['label' => __('Fail'), 'class' => 'badge bg-danger'],
-        'error' => ['label' => __('Fail'), 'class' => 'badge bg-danger'],
-        'unknown' => ['label' => __('Unknown'), 'class' => 'badge bg-secondary'],
+        'success' => ['label' => __('Success'), 'class' => 'badge text-bg-success'],
+        'warning' => ['label' => __('Warning'), 'class' => 'badge text-bg-warning'],
+        'fail' => ['label' => __('Fail'), 'class' => 'badge text-bg-danger'],
+        'danger' => ['label' => __('Fail'), 'class' => 'badge text-bg-danger'],
+        'error' => ['label' => __('Fail'), 'class' => 'badge text-bg-danger'],
+        'unknown' => ['label' => __('Unknown'), 'class' => 'badge text-bg-secondary'],
     ];
     $overall = strtolower($server->overall_status ?? 'unknown');
     $overallMeta = $statusMap[$overall] ?? $statusMap['unknown'];
@@ -77,7 +77,7 @@
                         <dt class="col-sm-4">{{ __('Users') }}</dt>
                         <dd class="col-sm-8">
                             @forelse($server->users as $user)
-                                <span class="badge bg-light text-dark me-1 mb-1">{{ $user->name }}</span>
+                                <span class="badge text-bg-light me-1 mb-1">{{ $user->name }}</span>
                             @empty
                                 <span class="text-muted">{{ __('No users attached') }}</span>
                             @endforelse
@@ -130,7 +130,7 @@
                         <tr>
                             <td class="fw-semibold">{{ \Illuminate\Support\Str::headline($name) }}</td>
                             <td>
-                                <span class="badge {{ $enabled ? 'bg-success' : 'bg-secondary' }}">
+                                <span class="badge {{ $enabled ? 'text-bg-success' : 'text-bg-secondary' }}">
                                     {{ $enabled ? __('Enabled') : __('Disabled') }}
                                 </span>
                             </td>
@@ -194,22 +194,22 @@
                                 <span class="{{ $overallBadge['class'] }} ms-3">{{ $overallBadge['label'] }}</span>
                             @endif
                         </div>
-                        <div class="list-group">
-                            @foreach($entries->sortBy('name') as $history)
-                                @continue($history->name === \App\Jobs\FinalizeServerCheckRun::OVERALL_STATUS)
-                                @php
-                                    $status = strtolower($history->status ?? 'unknown');
-                                    $badge = $statusMap[$status] ?? $statusMap['unknown'];
-                                @endphp
-                                <div class="list-group-item d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <div class="fw-semibold">{{ $history->name }}</div>
-                                        <div class="text-muted small">{{ $history->message }}</div>
-                                    </div>
-                                    <span class="{{ $badge['class'] }}">{{ $badge['label'] }}</span>
+                                <div class="list-group">
+                                    @foreach($entries->sortBy('name') as $history)
+                                        @continue($history->name === \App\Jobs\FinalizeServerCheckRun::OVERALL_STATUS)
+                                        @php
+                                            $status = strtolower($history->status ?? 'unknown');
+                                            $badge = $statusMap[$status] ?? $statusMap['unknown'];
+                                        @endphp
+                                        <div class="list-group-item d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <div class="fw-semibold">{{ $history->name }}</div>
+                                                <div class="text-muted small">{{ $history->message }}</div>
+                                            </div>
+                                            <span class="{{ $badge['class'] }}">{{ $badge['label'] }}</span>
+                                        </div>
+                                    @endforeach
                                 </div>
-                            @endforeach
-                        </div>
                     </div>
                 @endforeach
             @endif

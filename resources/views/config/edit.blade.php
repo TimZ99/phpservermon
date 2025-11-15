@@ -12,7 +12,7 @@
                         <p class="text-uppercase text-muted small mb-1">{{ __('General') }}</p>
                         <h2 class="h4 mb-0">{{ __('Configuration') }}</h2>
                     </div>
-                    <span id="heartbeat-indicator" class="badge bg-secondary">
+                    <span id="heartbeat-indicator" class="badge text-bg-secondary">
                         @if ($queue_connection !== 'database')
                             {{ __('Queue driver: :driver', ['driver' => $queue_connection]) }}
                         @else

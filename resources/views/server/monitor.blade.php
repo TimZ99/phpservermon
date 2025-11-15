@@ -19,12 +19,12 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
                             <div>
-                                <p class="text-uppercase text-white-50 small mb-1">{{ __('Server') }}</p>
-                                <h2 class="h5 mb-0">
-                                    <a class="text-white text-decoration-none" href="{{ route('server.show', $server->id) }}">{{ $server->name }}</a>
-                                </h2>
+                                <p class="text-uppercase text-muted small mb-1">{{ __('Server') }}</p>
+                                <h5 class="mb-0">
+                                    <a class="text-body-emphasis text-decoration-none" href="{{ route('server.show', $server->id) }}">{{ $server->name }}</a>
+                                </h5>
                             </div>
-                            <span class="badge bg-white text-dark text-uppercase">{{ $server->statusCss }}</span>
+                            <span class="badge text-bg-light text-uppercase">{{ $server->statusCss }}</span>
                         </div>
 
                         <div class="card-text my-0">
