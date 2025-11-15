@@ -49,6 +49,11 @@ class SettingsConfigServiceProvider extends ServiceProvider
                 'app.timezone' => $generalSettings->timezone ?? config('app.timezone'),
                 'email.from.name' => $notificationSettings->email_from_name ?? config('email.from.name'),
                 'email.from.address' => $notificationSettings->email_from_address ?? config('email.from.address'),
+                'mail.mailers.smtp.host' => $notificationSettings->email_host ?? config('mail.mailers.smtp.host'),
+                'mail.mailers.smtp.port' => $notificationSettings->email_port ?? config('mail.mailers.smtp.port'),
+                'mail.mailers.smtp.username' => $notificationSettings->email_username ?? config('mail.mailers.smtp.username'),
+                'mail.mailers.smtp.password' => $notificationSettings->email_password ?? config('mail.mailers.smtp.password'),
+                'mail.mailers.smtp.scheme' => $notificationSettings->email_encryption ?? config('mail.mailers.smtp.scheme'),
                 'notification.telegram_bot_token' => $notificationSettings->telegram_bot_token ?? config('notification.telegram_bot_token'),
             ]);
         } catch (\Throwable $e) {
