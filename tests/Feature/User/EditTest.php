@@ -1,16 +1,22 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\patch;
+
+uses(RefreshDatabase::class);
 
 test('cannot edit other users without user:manage:* scope', function () {
     $user1 = User::factory()->create();
     $user2 = User::factory()->create();
 
-    $this->actingAs($user1)
-        ->patch('/user/'.$user2->id, ['name' => 'New Name'])
+    actingAs($user1);
+    patch('/user/'.$user2->id, ['name' => 'New Name'])
         ->assertForbidden();
 
-    $this->assertNotEquals('New Name', $user2->fresh()->name);
+    expect($user2->fresh()->name)->not->toBe('New Name');
 });
 
 test('user can edit other users with the user:manage:* scope', function () {
@@ -18,10 +24,10 @@ test('user can edit other users with the user:manage:* scope', function () {
     $userWithScope->setScope(['user:manage:*']);
     $user = User::factory()->create();
 
-    $this->actingAs($userWithScope)
-        ->patch('/user/'.$user->id, ['name' => 'New Name'])
+    actingAs($userWithScope);
+    patch('/user/'.$user->id, ['name' => 'New Name'])
         ->assertSessionHasNoErrors()
         ->assertRedirectToRoute('user.show', $user->id);
 
-    $this->assertEquals('New Name', $user->fresh()->name);
+    expect($user->fresh()->name)->toBe('New Name');
 });
