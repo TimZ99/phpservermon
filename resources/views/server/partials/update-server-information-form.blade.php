@@ -21,68 +21,79 @@ $headerLines = collect(data_get($resolvedSettings, 'Headers.input.required', [])
     ->implode(PHP_EOL);
 @endphp
 
-<section>
-    <header>
-        <h2>{{ __('General settings') }}</h2>
-    </header>
-    <form method="post" action="{{ route('server.update', $server->id) }}" class="mt-6">
-        @csrf
-        @method('patch')
+<form method="post" action="{{ route('server.update', $server->id) }}">
+    @csrf
+    @method('patch')
 
-        <label for="name">{{ __('Name') }}</label>
-        <input id="name" name="name" class="form-control mt-1 mb-2" type="text" value="{{ old('name', $server->name) }}" required autofocus autocomplete="off" />
-        <x-input-error class="mt-2" :messages="$errors->get('name')" />
-
-        <label for="ip">{{ __('IP') }}</label>
-        <input id="ip" name="ip" class="form-control mt-1 mb-2" type="text" value="{{ old('ip', $server->ip) }}" required autocomplete="off" />
-        <x-input-error class="mt-2" :messages="$errors->get('ip')" />
-
-        <label for="popular_ports">{{ __('Port') }}</label>
-        <select id="popular_ports" name="popular_ports" class="form-select mb-2">
-            <option @empty(old('port', $server->port)) selected @endempty disabled>{{ __('Select a port') }}</option>
-            <option @if (in_array(old('port', $server->port), array_keys($ports))) selected @endif value="custom">{{ __('Custom port') }}</option>
-            <optgroup label="{{ __('Popular ports') }}">
-                @foreach ($ports as $value => $label)
-                <option @if (old('port', $server->port) == $value) selected @endif value="{{ $value }}">{{ $label }}</option>
-                @endforeach
-            </optgroup>
-        </select>
-
-        <label for="port" class="d-none">{{ __('Custom port') }}</label>
-        <input id="port" name="port" class="form-control mb-2 d-none" type="number" value="{{ old('port', $server->port) }}" autocomplete="off" />
-        <x-input-error class="mt-2" :messages="$errors->get('port')" />
-
-        <div class="form-group">
-            <label for="users">{{ __('Users') }}</label>
-            <select class="form-select mb-2" id="users" name="users[]" multiple>
-                @foreach ($users as $user)
-                <option
-                    value="{{ $user->id }}"
-                    @if(in_array($user->id, $server->users->pluck('id')->toArray())) selected @endif
-                >
-                    {{ $user->name }}
-                </option>
-                @endforeach
-            </select>
+    <div class="d-flex flex-column gap-4">
+        <div class="card">
+            <div class="card-body">
+                <div class="mb-4">
+                    <p class="text-uppercase text-muted small mb-1">{{ __('General') }}</p>
+                    <h2 class="h4 mb-0">{{ __('Server settings') }}</h2>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="name" class="form-label">{{ __('Name') }}</label>
+                        <input id="name" name="name" class="form-control" type="text" value="{{ old('name', $server->name) }}" required autofocus autocomplete="off" />
+                        <x-input-error class="mt-2" :messages="$errors->get('name')" />
+                    </div>
+                    <div class="col-md-6">
+                        <label for="ip" class="form-label">{{ __('IP') }}</label>
+                        <input id="ip" name="ip" class="form-control" type="text" value="{{ old('ip', $server->ip) }}" required autocomplete="off" />
+                        <x-input-error class="mt-2" :messages="$errors->get('ip')" />
+                    </div>
+                    <div class="col-md-6">
+                        <label for="popular_ports" class="form-label">{{ __('Port') }}</label>
+                        <select id="popular_ports" name="popular_ports" class="form-select">
+                            <option @empty(old('port', $server->port)) selected @endempty disabled>{{ __('Select a port') }}</option>
+                            <option @if (in_array(old('port', $server->port), array_keys($ports))) selected @endif value="custom">{{ __('Custom port') }}</option>
+                            <optgroup label="{{ __('Popular ports') }}">
+                                @foreach ($ports as $value => $label)
+                                <option @if (old('port', $server->port) == $value) selected @endif value="{{ $value }}">{{ $label }}</option>
+                                @endforeach
+                            </optgroup>
+                        </select>
+                        <x-input-error class="mt-2" :messages="$errors->get('popular_ports')" />
+                    </div>
+                    <div class="col-md-6 d-flex flex-column">
+                        <label for="port" class="form-label d-none">{{ __('Custom port') }}</label>
+                        <input id="port" name="port" class="form-control d-none" type="number" value="{{ old('port', $server->port) }}" autocomplete="off" />
+                        <x-input-error class="mt-2" :messages="$errors->get('port')" />
+                    </div>
+                    <div class="col-12">
+                        <label for="users" class="form-label">{{ __('Users') }}</label>
+                        <select class="form-select" id="users" name="users[]" multiple>
+                            @foreach ($users as $user)
+                            <option
+                                value="{{ $user->id }}"
+                                @if(in_array($user->id, ($server->users ?? collect())->pluck('id')->toArray())) selected @endif
+                            >
+                                {{ $user->name }}
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <hr class="my-4">
+    <div class="card">
+        <div class="card-body">
+                <div class="mb-4">
+                    <p class="text-uppercase text-muted small mb-1">{{ __('Checks') }}</p>
+                    <h2 class="h4 mb-0">{{ __('Check settings') }}</h2>
+                    <p class="text-body-secondary small mb-0">{{ __('Enable or disable individual checks and tweak their thresholds. Checks run in the order shown.') }}</p>
+                </div>
 
-        <header class="mb-3">
-            <h2 class="mb-1">{{ __('Check settings') }}</h2>
-            <p class="text-muted mb-0">
-                {{ __('Enable or disable individual checks and tweak their thresholds. Checks run in the order shown.') }}
-            </p>
-        </header>
-
-        <div class="row">
-            <div class="col-md-6 mb-4">
+                <div class="row g-4">
+                    <div class="col-md-6">
                 <div class="card h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <h5 class="card-title mb-1">{{ __('Status code') }}</h5>
-                                <p class="text-muted small mb-0">{{ data_get($checkDefinitions, 'StatusCode.description') }}</p>
+                                <p class="text-body-secondary small mb-0">{{ data_get($checkDefinitions, 'StatusCode.description') }}</p>
                             </div>
                             <div class="form-check form-switch">
                                 <input type="hidden" name="check_settings[StatusCode][enabled]" value="0">
@@ -92,15 +103,15 @@ $headerLines = collect(data_get($resolvedSettings, 'Headers.input.required', [])
                         </div>
                     </div>
                 </div>
-            </div>
+                    </div>
 
-            <div class="col-md-6 mb-4">
+                    <div class="col-md-6">
                 <div class="card h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <h5 class="card-title mb-1">{{ __('SSL active') }}</h5>
-                                <p class="text-muted small mb-0">{{ data_get($checkDefinitions, 'SSL_active.description') }}</p>
+                                <p class="text-body-secondary small mb-0">{{ data_get($checkDefinitions, 'SSL_active.description') }}</p>
                             </div>
                             <div class="form-check form-switch">
                                 <input type="hidden" name="check_settings[SSL_active][enabled]" value="0">
@@ -110,15 +121,15 @@ $headerLines = collect(data_get($resolvedSettings, 'Headers.input.required', [])
                         </div>
                     </div>
                 </div>
-            </div>
+                    </div>
 
-            <div class="col-md-6 mb-4">
+                    <div class="col-md-6">
                 <div class="card h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <h5 class="card-title mb-1">{{ __('SSL certificate validity') }}</h5>
-                                <p class="text-muted small mb-0">{{ data_get($checkDefinitions, 'SSL_certificate_valid.description') }}</p>
+                                <p class="text-body-secondary small mb-0">{{ data_get($checkDefinitions, 'SSL_certificate_valid.description') }}</p>
                             </div>
                             <div class="form-check form-switch">
                                 <input type="hidden" name="check_settings[SSL_certificate_valid][enabled]" value="0">
@@ -128,15 +139,15 @@ $headerLines = collect(data_get($resolvedSettings, 'Headers.input.required', [])
                         </div>
                     </div>
                 </div>
-            </div>
+                    </div>
 
-            <div class="col-md-6 mb-4">
+                    <div class="col-md-6">
                 <div class="card h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <h5 class="card-title mb-1">{{ __('SSL expiration window') }}</h5>
-                                <p class="text-muted small mb-2">{{ data_get($checkDefinitions, 'SSL_expiration.description') }}</p>
+                                <p class="text-body-secondary small mb-2">{{ data_get($checkDefinitions, 'SSL_expiration.description') }}</p>
                             </div>
                             <div class="form-check form-switch">
                                 <input type="hidden" name="check_settings[SSL_expiration][enabled]" value="0">
@@ -150,15 +161,15 @@ $headerLines = collect(data_get($resolvedSettings, 'Headers.input.required', [])
                         <x-input-error class="mt-2" :messages="$errors->get('check_settings.SSL_expiration.days')" />
                     </div>
                 </div>
-            </div>
+                    </div>
 
-            <div class="col-md-6 mb-4">
+                    <div class="col-md-6">
                 <div class="card h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <h5 class="card-title mb-1">{{ __('Content regex') }}</h5>
-                                <p class="text-muted small mb-2">{{ data_get($checkDefinitions, 'ContentRegex.description') }}</p>
+                                <p class="text-body-secondary small mb-2">{{ data_get($checkDefinitions, 'ContentRegex.description') }}</p>
                             </div>
                             <div class="form-check form-switch">
                                 <input type="hidden" name="check_settings[ContentRegex][enabled]" value="0">
@@ -173,13 +184,13 @@ $headerLines = collect(data_get($resolvedSettings, 'Headers.input.required', [])
                 </div>
             </div>
 
-            <div class="col-md-6 mb-4">
+            <div class="col-md-6">
                 <div class="card h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <h5 class="card-title mb-1">{{ __('Latency thresholds (ms)') }}</h5>
-                                <p class="text-muted small mb-2">{{ data_get($checkDefinitions, 'Latency.description') }}</p>
+                                <p class="text-body-secondary small mb-2">{{ data_get($checkDefinitions, 'Latency.description') }}</p>
                             </div>
                             <div class="form-check form-switch">
                                 <input type="hidden" name="check_settings[Latency][enabled]" value="0">
@@ -201,15 +212,15 @@ $headerLines = collect(data_get($resolvedSettings, 'Headers.input.required', [])
                         <x-input-error class="mt-2" :messages="$errors->get('check_settings.Latency.fail_ms')" />
                     </div>
                 </div>
-            </div>
+                    </div>
 
-            <div class="col-12 mb-4">
+                    <div class="col-12">
                 <div class="card h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <h5 class="card-title mb-1">{{ __('Response headers') }}</h5>
-                                <p class="text-muted small mb-2">{{ data_get($checkDefinitions, 'Headers.description') }}</p>
+                                <p class="text-body-secondary small mb-2">{{ data_get($checkDefinitions, 'Headers.description') }}</p>
                             </div>
                             <div class="form-check form-switch">
                                 <input type="hidden" name="check_settings[Headers][enabled]" value="0">
@@ -219,24 +230,41 @@ $headerLines = collect(data_get($resolvedSettings, 'Headers.input.required', [])
                         </div>
                         <label for="headers-required" class="form-label mt-3">{{ __('Required headers (one per line, Header:Value)') }}</label>
                         <textarea id="headers-required" class="form-control" rows="4" name="check_settings[Headers][required]" placeholder="Cache-Control:no-store&#10;X-Frame-Options:DENY">{{ old('check_settings.Headers.required', $headerLines) }}</textarea>
-                        <small class="text-muted">{{ __('Leave value empty to only assert presence. Prefix with /regex/ for pattern checks.') }}</small>
+                        <div class="form-text">{{ __('Leave value empty to only assert presence. Prefix with /regex/ for pattern checks.') }}</div>
                         <x-input-error class="mt-2" :messages="$errors->get('check_settings.Headers.required')" />
+                    </div>
+                </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
+        <div class="card mt-4">
+            <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div>
+                    <p class="text-uppercase text-muted small mb-1">{{ __('Save changes') }}</p>
+                    <p class="mb-0 text-body-secondary">{{ __('Any changes you made above are applied immediately after saving.') }}</p>
+                </div>
 
-            @if (session('status') === 'server-updated')
-            <p x-data="{ show: true }" x-show="show">
-                {{ __('Server updated successfully.') }}
-            </p>
-            @endif
+                <div class="d-flex align-items-center gap-3">
+                    <x-primary-button>{{ __('Save') }}</x-primary-button>
+
+                    @if (session('status') === 'server-updated')
+                    <p
+                        x-data="{ show: true }"
+                        x-show="show"
+                        x-transition
+                        x-init="setTimeout(() => show = false, 2500)"
+                        class="text-success mb-0"
+                    >
+                        {{ __('Server updated successfully.') }}
+                    </p>
+                    @endif
+                </div>
+            </div>
         </div>
-    </form>
-</section>
+</form>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const popularPortsSelect = document.getElementById('popular_ports');

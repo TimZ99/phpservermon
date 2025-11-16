@@ -29,26 +29,30 @@
                     </x-nav-link>
                     @endcan
                 </ul>
-                <li class="nav-item dropdown d-flex pe-4 text-bg-dark">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                        aria-expanded="false">
-                        {{ Auth::user()->name }}
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
-                        <li>
-                            <a class="dropdown-item" href="{{ route('profile.edit') }}">Profile</a>
-                        </li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <li><a class="dropdown-item" href="{{ route('logout') }}"
-                                    onclick="event.preventDefault(); this.closest('form').submit();">{{ __('Log Out') }}</a>
+                <ul class="navbar-nav ms-lg-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            {{ Auth::user()->name }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" href="{{ route('profile.edit') }}">Profile</a>
                             </li>
-                        </form>
-                    </ul>
-                </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button class="dropdown-item" type="submit">
+                                        {{ __('Log Out') }}
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
             @else
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     @if (Route::has('login'))

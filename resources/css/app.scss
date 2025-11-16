@@ -1,1 +1,69 @@
 @use 'bootstrap/scss/bootstrap';
+
+:root {
+  --app-body-bg: #f8f9fa;
+  --app-body-text: #212529;
+  --app-surface-bg: #ffffff;
+  --app-surface-text: #212529;
+  --app-border-color: #dee2e6;
+}
+
+:root.theme-night {
+  color-scheme: dark;
+  --app-body-bg: #0f172a;
+  --app-body-text: #e2e8f0;
+  --app-surface-bg: #152035;
+  --app-surface-text: #f1f5f9;
+  --app-border-color: rgba(148, 163, 184, 0.3);
+}
+
+body {
+  background-color: var(--app-body-bg);
+  color: var(--app-body-text);
+}
+
+.card,
+.modal-content {
+  background-color: var(--app-surface-bg);
+  color: var(--app-surface-text);
+  border-color: var(--app-border-color);
+}
+
+.card {
+  border: none;
+  border-radius: 0.85rem;
+  box-shadow: 0 1rem 2rem rgba(15, 23, 42, 0.08);
+}
+
+.theme-night .card {
+  box-shadow: 0 1rem 2rem rgba(2, 6, 23, 0.65);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+
+.footer {
+  background-color: var(--app-surface-bg);
+  border-top: 1px solid var(--app-border-color);
+}
+
+.theme-night .text-muted,
+.theme-night .text-body-secondary {
+  color: rgba(226, 232, 240, 0.75) !important;
+}
+
+.page-header-inner {
+  padding-top: 0.5rem;
+  padding-bottom: 0.75rem;
+  transition: padding-top 0.2s ease;
+}
+
+@media (min-width: 992px) {
+  .page-header-inner {
+    padding-top: 0.75rem;
+    padding-bottom: 1.25rem;
+  }
+}
+
+.page-header-inner.is-sticky {
+  padding-top: 1.75rem;
+}

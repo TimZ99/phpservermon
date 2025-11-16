@@ -1,6 +1,6 @@
 <x-guest-layout>
-    <div class="mt-4 col-12 col-md-9 col-lg-7 col-xl-6 col-xxl-5 container d-flex align-items-center justify-content-center">
-        <div class="card">
+    <div class="container min-vh-100 py-5 d-flex align-items-center justify-content-center">
+        <div class="card w-100" style="max-width: 520px;">
             <div class="card-header">
                 Confirm password?
             </div>
@@ -13,11 +13,11 @@
                     @csrf
 
                     <!-- Email Address -->
-                    <label for="password">{{ __('Password') }}</label>
+                    <label for="password" class="form-label">{{ __('Password') }}</label>
                     <input id="password" class="form-control mb-2" type="password" name="password" required autocomplete="current-password" />
                     <x-input-error :messages="$errors->get('password')" class="mt-2" />
 
-                    <div class="flex items-center justify-end mt-4">
+                    <div class="d-flex justify-content-end mt-4">
                         <x-primary-button>
                             {{ __('Confirm') }}
                         </x-primary-button>

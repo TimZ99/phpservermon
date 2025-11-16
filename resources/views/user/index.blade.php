@@ -1,10 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
-        Overview
+        {{ __('Users') }}
     </x-slot>
-    <ul class="list-group">
+
+    <div class="row g-4">
         @foreach($users as $user)
             @include('user.components.user-card', ['user' => $user])
         @endforeach
-    </ul>
+    </div>
 </x-app-layout>

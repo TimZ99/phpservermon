@@ -49,7 +49,7 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name', 'email', 'phone', 'password', 'suspended',
-        'telegram_user_id', 'scopes',
+        'telegram_user_id', 'theme_mode', 'scopes',
     ];
 
     /**
@@ -73,6 +73,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'suspended' => 'boolean',
             'telegram_user_id' => 'integer',
+            'theme_mode' => 'string',
             'scopes' => 'json',
         ];
     }

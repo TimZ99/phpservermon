@@ -3,10 +3,8 @@
         {{ __('Edit user') }}
     </x-slot>
 
-    <div class="card">
-        <div class="card-body">
-            @include('user.partials.update-user-information-form')
-            @include('user.partials.delete-user-form')
-        </div>
+    <div class="d-flex flex-column gap-4">
+        @include('user.partials.update-user-information-form')
+        @include('user.partials.delete-user-form')
     </div>
 </x-app-layout>

@@ -1,5 +1,10 @@
+@php
+    $themePreference = optional(auth()->user())->theme_mode ?? 'auto';
+    $initialTheme = $themePreference === 'night' ? 'dark' : 'light';
+    $initialThemeClass = $initialTheme === 'dark' ? 'theme-night' : 'theme-day';
+@endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme-preference="{{ $themePreference }}" data-bs-theme="{{ $initialTheme }}" class="{{ $initialThemeClass }}">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +12,7 @@
 
         <title>{{ config('app.name', 'PHPServerMonitor') }}</title>
 
-        <meta name="description" content="PHP Server Monitor">
+        <meta name="description" content="PHPServerMonitor">
         <meta name="robots" content="noindex" />
         <!--<link rel="manifest" href="./manifest.json">-->
         <meta name="mobile-web-app-capable" content="yes">
@@ -26,6 +31,19 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
+        <script>
+            (() => {
+                const root = document.documentElement;
+                const preference = root.dataset.themePreference || 'auto';
+                if (preference === 'auto' && window.matchMedia) {
+                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    root.dataset.bsTheme = prefersDark ? 'dark' : 'light';
+                    root.classList.remove('theme-day', 'theme-night');
+                    root.classList.add(prefersDark ? 'theme-night' : 'theme-day');
+                }
+            })();
+        </script>
+
         <!-- Scripts -->
         @vite(['resources/css/app.scss', 'resources/js/app.js'])
     </head>
@@ -34,7 +52,7 @@
         <main> 
             {{ $slot }}
         </main>
-        <footer class="fixed-bottom" role="contentinfo">
+        <footer class="footer fixed-bottom py-3" role="contentinfo">
             <div class="container">
                 <span class="text-body-secondary">
                     Powered by

@@ -3,10 +3,8 @@
         {{ __('Edit server') }}
     </x-slot>
 
-    <div class="card">
-        <div class="card-body">
-            @include('server.partials.update-server-information-form')
-            @include('server.partials.delete-server-form')
-        </div>
+    <div class="d-flex flex-column gap-4">
+        @include('server.partials.update-server-information-form')
+        @include('server.partials.delete-server-form')
     </div>
 </x-app-layout>
