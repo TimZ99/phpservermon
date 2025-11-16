@@ -158,8 +158,16 @@ class ServerController extends Controller
     {
         $this->authorize('manageAny', Server::class);
 
-        // Return the server create page with a list of users with id and name
-        return view('server.create');
+        $registry = app(ServerCheckRegistry::class);
+        $server = new Server;
+        $server->setRelation('users', collect());
+
+        return view('server.create', [
+            'server' => $server,
+            'users' => User::where('suspended', false)->select('id', 'name')->get(),
+            'defaultCheckSettings' => $registry->defaults(),
+            'checkDefinitions' => $registry->all(),
+        ]);
     }
 
     /**
@@ -172,11 +180,11 @@ class ServerController extends Controller
     {
         $this->authorize('manageAny', Server::class);
         try {
-            // Create the server
-            $server = Server::create($request->validated());
-            $server->update(['check_settings' => $this->buildCheckSettingsFromRequest($request, $server)]);
-            // Sync the users with the server
-            $server->users()->sync($request->input('users'));
+            $data = $request->safe()->only(['name', 'ip', 'port']);
+            $server = Server::make($data);
+            $server->check_settings = $this->buildCheckSettingsFromRequest($request, $server);
+            $server->save();
+            $this->syncServerUsers($server, $request->input('users', []));
 
             // Return the server page with the created server
             return to_route('server.show', $server->id);
@@ -231,15 +239,7 @@ class ServerController extends Controller
          *
          * If no users are provided, detach all the server's users
          */
-        if ($request->has('users')) {
-            $user_ids = array_filter($request->input('users'), function ($user_id) {
-                return in_array((int) $user_id, User::pluck('id')->toArray());
-            });
-            // Filter out invalid user ids from the input
-            $server->users()->sync($user_ids);
-        } else {
-            $server->users()->detach();
-        }
+        $this->syncServerUsers($server, $request->input('users', []));
         /**
          * Update the server
          * Fill the server with the validated data
@@ -400,5 +400,17 @@ class ServerController extends Controller
         }
 
         return $requirements;
+    }
+
+    protected function syncServerUsers(Server $server, array $userIds): void
+    {
+        $ids = empty($userIds)
+            ? []
+            : User::whereIn('id', $userIds)
+                ->where('suspended', false)
+                ->pluck('id')
+                ->all();
+
+        $server->users()->sync($ids);
     }
 }
