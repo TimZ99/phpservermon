@@ -3,7 +3,7 @@
         {{ __('Edit server') }}
     </x-slot>
 
-    <div class="vstack gap-4">
+    <div class="d-flex flex-column gap-4">
         @include('server.partials.update-server-information-form')
         @include('server.partials.delete-server-form')
     </div>

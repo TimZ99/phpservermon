@@ -10,7 +10,7 @@
             <p class="text-muted mb-0">{{ __('Choose how PHPServerMonitor looks across light, dark, or automatic modes.') }}</p>
         </div>
 
-        <form method="post" action="{{ route('profile.update') }}" class="vstack gap-3">
+        <form method="post" action="{{ route('profile.update') }}" class="d-flex flex-column gap-3">
             @csrf
             @method('patch')
 

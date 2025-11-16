@@ -32,14 +32,17 @@
                             @php
                                 $overallStatus = strtolower($server->overall_status ?? 'unknown');
                                 $badgeClass = match($overallStatus) {
-                                    'success' => 'bg-success',
-                                    'warning' => 'bg-warning text-dark',
-                                    'fail', 'danger', 'error' => 'bg-danger',
-                                    default => 'bg-secondary',
+                                    'success' => 'text-bg-success',
+                                    'warning' => 'text-bg-warning',
+                                    'fail', 'danger', 'error' => 'text-bg-danger',
+                                    default => 'text-bg-secondary',
                                 };
                             @endphp
                             <span class="badge {{ $badgeClass }} my-1">{{ strtoupper($overallStatus) }}</span><br>
-                            {{ $server->last_checked_at->timezone(config('app.timezone'))->format('M j, Y H:i:s') ?? __('Never') }}<br>
+                            @if ($server->last_checked_at)
+                                {{ $server->last_checked_at->timezone(config('app.timezone'))->format('M j, Y H:i:s') }}
+                            @endif
+                            <br>
                             <div class="mt-2" style="width:100%;">
                                 @foreach ($server->show_status as $check)
                                     <div style="width: 10px; height: 10px; background-color: {{ $check['color'] }}; display: inline-block;" title="{{ $check['name'] }}"></div>

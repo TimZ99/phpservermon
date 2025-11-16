@@ -1,10 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
-        Overview
+        {{ __('Servers') }}
     </x-slot>
-    <ul class="list-group">
+
+    <div class="row g-4">
         @foreach($servers as $server)
             @include('server.components.server-card', ['server' => $server])
         @endforeach
-    </ul>
+    </div>
 </x-app-layout>

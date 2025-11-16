@@ -2,7 +2,7 @@
     <x-slot name="header">
         {{ __('Configuration') }}
     </x-slot>
-    <form method="post" action="{{ route('config.update') }}">
+    <form method="post" action="{{ route('config.update') }}" class="d-flex flex-column gap-4">
         @csrf
         @method('patch')
         <div class="card">
@@ -97,7 +97,7 @@
                 </div>
             </div>
         </div>
-        <div class="row mt-4 g-4">
+        <div class="row g-4">
             <div class="col-lg-6">
                 <div class="card">
                     <div class="card-body">
@@ -174,7 +174,7 @@
             </div>
         </div>
 
-        <div class="card mt-4">
+        <div class="card">
             <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
                 <div>
                     <p class="text-uppercase text-muted small mb-1">{{ __('Save changes') }}</p>

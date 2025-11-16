@@ -25,7 +25,7 @@ $headerLines = collect(data_get($resolvedSettings, 'Headers.input.required', [])
     @csrf
     @method('patch')
 
-    <div class="vstack gap-4">
+    <div class="d-flex flex-column gap-4">
         <div class="card">
             <div class="card-body">
                 <div class="mb-4">
@@ -67,7 +67,7 @@ $headerLines = collect(data_get($resolvedSettings, 'Headers.input.required', [])
                             @foreach ($users as $user)
                             <option
                                 value="{{ $user->id }}"
-                                @if(in_array($user->id, $server->users->pluck('id')->toArray())) selected @endif
+                                @if(in_array($user->id, ($server->users ?? collect())->pluck('id')->toArray())) selected @endif
                             >
                                 {{ $user->name }}
                             </option>
@@ -80,10 +80,10 @@ $headerLines = collect(data_get($resolvedSettings, 'Headers.input.required', [])
 
     <div class="card">
         <div class="card-body">
-            <div class="mb-4">
-                <p class="text-uppercase text-muted small mb-1">{{ __('Checks') }}</p>
+                <div class="mb-4">
+                    <p class="text-uppercase text-muted small mb-1">{{ __('Checks') }}</p>
                     <h2 class="h4 mb-0">{{ __('Check settings') }}</h2>
-                    <p class="text-muted small mb-0">{{ __('Enable or disable individual checks and tweak their thresholds. Checks run in the order shown.') }}</p>
+                    <p class="text-body-secondary small mb-0">{{ __('Enable or disable individual checks and tweak their thresholds. Checks run in the order shown.') }}</p>
                 </div>
 
                 <div class="row g-4">
@@ -93,7 +93,7 @@ $headerLines = collect(data_get($resolvedSettings, 'Headers.input.required', [])
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <h5 class="card-title mb-1">{{ __('Status code') }}</h5>
-                                <p class="text-muted small mb-0">{{ data_get($checkDefinitions, 'StatusCode.description') }}</p>
+                                <p class="text-body-secondary small mb-0">{{ data_get($checkDefinitions, 'StatusCode.description') }}</p>
                             </div>
                             <div class="form-check form-switch">
                                 <input type="hidden" name="check_settings[StatusCode][enabled]" value="0">
@@ -111,7 +111,7 @@ $headerLines = collect(data_get($resolvedSettings, 'Headers.input.required', [])
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <h5 class="card-title mb-1">{{ __('SSL active') }}</h5>
-                                <p class="text-muted small mb-0">{{ data_get($checkDefinitions, 'SSL_active.description') }}</p>
+                                <p class="text-body-secondary small mb-0">{{ data_get($checkDefinitions, 'SSL_active.description') }}</p>
                             </div>
                             <div class="form-check form-switch">
                                 <input type="hidden" name="check_settings[SSL_active][enabled]" value="0">
@@ -129,7 +129,7 @@ $headerLines = collect(data_get($resolvedSettings, 'Headers.input.required', [])
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <h5 class="card-title mb-1">{{ __('SSL certificate validity') }}</h5>
-                                <p class="text-muted small mb-0">{{ data_get($checkDefinitions, 'SSL_certificate_valid.description') }}</p>
+                                <p class="text-body-secondary small mb-0">{{ data_get($checkDefinitions, 'SSL_certificate_valid.description') }}</p>
                             </div>
                             <div class="form-check form-switch">
                                 <input type="hidden" name="check_settings[SSL_certificate_valid][enabled]" value="0">
@@ -147,7 +147,7 @@ $headerLines = collect(data_get($resolvedSettings, 'Headers.input.required', [])
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <h5 class="card-title mb-1">{{ __('SSL expiration window') }}</h5>
-                                <p class="text-muted small mb-2">{{ data_get($checkDefinitions, 'SSL_expiration.description') }}</p>
+                                <p class="text-body-secondary small mb-2">{{ data_get($checkDefinitions, 'SSL_expiration.description') }}</p>
                             </div>
                             <div class="form-check form-switch">
                                 <input type="hidden" name="check_settings[SSL_expiration][enabled]" value="0">
@@ -169,7 +169,7 @@ $headerLines = collect(data_get($resolvedSettings, 'Headers.input.required', [])
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <h5 class="card-title mb-1">{{ __('Content regex') }}</h5>
-                                <p class="text-muted small mb-2">{{ data_get($checkDefinitions, 'ContentRegex.description') }}</p>
+                                <p class="text-body-secondary small mb-2">{{ data_get($checkDefinitions, 'ContentRegex.description') }}</p>
                             </div>
                             <div class="form-check form-switch">
                                 <input type="hidden" name="check_settings[ContentRegex][enabled]" value="0">
@@ -190,7 +190,7 @@ $headerLines = collect(data_get($resolvedSettings, 'Headers.input.required', [])
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <h5 class="card-title mb-1">{{ __('Latency thresholds (ms)') }}</h5>
-                                <p class="text-muted small mb-2">{{ data_get($checkDefinitions, 'Latency.description') }}</p>
+                                <p class="text-body-secondary small mb-2">{{ data_get($checkDefinitions, 'Latency.description') }}</p>
                             </div>
                             <div class="form-check form-switch">
                                 <input type="hidden" name="check_settings[Latency][enabled]" value="0">
@@ -220,7 +220,7 @@ $headerLines = collect(data_get($resolvedSettings, 'Headers.input.required', [])
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <h5 class="card-title mb-1">{{ __('Response headers') }}</h5>
-                                <p class="text-muted small mb-2">{{ data_get($checkDefinitions, 'Headers.description') }}</p>
+                                <p class="text-body-secondary small mb-2">{{ data_get($checkDefinitions, 'Headers.description') }}</p>
                             </div>
                             <div class="form-check form-switch">
                                 <input type="hidden" name="check_settings[Headers][enabled]" value="0">
@@ -230,7 +230,7 @@ $headerLines = collect(data_get($resolvedSettings, 'Headers.input.required', [])
                         </div>
                         <label for="headers-required" class="form-label mt-3">{{ __('Required headers (one per line, Header:Value)') }}</label>
                         <textarea id="headers-required" class="form-control" rows="4" name="check_settings[Headers][required]" placeholder="Cache-Control:no-store&#10;X-Frame-Options:DENY">{{ old('check_settings.Headers.required', $headerLines) }}</textarea>
-                        <small class="text-muted">{{ __('Leave value empty to only assert presence. Prefix with /regex/ for pattern checks.') }}</small>
+                        <div class="form-text">{{ __('Leave value empty to only assert presence. Prefix with /regex/ for pattern checks.') }}</div>
                         <x-input-error class="mt-2" :messages="$errors->get('check_settings.Headers.required')" />
                     </div>
                 </div>
@@ -240,30 +240,30 @@ $headerLines = collect(data_get($resolvedSettings, 'Headers.input.required', [])
         </div>
     </div>
 
-    <div class="card mt-4">
-        <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
-            <div>
-                <p class="text-uppercase text-muted small mb-1">{{ __('Save changes') }}</p>
-                <p class="mb-0 text-body-secondary">{{ __('Any changes you made above are applied immediately after saving.') }}</p>
-            </div>
+        <div class="card mt-4">
+            <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div>
+                    <p class="text-uppercase text-muted small mb-1">{{ __('Save changes') }}</p>
+                    <p class="mb-0 text-body-secondary">{{ __('Any changes you made above are applied immediately after saving.') }}</p>
+                </div>
 
-            <div class="d-flex align-items-center gap-3">
-                <x-primary-button>{{ __('Save') }}</x-primary-button>
+                <div class="d-flex align-items-center gap-3">
+                    <x-primary-button>{{ __('Save') }}</x-primary-button>
 
-                @if (session('status') === 'server-updated')
-                <p
-                    x-data="{ show: true }"
-                    x-show="show"
-                    x-transition
-                    x-init="setTimeout(() => show = false, 2500)"
-                    class="text-success mb-0"
-                >
-                    {{ __('Server updated successfully.') }}
-                </p>
-                @endif
+                    @if (session('status') === 'server-updated')
+                    <p
+                        x-data="{ show: true }"
+                        x-show="show"
+                        x-transition
+                        x-init="setTimeout(() => show = false, 2500)"
+                        class="text-success mb-0"
+                    >
+                        {{ __('Server updated successfully.') }}
+                    </p>
+                    @endif
+                </div>
             </div>
         </div>
-    </div>
 </form>
 <script>
     document.addEventListener("DOMContentLoaded", function() {

@@ -1,19 +1,19 @@
 <x-guest-layout>
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
-    <div class="mt-4 col-12 col-md-9 col-lg-7 col-xl-6 col-xxl-5 container d-flex align-items-center justify-content-center">
-        <div class="card">
+    <div class="container min-vh-100 py-5 d-flex align-items-center justify-content-center">
+        <div class="card w-100" style="max-width: 520px;">
             <div class="card-body">
                 <form method="POST" action="{{ route('login') }}">
                     @csrf
 
                     <!-- Email Address -->
-                    <label for="email">{{ __('Email') }}</label>
+                    <label for="email" class="form-label">{{ __('Email') }}</label>
                     <input id="email" class="form-control mb-2" type="email" name="email" value="{{ old('email') }}" required autocomplete="username" />
                     <x-input-error :messages="$errors->get('email')" class="mt-2" />
 
                     <!-- Password -->
-                    <label for="password">{{ __('Password') }}</label>
+                    <label for="password" class="form-label">{{ __('Password') }}</label>
                     <input id="password" class="form-control mb-2"
                                     type="password"
                                     name="password"
@@ -30,13 +30,13 @@
                     </div>
 
                     <!-- Forgot password and login buttons -->
-                    <div class="flex items-center justify-end mt-4">
+                    <div class="d-flex justify-content-end align-items-center mt-4 gap-3">
                         @if (Route::has('password.request'))
                             <a class="text-decoration-underline" href="{{ route('password.request') }}">
                                 {{ __('Forgot your password?') }}
                             </a>
                         @endif
-                        <x-primary-button class="ms-4" outline>
+                        <x-primary-button outline>
                             {{ __('Login') }}
                         </x-primary-button>
                     </div>
