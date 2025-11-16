@@ -31,6 +31,8 @@ class ServerUpdateRequest extends FormRequest
             'check_settings.Latency.warning_ms' => ['nullable', 'integer', 'min:10', 'max:120000'],
             'check_settings.Latency.fail_ms' => ['nullable', 'integer', 'min:10', 'max:120000'],
             'check_settings.Headers.required' => ['nullable', 'string', 'max:5000'],
+            'users' => ['nullable', 'array'],
+            'users.*' => ['integer', 'exists:users,id'],
         ];
     }
 }

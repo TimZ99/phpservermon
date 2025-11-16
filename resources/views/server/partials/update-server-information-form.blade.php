@@ -19,11 +19,17 @@ $headerLines = collect(data_get($resolvedSettings, 'Headers.input.required', [])
         return $value === null || $value === '' ? $name : $name.':'.$value;
     })
     ->implode(PHP_EOL);
+$isEdit = $server && $server->exists;
+$formAction = $isEdit ? route('server.update', $server->id) : route('server.store');
+$selectedUsers = collect(old('users', ($server->users ?? collect())->pluck('id')->toArray()))
+    ->map(fn ($id) => (int) $id);
 @endphp
 
-<form method="post" action="{{ route('server.update', $server->id) }}">
+<form method="post" action="{{ $formAction }}">
     @csrf
-    @method('patch')
+    @if($isEdit)
+        @method('patch')
+    @endif
 
     <div class="d-flex flex-column gap-4">
         <div class="card">
@@ -67,7 +73,7 @@ $headerLines = collect(data_get($resolvedSettings, 'Headers.input.required', [])
                             @foreach ($users as $user)
                             <option
                                 value="{{ $user->id }}"
-                                @if(in_array($user->id, ($server->users ?? collect())->pluck('id')->toArray())) selected @endif
+                                @if($selectedUsers->contains((int) $user->id)) selected @endif
                             >
                                 {{ $user->name }}
                             </option>

@@ -3,9 +3,5 @@
         {{ __('Create server') }}
     </x-slot>
 
-    <div class="card">
-        <div class="card-body">
-            To be created...
-        </div>
-    </div>
+    @include('server.partials.update-server-information-form')
 </x-app-layout>
