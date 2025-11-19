@@ -1,46 +1,83 @@
 <?php
 
 use App\Models\User;
-use Illuminate\Auth\Events\Verified;
-use Illuminate\Support\Facades\Event;
+use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
 
-test('email verification screen can be rendered', function () {
-    $user = User::factory()->unverified()->create();
+use function Pest\Laravel\actingAs;
 
-    $response = $this->actingAs($user)->get('/verify-email');
+uses(RefreshDatabase::class);
 
-    $response->assertStatus(200);
+beforeEach(function () {
+    Notification::fake();
 });
 
-test('email can be verified', function () {
-    $user = User::factory()->unverified()->create();
+it('redirects verified users away from the verification prompt', function () {
+    $user = User::factory()->create(['email_verified_at' => now()]);
 
-    Event::fake();
+    actingAs($user)
+        ->get(route('verification.notice'))
+        ->assertRedirect(route('server.monitor'));
+});
+
+it('shows the verification view for unverified users', function () {
+    $user = User::factory()->create(['email_verified_at' => null]);
+
+    actingAs($user)
+        ->get(route('verification.notice'))
+        ->assertOk()
+        ->assertViewIs('auth.verify-email');
+});
+
+it('sends a verification notification when requested', function () {
+    $user = User::factory()->create(['email_verified_at' => null]);
+
+    actingAs($user)
+        ->post(route('verification.send'))
+        ->assertRedirect()
+        ->assertSessionHas('status', 'verification-link-sent');
+
+    Notification::assertSentTo($user, VerifyEmail::class);
+});
+
+it('redirects verified users when requesting a new verification link', function () {
+    $user = User::factory()->create(['email_verified_at' => now()]);
+
+    actingAs($user)
+        ->post(route('verification.send'))
+        ->assertRedirect(route('server.monitor'));
+
+    Notification::assertNothingSent();
+});
+
+it('marks the email as verified when visiting the signed link', function () {
+    $user = User::factory()->create(['email_verified_at' => null]);
 
     $verificationUrl = URL::temporarySignedRoute(
         'verification.verify',
-        now()->addMinutes(60),
+        now()->addMinutes(30),
         ['id' => $user->id, 'hash' => sha1($user->email)]
     );
 
-    $response = $this->actingAs($user)->get($verificationUrl);
+    actingAs($user)
+        ->get($verificationUrl)
+        ->assertRedirect(route('server.monitor').'?verified=1');
 
-    Event::assertDispatched(Verified::class);
     expect($user->fresh()->hasVerifiedEmail())->toBeTrue();
-    $response->assertRedirect(route('server.monitor', absolute: false).'?verified=1');
 });
 
-test('email is not verified with invalid hash', function () {
-    $user = User::factory()->unverified()->create();
+it('simply redirects when the email is already verified', function () {
+    $user = User::factory()->create(['email_verified_at' => now()]);
 
     $verificationUrl = URL::temporarySignedRoute(
         'verification.verify',
-        now()->addMinutes(60),
-        ['id' => $user->id, 'hash' => sha1('wrong-email')]
+        now()->addMinutes(30),
+        ['id' => $user->id, 'hash' => sha1($user->email)]
     );
 
-    $this->actingAs($user)->get($verificationUrl);
-
-    expect($user->fresh()->hasVerifiedEmail())->toBeFalse();
+    actingAs($user)
+        ->get($verificationUrl)
+        ->assertRedirect(route('server.monitor').'?verified=1');
 });

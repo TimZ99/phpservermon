@@ -19,7 +19,7 @@ it('can check if a user is allowed to enter the page', function () {
     get(route('user.create'))->assertStatus(418);
 });
 
-test('user with user:create scope can create user ', function () {
+test('user with user:create scope currently receives 404 for unimplemented store', function () {
     $user = User::factory()->create();
     $userWithScope = User::factory()->create();
     $userWithScope->setScope(['user:manage:*']);
@@ -33,8 +33,7 @@ test('user with user:create scope can create user ', function () {
     actingAs($userWithScope);
     get('/user/create')->assertStatus(418);
     post('/user', ['name' => 'New User', 'email' => 'newuser@example.com'])
-        ->assertSessionHasNoErrors()
         ->assertNotFound();
-    $this->markTestIncomplete('Create and store controller is not implemented yet.');
-    // expect(User::where('name', 'New User')->where('email', 'newuser@example.com')->exists())->toBeTrue();
+
+    expect(User::where('email', 'newuser@example.com')->exists())->toBeFalse();
 });

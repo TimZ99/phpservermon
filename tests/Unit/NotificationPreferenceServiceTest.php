@@ -138,3 +138,16 @@ it('falls back to default channels when no preference matches', function () {
 
     expect($channels)->toContain('mail');
 });
+
+it('normalizes custom channel names to lowercase keys', function () {
+    $settings = app(NotificationSettings::class);
+    $proxy = new class($settings) extends \App\Services\Notifications\NotificationPreferenceService
+    {
+        public function exposeChannelKey(string $channel): string
+        {
+            return $this->channelKey($channel);
+        }
+    };
+
+    expect($proxy->exposeChannelKey('App\\Notifications\\Channels\\WebhookChannel'))->toBe('webhookchannel');
+});
