@@ -64,3 +64,27 @@ it('rejects suspended or invalid users on create', function () {
         'users' => [$suspendedUser->id, 999],
     ])->assertSessionHasErrors(['users.1']);
 });
+
+it('returns to the form with an error when creation fails unexpectedly', function () {
+    $manager = User::factory()->create(['scopes' => ['server:manage:*']]);
+    actingAs($manager)->from(route('server.create'));
+
+    $dispatcher = Server::getEventDispatcher();
+    Server::flushEventListeners();
+    Server::saving(function () {
+        throw new \RuntimeException('save failed');
+    });
+
+    try {
+        post(route('server.store'), [
+            'name' => 'Boom',
+            'ip' => '10.0.0.1',
+            'port' => 80,
+        ])
+            ->assertRedirect(route('server.create'))
+            ->assertSessionHasErrors(['general']);
+    } finally {
+        Server::flushEventListeners();
+        Server::setEventDispatcher($dispatcher);
+    }
+});
