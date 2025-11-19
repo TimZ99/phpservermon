@@ -29,6 +29,7 @@ it('updates profile information', function () {
 
 it('keeps email verification when email unchanged', function () {
     $user = User::factory()->create();
+    $currentVerifiedAt = $user->email_verified_at;
 
     $this->actingAs($user)
         ->patch('/profile', [
@@ -38,7 +39,7 @@ it('keeps email verification when email unchanged', function () {
         ->assertSessionHasNoErrors()
         ->assertRedirect('/profile');
 
-    $this->assertNotNull($user->refresh()->email_verified_at);
+    $this->assertTrue($currentVerifiedAt == $user->refresh()->email_verified_at);
 });
 
 it('allows a user to delete their account', function () {
