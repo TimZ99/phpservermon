@@ -47,7 +47,7 @@ it('displays server status indicators on list page', function () {
         ->assertViewHas('servers', function ($viewServers) use ($server) {
             $viewServer = $viewServers->firstWhere('id', $server->id);
 
-            return isset($viewServer->statusCss) && isset($viewServer->statusCssColor);
+            return isset($viewServer->statusCss);
         });
 });
 

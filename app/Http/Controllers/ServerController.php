@@ -107,11 +107,6 @@ class ServerController extends Controller
                 'warning' => 'warning',
                 default => 'danger',
             };
-            $server->statusCssColor = match ($server->statusCss) {
-                'success' => '#28a745',
-                'warning' => '#ffc107',
-                default => '#dc3545',
-            };
         }
 
         return view('server.index', ['servers' => $servers]);
