@@ -54,7 +54,7 @@ class ServerFactory extends Factory
 
         return [
             'name' => $status.' '.fake()->word(),
-            'ip' => 'https://httpstat.us/'.$status,
+            'ip' => 'https://tools-httpstatus.pickup-services.com/'.$status,
             'check_settings' => $json,
         ];
     }
