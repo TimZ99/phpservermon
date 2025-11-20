@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends \Illuminate\Support\ServiceProvider
 {
@@ -26,6 +27,10 @@ class AppServiceProvider extends \Illuminate\Support\ServiceProvider
      */
     public function boot(): void
     {
+        if (str_starts_with((string) config('app.url'), 'https://')) {
+            URL::forceScheme('https');
+        }
+
         // If the environment is local, prevent models from silently discarding
         // attributes that are not present in the database.
         Model::preventSilentlyDiscardingAttributes($this->app->environment('local'));

@@ -21,7 +21,7 @@ class ProfileController extends Controller
         $notificationSettings = app(\App\Settings\NotificationSettings::class);
 
         return view('profile.edit', [
-            'user' => $request->user(),
+            'user' => $request->user()->loadMissing('passkeys'),
             'telegramGloballyEnabled' => $notificationSettings->telegram_global_enabled,
             'telegramBotConfigured' => ! empty($notificationSettings->telegram_bot_token),
         ]);

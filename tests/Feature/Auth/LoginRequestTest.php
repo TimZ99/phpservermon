@@ -4,6 +4,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
+use Spatie\LaravelPasskeys\Models\Passkey;
 
 use function Pest\Laravel\post;
 
@@ -47,4 +48,17 @@ it('throttles login requests after too many attempts', function () {
         'email' => $user->email,
         'password' => 'password',
     ])->assertSessionHasErrors('email');
+});
+
+it('requires passkey authentication when a user has registered passkeys', function () {
+    $user = User::factory()->create(['password' => bcrypt('secret-pass')]);
+
+    Passkey::factory()->for($user, 'authenticatable')->create();
+
+    post(route('login'), [
+        'email' => $user->email,
+        'password' => 'secret-pass',
+    ])->assertSessionHasErrors('email');
+
+    expect(auth()->check())->toBeFalse();
 });

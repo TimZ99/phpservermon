@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Notifications\Notifiable;
+use Spatie\LaravelPasskeys\Models\Concerns\HasPasskeys;
+use Spatie\LaravelPasskeys\Models\Concerns\InteractsWithPasskeys;
 
 /**
  * User Model
@@ -37,10 +39,10 @@ use Illuminate\Notifications\Notifiable;
  *
  * @var suspended boolean
  */
-class User extends Authenticatable
+class User extends Authenticatable implements HasPasskeys
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, InteractsWithPasskeys, Notifiable;
 
     /**
      * The attributes that are mass assignable.
