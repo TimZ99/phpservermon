@@ -1,15 +1,18 @@
 <?php
 
 use App\Models\User;
+use App\Notifications\Messages\DynamicNotification;
+use App\Settings\NotificationSettings;
+use Illuminate\Support\Facades\Notification;
 
-test('profile page is displayed', function () {
+it('displays profile page', function () {
     $user = User::factory()->create();
 
     $this->actingAs($user)->get('/profile')
         ->assertOk();
 });
 
-test('profile information can be updated', function () {
+it('updates profile information', function () {
     $user = User::factory()->create();
 
     $this->actingAs($user)
@@ -27,8 +30,9 @@ test('profile information can be updated', function () {
     $this->assertNull($user->email_verified_at);
 });
 
-test('email verification status is unchanged when the email address is unchanged', function () {
+it('keeps email verification when email unchanged', function () {
     $user = User::factory()->create();
+    $currentVerifiedAt = $user->email_verified_at;
 
     $this->actingAs($user)
         ->patch('/profile', [
@@ -38,10 +42,10 @@ test('email verification status is unchanged when the email address is unchanged
         ->assertSessionHasNoErrors()
         ->assertRedirect('/profile');
 
-    $this->assertNotNull($user->refresh()->email_verified_at);
+    $this->assertTrue($currentVerifiedAt == $user->refresh()->email_verified_at);
 });
 
-test('user can delete their account', function () {
+it('allows a user to delete their account', function () {
     $user = User::factory()->create();
 
     $this->actingAs($user)
@@ -55,7 +59,7 @@ test('user can delete their account', function () {
     $this->assertNull($user->fresh());
 });
 
-test('correct password must be provided to delete account', function () {
+it('requires correct password to delete account', function () {
     $user = User::factory()->create();
 
     $response = $this
@@ -70,4 +74,71 @@ test('correct password must be provided to delete account', function () {
         ->assertRedirect('/profile');
 
     $this->assertNotNull($user->fresh());
+});
+
+it('redirects unauthenticated users to login', function () {
+    $this->get('/profile')->assertRedirect(route('login'));
+    $this->patch('/profile')->assertRedirect(route('login'));
+    $this->delete('/profile')->assertRedirect(route('login'));
+    $this->get(route('profile.test.telegram'))->assertRedirect(route('login'));
+});
+
+it('aborts telegram test when globally disabled', function () {
+    Notification::fake();
+    NotificationSettings::fake([
+        'telegram_global_enabled' => false,
+        'telegram_bot_token' => null,
+    ]);
+
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->get(route('profile.test.telegram'))
+        ->assertRedirect(route('profile.edit'))
+        ->assertSessionHas('status', 'telegram-disabled');
+
+    Notification::assertNothingSent();
+});
+
+it('sends telegram test notification when enabled', function () {
+    Notification::fake();
+    NotificationSettings::fake([
+        'telegram_global_enabled' => true,
+        'telegram_bot_token' => 'token',
+    ]);
+
+    $user = User::factory()->create([
+        'telegram_user_id' => 123456,
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('profile.test.telegram'))
+        ->assertRedirect(route('profile.edit'))
+        ->assertSessionHas('status', 'telegram-test-sent');
+
+    Notification::assertSentTo(
+        $user,
+        DynamicNotification::class,
+        fn (DynamicNotification $notification) => $notification->notification_event === 'test_message'
+    );
+});
+
+it('reports error when telegram notification fails', function () {
+    NotificationSettings::fake([
+        'telegram_global_enabled' => true,
+        'telegram_bot_token' => 'token',
+    ]);
+
+    $user = User::factory()->create([
+        'telegram_user_id' => 123456,
+    ]);
+
+    Notification::shouldReceive('send')
+        ->once()
+        ->andThrow(new \Exception('boom'));
+
+    $this->actingAs($user)
+        ->get(route('profile.test.telegram'))
+        ->assertRedirect(route('profile.edit'))
+        ->assertSessionHas('status', 'Failed to send Telegram notification: boom');
 });

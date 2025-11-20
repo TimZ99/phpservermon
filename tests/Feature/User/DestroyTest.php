@@ -1,6 +1,12 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\delete;
+
+uses(RefreshDatabase::class);
 
 test('user with user:manage scope can delete a user, but not the last one', function () {
     $userWithScope1 = User::factory()->create();
@@ -10,33 +16,32 @@ test('user with user:manage scope can delete a user, but not the last one', func
     $userWithScope2->setScope(['user:manage:*']);
     $userWithScope2->save();
 
-    $this->assertDatabaseCount('users', 2);
+    expect(User::count())->toBe(2);
 
-    $this->actingAs($userWithScope1)
-        ->delete('/user/'.$userWithScope2->id)
+    actingAs($userWithScope1);
+    delete('/user/'.$userWithScope2->id)
         ->assertSessionHasNoErrors()
         ->assertRedirectToRoute('user.index');
 
-    $this->assertDatabaseCount('users', 1);
-    $this->assertNull($userWithScope2->fresh());
+    expect(User::count())->toBe(1);
+    expect($userWithScope2->fresh())->toBeNull();
 
     // prevent deleting the last user with user:manage:* scope
-    $this->actingAs($userWithScope1)
-        ->delete('/user/'.$userWithScope1->id)
+    actingAs($userWithScope1);
+    delete('/user/'.$userWithScope1->id)
         ->assertSessionHasErrors('user:editdelete');
-    $this->assertDatabaseCount('users', 1);
-    $this->assertNotNull($userWithScope1->fresh());
+    expect(User::count())->toBe(1);
+    expect($userWithScope1->fresh())->not->toBeNull();
 });
 
 test('user without user:manage scope cannot delete other users', function () {
     $user1 = User::factory()->create();
     $user2 = User::factory()->create();
 
-    $this->assertDatabaseCount('users', 2);
+    expect(User::count())->toBe(2);
 
-    $this->actingAs($user1)
-        ->delete('/user/'.$user2->id)
+    actingAs($user1);
+    delete('/user/'.$user2->id)
         ->assertForbidden();
-
-    $this->assertDatabaseCount('users', 2);
+    expect(User::count())->toBe(2);
 });

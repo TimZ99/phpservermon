@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\NotificationPreference;
+use App\Models\Server;
 use App\Models\User;
 
 beforeEach(function () {
@@ -31,6 +33,14 @@ it('can check if a user is the last with user:manage:* scope', function () {
 it('can route notifications for Telegram', function () {
     $this->user['telegram_user_id'] = 123456;
     expect($this->user->routeNotificationForTelegram())->toBe(123456);
+});
+
+it('returns null for telegram route when chat id missing', function () {
+    $this->user['telegram_user_id'] = null;
+    expect($this->user->routeNotificationForTelegram())->toBeNull();
+
+    $this->user['telegram_user_id'] = '';
+    expect($this->user->routeNotificationForTelegram())->toBeNull();
 });
 
 // setScope function and getScopes function
@@ -104,4 +114,28 @@ it('returns false when invalid JSON or no matching scope', function () {
 
     $this->user->scopes = json_encode(['a:b']);
     expect($this->user->hasScope('x:y'))->toBeFalse();
+});
+
+it('returns notification preferences related to the user', function () {
+    $server = Server::factory()->create();
+    $preference = NotificationPreference::create([
+        'user_id' => $this->user->id,
+        'server_id' => $server->id,
+        'check_name' => 'cpu',
+        'channel' => 'mail',
+        'enabled' => true,
+    ]);
+
+    NotificationPreference::create([
+        'user_id' => User::factory()->create()->id,
+        'server_id' => $server->id,
+        'check_name' => 'disk',
+        'channel' => 'mail',
+        'enabled' => true,
+    ]);
+
+    $preferences = $this->user->fresh()->notificationPreferences;
+
+    expect($preferences)->toHaveCount(1);
+    expect($preferences->first()->is($preference))->toBeTrue();
 });

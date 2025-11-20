@@ -32,9 +32,22 @@ it('returns default channels when user has contact info', function () {
     expect($channels)->toContain('mail', TelegramChannel::class);
 });
 
+it('returns no channels when globals disabled or contact info missing', function () {
+    $settings = app(NotificationSettings::class);
+    $settings->email_global_enabled = false;
+    $settings->telegram_global_enabled = false;
+
+    $user = User::factory()->create(['email' => '', 'telegram_user_id' => null]);
+    $server = Server::factory()->create();
+    $server->users()->attach($user->id);
+
+    expect(preferenceService()->channelsFor($user, $server, '__OVERALLSTATUS__'))->toBe([]);
+});
+
 it('honors per-server mute preferences', function () {
     $user = User::factory()->create(['email' => 'demo@example.com']);
     $server = Server::factory()->create();
+    $server->users()->attach($user->id);
 
     NotificationPreference::create([
         'user_id' => $user->id,
@@ -107,4 +120,34 @@ it('prefers most specific preference ordering', function () {
     $channels = preferenceService()->channelsFor($user, $server, $check);
 
     expect($channels)->toContain('mail');
+});
+
+it('falls back to default channels when no preference matches', function () {
+    $user = User::factory()->create(['email' => 'demo@example.com']);
+    $server = Server::factory()->create();
+
+    NotificationPreference::create([
+        'user_id' => $user->id,
+        'server_id' => null,
+        'check_name' => 'OtherCheck',
+        'channel' => 'mail',
+        'enabled' => false,
+    ]);
+
+    $channels = preferenceService()->channelsFor($user, $server, '__OVERALLSTATUS__');
+
+    expect($channels)->toContain('mail');
+});
+
+it('normalizes custom channel names to lowercase keys', function () {
+    $settings = app(NotificationSettings::class);
+    $proxy = new class($settings) extends \App\Services\Notifications\NotificationPreferenceService
+    {
+        public function exposeChannelKey(string $channel): string
+        {
+            return $this->channelKey($channel);
+        }
+    };
+
+    expect($proxy->exposeChannelKey('App\\Notifications\\Channels\\WebhookChannel'))->toBe('webhookchannel');
 });

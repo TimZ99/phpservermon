@@ -2,26 +2,36 @@
 
 use App\Models\Server;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertGuest;
+use function Pest\Laravel\delete;
+use function Pest\Laravel\get;
+use function Pest\Laravel\patch;
+
+uses(RefreshDatabase::class);
 
 test('all routes are covered by authorization', function () {
     Server::factory()->create();
     // guest
-    $this->assertGuest();
-    $this->get('/users')->assertRedirectToRoute('login');
-    $this->get('/user')->assertNotFound();
-    $this->get('/user/randomid')->assertRedirectToRoute('login');
-    $this->get('/user/randomid/edit')->assertRedirectToRoute('login');
-    $this->patch('/user/randomid')->assertRedirectToRoute('login');
-    $this->delete('/user/randomid')->assertRedirectToRoute('login');
+    assertGuest();
+    get('/users')->assertRedirectToRoute('login');
+    get('/user')->assertNotFound();
+    get('/user/randomid')->assertRedirectToRoute('login');
+    get('/user/randomid/edit')->assertRedirectToRoute('login');
+    patch('/user/randomid')->assertRedirectToRoute('login');
+    delete('/user/randomid')->assertRedirectToRoute('login');
 
     // user
     $user = User::factory()->create();
-    $this->actingAs($user)->get('/users')->assertForbidden();
-    $this->actingAs($user)->get('/user')->assertNotFound();
-    $this->actingAs($user)->get('/user/'.$user->id)->assertForbidden();
-    $this->actingAs($user)->get('/user/'.$user->id.'/edit')->assertForbidden();
-    $this->actingAs($user)->patch('/user/'.$user->id)->assertForbidden();
-    $this->actingAs($user)->delete('/user/'.$user->id)->assertForbidden();
+    actingAs($user);
+    get('/users')->assertForbidden();
+    get('/user')->assertNotFound();
+    get('/user/'.$user->id)->assertForbidden();
+    get('/user/'.$user->id.'/edit')->assertForbidden();
+    patch('/user/'.$user->id)->assertForbidden();
+    delete('/user/'.$user->id)->assertForbidden();
 });
 
 test('users index can be displayed', function () {
@@ -30,8 +40,8 @@ test('users index can be displayed', function () {
     $userWithScope->save();
     $user = User::factory()->create();
 
-    $this->actingAs($userWithScope)
-        ->get('/users')
+    actingAs($userWithScope);
+    get('/users')
         ->assertOk()
         ->assertSee($user->name);
 });
@@ -42,8 +52,8 @@ test('user show can be displayed', function () {
     $userWithScope->save();
     $user = User::factory()->create();
 
-    $this->actingAs($userWithScope)
-        ->get('/user/'.$user->id)
+    actingAs($userWithScope);
+    get('/user/'.$user->id)
         ->assertOk()
         ->assertSee($user->name)
         ->assertSee($user->email);

@@ -1,43 +1,90 @@
 <?php
 
+use App\Models\Server;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
-test('user with server:create scope can create server ', function () {
-    $this->markTestIncomplete('Create and store controller is not implemented yet.');
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
+use function Pest\Laravel\post;
 
-    $user = User::factory()->create();
-    $userWithScope = User::factory()->create();
-    $userWithScope->setScope(['server:manage:*']);
-    $userWithScope->save();
+uses(RefreshDatabase::class);
 
-    // Test unauthenticated user
-    $this->assertGuest();
-    $this->get('/server/create')->assertRedirectToRoute('login');
-    $this->post('/server', ['name' => 'Unauthorized Server', 'ip' => '10.0.0.1'])
-        ->assertRedirectToRoute('login');
-    $this->assertDatabaseMissing('servers', [
-        'name' => 'Unauthorized Server',
-        'ip' => '10.0.0.1',
-    ]);
+it('denies access to guests and unauthorized users', function () {
+    $guest = User::factory()->create();
 
-    // Test authenticated user
-    $this->actingAs($user)->get('/server/create')->assertForbidden();
-    $this->actingAs($user)->post('/server', ['name' => 'Unauthorized Server', 'ip' => '10.0.0.1'])
-        ->assertForbidden();
-    // Ensure no server is created in the database
-    $this->assertDatabaseMissing('servers', [
-        'name' => 'Unauthorized Server',
-        'ip' => '10.0.0.1',
-    ]);
+    get(route('server.create'))->assertRedirect(route('login'));
+    post(route('server.store'), ['name' => 'Guest Server'])->assertRedirect(route('login'));
 
-    // Test user with scope
-    $this->actingAs($userWithScope)->get('/server/create')->assertOk();
-    $this->actingAs($userWithScope)->post('/server', ['name' => 'New Server', 'ip' => '192.168.1.1'])
-        ->assertSessionHasNoErrors()
-        ->assertRedirect('/servers');
+    expect(Server::where('name', 'Guest Server')->exists())->toBeFalse();
 
-    $this->assertDatabaseHas('servers', [
+    actingAs($guest);
+    get(route('server.create'))->assertForbidden();
+    post(route('server.store'), ['name' => 'Unauthorized'])->assertForbidden();
+});
+
+it('allows server managers to create a server', function () {
+    $manager = User::factory()->create(['scopes' => ['server:manage:*']]);
+    $assignee = User::factory()->create();
+
+    actingAs($manager);
+    get(route('server.create'))
+        ->assertOk();
+
+    $response = post(route('server.store'), [
         'name' => 'New Server',
-        'ip' => '192.168.1.1',
+        'ip' => '192.168.1.50',
+        'port' => 8080,
+        'users' => [$assignee->id],
     ]);
+
+    $server = Server::where('name', 'New Server')->first();
+    expect($server)->not->toBeNull();
+
+    $response->assertRedirect(route('server.show', $server));
+    expect($server->users->pluck('id')->toArray())->toBe([$assignee->id]);
+});
+
+it('validates required fields during server creation', function () {
+    $manager = User::factory()->create(['scopes' => ['server:manage:*']]);
+    actingAs($manager);
+
+    post(route('server.store'), [])->assertSessionHasErrors(['name']);
+    post(route('server.store'), ['name' => '', 'ip' => ''])->assertSessionHasErrors(['name']);
+});
+
+it('rejects suspended or invalid users on create', function () {
+    $manager = User::factory()->create(['scopes' => ['server:manage:*']]);
+    $suspendedUser = User::factory()->create(['suspended' => true]);
+
+    actingAs($manager);
+
+    post(route('server.store'), [
+        'name' => 'Invalid server',
+        'users' => [$suspendedUser->id, 999],
+    ])->assertSessionHasErrors(['users.1']);
+});
+
+it('returns to the form with an error when creation fails unexpectedly', function () {
+    $manager = User::factory()->create(['scopes' => ['server:manage:*']]);
+    actingAs($manager)->from(route('server.create'));
+
+    $dispatcher = Server::getEventDispatcher();
+    Server::flushEventListeners();
+    Server::saving(function () {
+        throw new \RuntimeException('save failed');
+    });
+
+    try {
+        post(route('server.store'), [
+            'name' => 'Boom',
+            'ip' => '10.0.0.1',
+            'port' => 80,
+        ])
+            ->assertRedirect(route('server.create'))
+            ->assertSessionHasErrors(['general']);
+    } finally {
+        Server::flushEventListeners();
+        Server::setEventDispatcher($dispatcher);
+    }
 });
