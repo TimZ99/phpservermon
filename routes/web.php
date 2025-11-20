@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\PasskeyController;
 use App\Http\Controllers\ConfigController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ServerController;
@@ -7,6 +8,10 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/monitor');
+
+Route::middleware('guest')->group(function () {
+    Route::passkeys();
+});
 
 Route::middleware(['auth', 'can:not-suspended'])->group(function () {
     /* Profile */
@@ -30,6 +35,10 @@ Route::middleware(['auth', 'can:not-suspended'])->group(function () {
     Route::get('/config', [ConfigController::class, 'edit'])->name('config.edit');
     Route::patch('/config', [ConfigController::class, 'update'])->name('config.update');
     Route::get('/config/heartbeat', [ConfigController::class, 'heartbeat'])->name('config.heartbeat');
+
+    Route::post('/passkeys/options', [PasskeyController::class, 'options'])->name('passkeys.options');
+    Route::post('/passkeys', [PasskeyController::class, 'store'])->name('passkeys.store');
+    Route::delete('/passkeys/{passkey}', [PasskeyController::class, 'destroy'])->name('passkeys.destroy');
 });
 
 require __DIR__.'/auth.php';

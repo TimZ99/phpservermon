@@ -28,6 +28,7 @@
         <div class="col-12 col-lg-8 d-flex flex-column gap-4">
             @include('profile.partials.update-profile-information-form')
             @include('profile.partials.theme-preference-form')
+            @include('profile.partials.passkey-authentication-card')
             @include('profile.partials.update-password-form')
             @include('profile.partials.delete-user-form')
         </div>

@@ -29,20 +29,51 @@
                         </label>
                     </div>
 
-                    <!-- Forgot password and login buttons -->
-                    <div class="d-flex justify-content-end align-items-center mt-4 gap-3">
-                        @if (Route::has('password.request'))
-                            <a class="text-decoration-underline" href="{{ route('password.request') }}">
-                                {{ __('Forgot your password?') }}
-                            </a>
-                        @endif
-                        <x-primary-button outline>
-                            {{ __('Login') }}
-                        </x-primary-button>
+                    <div class="d-flex flex-column gap-3 my-4">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                            @if (Route::has('password.request'))
+                                <a class="text-decoration-underline" href="{{ route('password.request') }}">
+                                    {{ __('Forgot your password?') }}
+                                </a>
+                            @endif
+                            <x-primary-button outline>
+                                {{ __('Login') }}
+                            </x-primary-button>
+                        </div>
                     </div>
-                    
                 </form>
+                <form id="passkey-login-form" method="POST" action="{{ route('passkeys.login') }}">
+                    @csrf
+                </form>
+
+                @if($message = session()->get('authenticatePasskey::message'))
+                    <div class="alert alert-danger text-bg-danger mt-3 mb-0">
+                        {{ $message }}
+                    </div>
+                @endif
+                <button type="button" class="btn btn-outline-primary w-100" onclick="authenticateWithPasskey()">
+                    {{ __('passkeys::passkeys.authenticate_using_passkey') }}
+                </button>
             </div>
         </div>
     </div>
 </x-guest-layout>
+
+<script>
+    async function authenticateWithPasskey(remember = false) {
+        const response = await fetch('{{ route('passkeys.authentication_options') }}')
+
+        const options = await response.json();
+
+        const startAuthenticationResponse = await startAuthentication({ optionsJSON: options, });
+
+        const form = document.getElementById('passkey-login-form');
+    
+        form.addEventListener('formdata', ({formData}) => {
+            formData.set('remember', remember);
+            formData.set('start_authentication_response', JSON.stringify(startAuthenticationResponse));
+        });
+
+        form.submit();
+    }
+</script>
