@@ -25,6 +25,7 @@ Route::middleware(['auth', 'can:not-suspended'])->group(function () {
     Route::get('/monitor', [ServerController::class, 'monitorPage'])->name('server.monitor');
     Route::get('/servers', [ServerController::class, 'index'])->name('server.index');
     Route::get('/server/{server}/run', [ServerController::class, 'runJob'])->name('server.runChecks');
+    Route::post('/server/{server}/checks/{check}/run', [ServerController::class, 'runSingleCheck'])->name('server.runCheck');
     Route::get('/servers/run', [ServerController::class, 'runBatch'])->name('server.runBatch');
 
     /* User */

@@ -37,6 +37,16 @@
     </script>
     @endif
 
+    @if (session('check_dispatched') && session('check_name'))
+        <div class="alert alert-info text-bg-info" role="alert">
+            {{ __('The :check check has been queued.', ['check' => \Illuminate\Support\Str::headline(session('check_name'))]) }}
+        </div>
+    @elseif(session('check_error'))
+        <div class="alert alert-warning text-bg-warning" role="alert">
+            {{ session('check_error') }}
+        </div>
+    @endif
+
     <div class="card mb-4">
         <div class="card-body">
             <div class="row g-4 align-items-center">
@@ -118,6 +128,7 @@
                             <th>{{ __('Status') }}</th>
                             <th>{{ __('Description') }}</th>
                             <th>{{ __('Inputs / Thresholds') }}</th>
+                            <th class="text-end">{{ __('Actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -149,6 +160,20 @@
                                         @endforeach
                                     </ul>
                                 @endif
+                            </td>
+                            <td class="text-end">
+                                @can('check', $server)
+                                    @if($enabled)
+                                        <form method="POST" action="{{ route('server.runCheck', [$server->id, $name]) }}">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-outline-primary">
+                                                {{ __('Run') }}
+                                            </button>
+                                        </form>
+                                    @else
+                                        <span class="text-muted small">{{ __('Disabled') }}</span>
+                                    @endif
+                                @endcan
                             </td>
                         </tr>
                         @empty

@@ -261,6 +261,28 @@ class ServerController extends Controller
         return to_route('server.show', $server->id)->with('check_dispatched', true);
     }
 
+    public function runSingleCheck(Server $server, string $check, RunServerCheckService $runServerCheck, ServerCheckRegistry $registry)
+    {
+        $this->authorize('check', $server);
+
+        $checkDefinitions = $registry->all();
+        if (! array_key_exists($check, $checkDefinitions)) {
+            abort(404);
+        }
+
+        $enabled = data_get($server->check_settings, "{$check}.enabled", false);
+        if (! $enabled) {
+            return to_route('server.show', $server->id)->with('check_error', __('This check is disabled.'));
+        }
+
+        $runServerCheck->handle([$server], true, [$check]);
+
+        return to_route('server.show', $server->id)->with([
+            'check_dispatched' => true,
+            'check_name' => $check,
+        ]);
+    }
+
     /**
      * Run a batch process on the given servers.
      *
