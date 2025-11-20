@@ -175,17 +175,22 @@
                 <h2 class="h4 mb-0">{{ __('Recent check history') }}</h2>
             </div>
             @php
-                $groups = $server->check_histories->groupBy(function ($history) use ($timezone) {
-                    return $history->created_at->timezone($timezone)->format('M j, Y H:i:s');
-                });
+                $groups = $server->check_histories
+                    ->sortByDesc('created_at')
+                    ->groupBy(fn ($history) => $history->server_checks_batch_id ?? $history->created_at->timestamp)
+                    ->sortByDesc(fn ($entries) => optional($entries->first())->created_at);
             @endphp
             @if($groups->isEmpty())
                 <p class="text-muted mb-0">{{ __('No checks have been recorded yet.') }}</p>
             @else
-                @foreach($groups as $timestamp => $entries)
+                @foreach($groups as $entries)
                     <div class="mb-3">
                         <div class="d-flex align-items-center mb-2">
-                            <span class="fw-semibold">{{ $timestamp }}</span>
+                            @php
+                                $firstEntry = $entries->sortByDesc('created_at')->first();
+                                $displayTime = optional($firstEntry?->created_at)->timezone($timezone)->format('M j, Y H:i:s');
+                            @endphp
+                            <span class="fw-semibold">{{ $displayTime }}</span>
                             @php
                                 $overallStatus = strtolower(optional($entries->first(fn($item) => $item->name === \App\Jobs\FinalizeServerCheckRun::OVERALL_STATUS))->status ?? 'unknown');
                                 $overallBadge = $statusMap[$overallStatus] ?? $statusMap['unknown'];
@@ -195,7 +200,7 @@
                             @endif
                         </div>
                                 <div class="list-group">
-                                    @foreach($entries->sortBy('name') as $history)
+                                    @foreach($entries->sortByDesc('created_at') as $history)
                                         @continue($history->name === \App\Jobs\FinalizeServerCheckRun::OVERALL_STATUS)
                                         @php
                                             $status = strtolower($history->status ?? 'unknown');
