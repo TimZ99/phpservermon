@@ -35,6 +35,13 @@
                                 {{ $user->suspended ? __('Yes') : __('No') }}
                             </span>
                         </dd>
+
+                        <dt class="col-sm-5">{{ __('Authentication method') }}</dt>
+                        <dd class="col-sm-7">
+                            <span class="badge text-bg-info">
+                                {{ ($user->passkeys ?? collect())->isNotEmpty() ? __('Passkey') : __('Password') }}
+                            </span>
+                        </dd>
                     </dl>
                 </div>
                 <div class="col-md-6">
