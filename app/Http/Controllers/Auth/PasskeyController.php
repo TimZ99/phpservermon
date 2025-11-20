@@ -67,6 +67,8 @@ class PasskeyController extends Controller
             ]);
         }
 
+        session()->flash('status', 'passkey-added');
+
         return response()->json(['status' => 'created']);
     }
 

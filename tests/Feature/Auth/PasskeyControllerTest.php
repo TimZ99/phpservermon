@@ -46,7 +46,8 @@ it('stores a passkey when options exist in the session', function () {
         'passkey' => fakePasskeyPayload('duplicate-token'),
     ])->assertOk()->assertJson(['status' => 'created']);
 
-    expect($user->fresh()->passkeys)->toHaveCount(1);
+    expect($user->fresh()->passkeys)->toHaveCount(1)
+        ->and(session()->get('status'))->toBe('passkey-added');
 });
 
 it('requires passkey options in the session before storing', function () {

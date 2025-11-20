@@ -1,68 +1,76 @@
-<section class="card">
-    <div class="card-body">
-        <div class="mb-4">
-            <p class="text-uppercase text-muted small mb-1">{{ __('Security') }}</p>
-            <h2 class="h4 mb-1">{{ __('Passkey Authentication') }}</h2>
-            <p class="text-muted mb-0">
-                {{ __('Register a passkey to sign in without a password. Once at least one passkey is active, email/password sign in is disabled until you remove every passkey.') }}
-            </p>
+<div class="mb-4">
+    <p class="text-uppercase text-muted small mb-1">{{ __('Security') }}</p>
+    <h2 class="h4 mb-1">{{ __('Passkey Authentication') }}</h2>
+    <p class="text-muted mb-0">
+        {{ __('Register a passkey to sign in without a password. Once at least one passkey is active, email/password sign in is disabled until you remove every passkey.') }}
+    </p>
+</div>
+
+<div class="d-flex flex-column gap-4">
+    @if (session('status') === 'passkey-added')
+        <div class="alert alert-success text-bg-success mb-0">
+            {{ __('Your passkey has been added successfully.') }}
         </div>
-
-        <div class="d-flex flex-column gap-4" x-data>
-            <form class="row g-3 align-items-end" data-passkey-form
-                data-options-url="{{ route('passkeys.options') }}"
-                data-store-url="{{ route('passkeys.store') }}">
-                <div class="col-12 col-md">
-                    <label for="passkey-name" class="form-label">{{ __('passkeys::passkeys.name') }}</label>
-                    <input type="text" id="passkey-name" name="passkey_name" class="form-control" autocomplete="off" required />
-                </div>
-                <div class="col-12 col-md-auto">
-                    <button type="submit" class="btn btn-primary px-4" data-passkey-submit>
-                        {{ __('passkeys::passkeys.create') }}
-                    </button>
-                </div>
-            </form>
-
-            <div id="passkey-status" class="alert d-none mb-0" role="alert"></div>
-
-            @if(($user->passkeys ?? collect())->isEmpty())
-                <div class="alert alert-secondary text-bg-secondary mb-0">
-                    {{ __('passkeys::passkeys.not_used_yet') }}
-                </div>
-            @else
-                <ul class="list-group">
-                    @foreach($user->passkeys as $passkey)
-                        <li class="list-group-item d-flex flex-column flex-lg-row gap-3 justify-content-between align-items-lg-center">
-                            <div>
-                                <div class="fw-semibold">{{ $passkey->name }}</div>
-                                <div class="text-muted small">
-                                    {{ __('passkeys::passkeys.last_used') }}:
-                                    {{ $passkey->last_used_at?->diffForHumans() ?? __('passkeys::passkeys.not_used_yet') }}
-                                </div>
-                            </div>
-                            <form method="POST" action="{{ route('passkeys.destroy', $passkey) }}" class="ms-lg-auto">
-                                @csrf
-                                @method('DELETE')
-                                <button class="btn btn-outline-danger btn-sm" type="submit">
-                                    {{ __('passkeys::passkeys.delete') }}
-                                </button>
-                            </form>
-                        </li>
-                    @endforeach
-                </ul>
-            @endif
-
-            <p class="text-muted small mb-0">
-                {{ __('Need to go back to passwords? Remove your saved passkeys and the classic email/password flow becomes available again.') }}
-            </p>
+    @endif
+    <form class="row g-3 align-items-end" data-passkey-form
+        data-options-url="{{ route('passkeys.options') }}"
+        data-store-url="{{ route('passkeys.store') }}">
+        <div class="col-12 col-md">
+            <label for="passkey-name" class="form-label">{{ __('passkeys::passkeys.name') }}</label>
+            <input type="text" id="passkey-name" name="passkey_name" class="form-control" autocomplete="off" required />
         </div>
-    </div>
-</section>
+        <div class="col-12 col-md-auto">
+            <button type="submit" class="btn btn-primary px-4" data-passkey-submit>
+                {{ __('passkeys::passkeys.create') }}
+            </button>
+        </div>
+    </form>
+
+    <div id="passkey-status" class="alert d-none mb-0" role="alert"></div>
+
+    @if(($user->passkeys ?? collect())->isEmpty())
+        <div class="alert alert-secondary text-bg-secondary mb-0">
+            {{ __('passkeys::passkeys.not_used_yet') }}
+        </div>
+    @else
+        <ul class="list-group">
+            @foreach($user->passkeys as $passkey)
+                <li class="list-group-item d-flex flex-column flex-lg-row gap-3 justify-content-between align-items-lg-center">
+                    <div>
+                        <div class="fw-semibold">{{ $passkey->name }}</div>
+                        <div class="text-muted small">
+                            {{ __('passkeys::passkeys.last_used') }}:
+                            {{ $passkey->last_used_at?->diffForHumans() ?? __('passkeys::passkeys.not_used_yet') }}
+                        </div>
+                    </div>
+                    <form method="POST" action="{{ route('passkeys.destroy', $passkey) }}" class="ms-lg-auto">
+                        @csrf
+                        @method('DELETE')
+                        <button class="btn btn-outline-danger btn-sm" type="submit">
+                            {{ __('passkeys::passkeys.delete') }}
+                        </button>
+                    </form>
+                </li>
+            @endforeach
+        </ul>
+    @endif
+
+    <p class="text-muted small mb-0">
+        {{ __('Need to go back to passwords? Remove your saved passkeys and the classic email/password flow becomes available again.') }}
+    </p>
+</div>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        const card = document.querySelector('[data-passkey-card]');
         const form = document.querySelector('[data-passkey-form]');
         const statusEl = document.getElementById('passkey-status');
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+        if (card?.dataset.passkeyFocus === 'true') {
+            setTimeout(() => {
+                card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 150);
+        }
 
         if (!form || typeof window.startRegistration !== 'function') {
             return;
