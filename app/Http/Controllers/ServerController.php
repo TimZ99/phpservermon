@@ -234,7 +234,16 @@ class ServerController extends Controller
          *
          * If no users are provided, detach all the server's users
          */
-        $this->syncServerUsers($server, $request->input('users', []));
+        if ($request->has('users')) {
+            $data = $request->validateWithBag('general', ['users' => ['nullable', 'array'], 'users.*' => ['integer', 'exists:users,id']]);
+            $user_ids = array_filter($data['users'], function ($user_id) {
+                return in_array($user_id, User::pluck('id')->toArray());
+            });
+            $server->users()->sync($user_ids);
+        } else {
+            $server->users()->detach();
+        }
+
         /**
          * Update the server
          * Fill the server with the validated data

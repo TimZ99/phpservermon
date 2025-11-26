@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UserUpdateRequest;
 use App\Models\Server;
 use App\Models\User;
-use Exception;
 
 /**
  * Routing:
@@ -84,54 +83,48 @@ class UserController extends Controller
     public function update(UserUpdateRequest $request, User $user)
     {
         $this->authorize('manage', $user);
-        try {
-            /**
-             * Sync the servers with the user
-             *
-             * If the request has servers, filter the list of server ids
-             * and sync the list of server ids with the user's servers
-             *
-             * If no servers are provided, detach all the user's servers
-             */
-            if ($request->has('servers')) {
-                $server_ids = array_filter($request->input('servers'), function ($server_id) {
-                    return in_array($server_id, Server::pluck('id')->toArray());
-                });
-                $user->servers()->sync($server_ids);
-            } else {
-                $user->servers()->detach();
-            }
-
-            /**
-             * Check if the user is last user with user:manage:* scope
-             * If the user is the one, don't allow the update
-             */
-            if ($user->isLastPowerfulUser() &&
-                ! (is_array($request->input('scopes')) && in_array('user:manage:*', $request->input('scopes')))
-            ) {
-                $error_message = 'User update failed, tried removing the last user with user:manage:* privileges';
-                logger()->notice($error_message, ['user_id' => $user->id]);
-
-                return back()->withInput()->withErrors(['lastuser:editscope' => $error_message]);
-            }
-
-            /**
-             * Update the user
-             * Fill the user with the validated data
-             * and save the user
-             */
-            $user->fill($request->validated());
-            $user->save();
-
-            logger()->info('User updated successfully', ['user_id' => $user->id]);
-
-            return to_route('user.show', $user->id);
-        } catch (Exception $e) {
-            \Sentry\captureException($e);
-            report($e);
-
-            return back()->withInput()->withErrors(['general' => 'A problem occurred while updating the user. Please try again later.']);
+        /**
+         * Sync the servers with the user
+         *
+         * If the request has servers, filter the list of server ids
+         * and sync the list of server ids with the user's servers
+         *
+         * If no servers are provided, detach all the user's servers
+         */
+        if ($request->has('servers')) {
+            $data = $request->validateWithBag('servers', ['servers' => ['nullable', 'array'], 'servers.*' => ['uuid', 'exists:servers,id']]);
+            $server_ids = array_filter($data['servers'], function ($server_id) {
+                return in_array($server_id, Server::pluck('id')->toArray());
+            });
+            $user->servers()->sync($server_ids);
+        } else {
+            $user->servers()->detach();
         }
+
+        /**
+         * Check if the user is last user with user:manage:* scope
+         * If the user is the one, don't allow the update
+         */
+        if ($user->isLastPowerfulUser() &&
+            ! (is_array($request->input('scopes')) && in_array('user:manage:*', $request->input('scopes')))
+        ) {
+            $error_message = 'User update failed, tried removing the last user with user:manage:* privileges';
+            logger()->notice($error_message, ['user_id' => $user->id]);
+
+            return back()->withInput()->withErrors(['lastuser:editscope' => $error_message]);
+        }
+
+        /**
+         * Update the user
+         * Fill the user with the validated data
+         * and save the user
+         */
+        $user->fill($request->validated());
+        $user->save();
+
+        logger()->info('User updated successfully', ['user_id' => $user->id]);
+
+        return to_route('user.show', $user->id);
     }
 
     /**
