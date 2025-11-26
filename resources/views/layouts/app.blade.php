@@ -52,18 +52,18 @@
         <!-- Page Heading -->
         @isset($header)
             <header class="bg-dark text-white border-bottom pb-3">
-                <div class="container page-header-inner">
+                <div class="container-fluid page-header-inner">
                     {{ $header }}
                 </div>
             </header>
         @endisset
         <main role="main" class="flex-grow-1 py-4">
-            <div class="container align-items-center justify-content-center">
+            <div class="container-fluid align-items-center justify-content-center">
                 {{ $slot }}
             </div>
         </main>
         <footer class="footer mt-auto py-3" role="contentinfo">
-            <div class="container text-center text-md-start">
+            <div class="container-fluid text-center text-md-start">
                 <span class="text-body-secondary">
                     Powered by
                     <a href="https://github.com/phpservermon/phpservermon/" target="_blank" rel="noopener">
