@@ -1,10 +1,10 @@
 <x-app-layout>
+    <x-slot name="containerClass">container-fluid</x-slot>
     @if(session('check_dispatched'))
     <div class="alert alert-info text-bg-info" role="alert">
         {{ __('Checks have been queued. This view will update as results arrive.') }}
     </div>
     @endif
-
     <div class="row g-4">
     @can('checkAny', App\Models\Server::class)
         <a href="{{route('server.runBatch')}}">
@@ -14,7 +14,7 @@
         </a>
         @endcan
         @forelse ($servers as $server)
-            <div class="col-sm-6 col-lg-3">
+            <div class="col-sm-6 col-lg-3 col-xl-2">
                 <div class="card text-bg-{{ $server->statusCss }} h-100" @can('view', $server) onclick="window.location.href='{{ route('server.show', $server->id) }}'" @endcan>
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">

@@ -2,6 +2,7 @@
     $themePreference = optional(auth()->user())->theme_mode ?? 'auto';
     $initialTheme = $themePreference === 'night' ? 'dark' : 'light';
     $initialThemeClass = $initialTheme === 'dark' ? 'theme-night' : 'theme-day';
+    $containerClass = $containerClass ?? 'container';
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme-preference="{{ $themePreference }}" data-bs-theme="{{ $initialTheme }}" class="{{ $initialThemeClass }}">
@@ -52,13 +53,13 @@
         <!-- Page Heading -->
         @isset($header)
             <header class="bg-dark text-white border-bottom">
-                <div class="container-fluid page-header-inner">
+                <div class="{{ $containerClass }} page-header-inner">
                     {{ $header }}
                 </div>
             </header>
         @endisset
         <main role="main" class="flex-grow-1 py-4">
-            <div class="container-fluid align-items-center justify-content-center">
+            <div class="{{ $containerClass }} align-items-center justify-content-center">
                 {{ $slot }}
             </div>
         </main>
