@@ -51,7 +51,7 @@
         @include('layouts.navigation')
         <!-- Page Heading -->
         @isset($header)
-            <header class="bg-dark text-white border-bottom pb-3">
+            <header class="bg-dark text-white border-bottom">
                 <div class="container-fluid page-header-inner">
                     {{ $header }}
                 </div>
